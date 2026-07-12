@@ -1,0 +1,102 @@
+name: Publish images
+
+# Builds each swale-built task image, pushes it to Docker Hub digest-pinned,
+# attests build provenance, and syncs the image README to the Docker Hub page.
+# The published digest is what a task definition pins in exec.image.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "images/**"
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Single image name to (re)publish (e.g. git). Empty = all changed."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+env:
+  REGISTRY_NAMESPACE: swaleio
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.list.outputs.images }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 2
+      - id: list
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.image }}" ]; then
+            echo "images=[\"${{ github.event.inputs.image }}\"]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- images/ \
+            | awk -F/ '{print $2}' | sort -u | grep -v '^$' || true)
+          json=$(printf '%s\n' "$changed" | grep -v '^$' | jq -R . | jq -cs .)
+          echo "images=${json:-[]}" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: discover
+    if: needs.discover.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.images) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
+
+      - uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
+        with:
+          images: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=${{ github.run_number }}-{{sha}}
+            type=raw,value=latest
+
+      - id: build
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
+        with:
+          context: images/${{ matrix.image }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: true
+          sbom: true
+
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-name: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Sync README to Docker Hub
+        if: hashFiles(format('images/{0}/README.md', matrix.image)) != ''
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
+          readme-filepath: images/${{ matrix.image }}/README.md
+
+      - name: Report published digest
+        run: |
+          echo "Published docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}"
+          echo "Pin this digest in the referencing task definition's exec.image." >> "$GITHUB_STEP_SUMMARY"
+          echo "\`docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"

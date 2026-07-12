@@ -7,8 +7,9 @@ equally to vendor images (which must already satisfy it) and swale-built images
 ## Invocation
 
 - The task definition's `exec.args` are passed as the container's **argv**,
-  appended to the image's `ENTRYPOINT`. There is no command, working-directory,
-  or environment override from the definition.
+  appended to the image's `ENTRYPOINT`. There is no command or
+  working-directory override from the definition; the definition may only add
+  environment variables via `exec.env` (see Environment below).
 - Containers run **non-interactively** — no TTY. All configuration arrives as
   command-line arguments or environment variables.
 - Containers should run as a **non-root** user where the image allows it.
@@ -62,6 +63,14 @@ equally to vendor images (which must already satisfy it) and swale-built images
   variables to later tasks.
 - `WORKFLOW_STORAGE` — the workspace path (`/mnt/workspace`).
 - `WORKFLOW_TASK_ID` — this task's run id.
+
+A definition may also declare its own environment variables under `exec.env` —
+a map of UPPER_SNAKE names to values that may embed `${{inputs.*}}`
+expressions, resolved before injection. These are injected at the **lowest**
+precedence (`exec.env` < `INPUT_*` < run-level environment < the reserved
+`WORKFLOW_*` variables above), and the reserved `WORKFLOW_`/`INPUT_` name
+prefixes are protected. This is how catalog tasks deliver well-known variables
+such as `HF_TOKEN` to the tools they wrap.
 
 ## Networking
 

@@ -6,11 +6,13 @@ inputs:
     description: Absolute path inside the container to the TRL SFT YAML config. Point it at the mounted workspace (e.g. /mnt/workspace/sft.yaml) so an earlier task can write it there, or any other container-local path.
     required: true
   token:
-    description: Hugging Face access token for gated or private models and datasets (pass a secret). Exported as HF_TOKEN by the image entrypoint; omit for public repos.
+    description: Hugging Face access token for gated or private models and datasets (pass a secret). Delivered as HF_TOKEN via the definition's exec.env; omit for public repos.
     default: ""
 exec:
   # docker.io/swaleio/transformers-gpu:1-0-0
   image: docker.io/swaleio/transformers-gpu@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  env:
+    HF_TOKEN: ${{inputs.token}}
   args:
     - trl
     - sft
@@ -30,7 +32,7 @@ settings, precision, batch sizes, and where the result lands.
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `config` | yes | — | Absolute path to the TRL SFT YAML config inside the container. Point it at the mounted workspace (e.g. `/mnt/workspace/sft.yaml`) so an earlier task can write it there. |
-| `token` | no | — | HF access token for gated/private models and datasets (pass a secret). The image entrypoint exports it as `HF_TOKEN`; it is never placed on the command line. |
+| `token` | no | — | HF access token for gated/private models and datasets (pass a secret). Delivered to the trainer as `HF_TOKEN` via the definition's `exec.env` (an omitted token resolves to an empty value, which the Hugging Face stack treats as no token); it is never placed on the command line. |
 
 ## Where the model lands
 

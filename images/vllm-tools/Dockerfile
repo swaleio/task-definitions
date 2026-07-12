@@ -10,12 +10,9 @@ RUN pip install --no-cache-dir "lm-eval==0.4.12"
 # the non-root `swale` user the container runs as.
 RUN (userdel --remove ubuntu || true) && useradd --create-home --uid 1000 swale
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
 # The base image's ENTRYPOINT launches the OpenAI-compatible API server. Reset
-# it to the wrapper so a task definition's exec.args form the full command line
+# it to empty so a task definition's exec.args form the full command line
 # (e.g. `vllm run-batch ...` or `lm_eval ...`).
 USER swale
 WORKDIR /mnt/workspace
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT []

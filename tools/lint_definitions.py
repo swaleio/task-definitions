@@ -16,9 +16,11 @@ import yaml
 NAME_RE = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
 IDENT_RE = re.compile(r"^[a-z0-9_]+$")  # snake_case identifiers
 DIGEST_RE = re.compile(r"@sha256:[0-9a-f]{64}$")
+ENV_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+ENV_RESERVED_PREFIXES = ("WORKFLOW_", "INPUT_")
 
 TOP_KEYS = {"name", "description", "inputs", "outputs", "exec"}
-EXEC_KEYS = {"image", "args"}
+EXEC_KEYS = {"image", "args", "env"}
 INPUT_KEYS = {"description", "required", "default"}
 OUTPUT_KEYS = {"description"}
 
@@ -88,6 +90,16 @@ def lint_file(path: str) -> list[str]:
         args = exec_block.get("args")
         if args is not None and not isinstance(args, list):
             errors.append(f"{rel}: exec.args must be a list of strings")
+        env = exec_block.get("env")
+        if env is not None:
+            if not isinstance(env, dict):
+                errors.append(f"{rel}: exec.env must be a mapping")
+            else:
+                for var_name in env:
+                    if not ENV_NAME_RE.match(str(var_name)):
+                        errors.append(f"{rel}: exec.env name '{var_name}' must match {ENV_NAME_RE.pattern}")
+                    if str(var_name).startswith(ENV_RESERVED_PREFIXES):
+                        errors.append(f"{rel}: exec.env name '{var_name}' uses a reserved prefix (WORKFLOW_/INPUT_)")
 
     for section, allowed in (("inputs", INPUT_KEYS), ("outputs", OUTPUT_KEYS)):
         block = data.get(section)

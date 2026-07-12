@@ -13,14 +13,11 @@ RUN pip install --no-cache-dir \
       "huggingface_hub[hf_xet]==0.36.0" \
  && useradd --create-home --uid 1000 swale
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# The Hub cache stays at its default under the user's home; the image does not
+# force a location.
 
-# The Hub cache stays at its default under the user's home. A caller that wants
-# downloaded models to survive across tasks in a run can relocate it onto the
-# mounted workspace via the INPUT_HF_HOME input (see entrypoint.sh); the image
-# does not force it.
-
+# No ENTRYPOINT: the PyTorch base leaves it unset, so a task definition's
+# exec.args are the full command line (e.g. `trl sft --config <path>` or
+# `bash -lc <script>` — bash, trl, and python are all on PATH).
 USER swale
 WORKDIR /mnt/workspace
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

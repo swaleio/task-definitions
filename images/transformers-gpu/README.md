@@ -12,26 +12,21 @@ fine-tuning, or arbitrary GPU Python without a build step.
   `huggingface_hub[hf_xet]==0.36.0`
 - **User:** non-root `swale` (uid 1000)
 - **Hub cache** — stays at the Hugging Face default under the user's home; the
-  image does not force a location. A caller can relocate it (e.g. onto the
-  mounted workspace so model blobs persist across tasks in a run) by setting
-  `INPUT_HF_HOME`.
-- **`WORKDIR /mnt/workspace`**, **`ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]`**
+  image does not force a location.
+- **`WORKDIR /mnt/workspace`**, **no `ENTRYPOINT`**
 
 ## Invocation
 
-The entrypoint does not run a fixed tool. It exports Hugging Face environment
-variables from task inputs (`INPUT_*` env vars injected by the platform) and
-then `exec`s the task definition's `exec.args` verbatim — so one image serves a
-fixed CLI task (`["trl", "sft", "--config", "${{inputs.config}}"]`) and a
+The image declares **no entrypoint** (the PyTorch base leaves it unset), so a
+task definition's `exec.args` are the **full** command line — one image serves
+a fixed CLI task (`["trl", "sft", "--config", "${{inputs.config}}"]`) and a
 free-form script task (`["bash", "-lc", "… exec python /tmp/run.py"]`) alike.
+`bash`, `trl`, and `python` are all on `PATH`.
 
-| Input env | Effect |
-|-----------|--------|
-| `INPUT_TOKEN` | Exported as `HF_TOKEN` to authenticate against the Hugging Face Hub (gated/private repos). Pass a secret. |
-| `INPUT_HF_HOME` | Exported as `HF_HOME` to relocate the Hub cache (e.g. onto the mounted workspace). Optional; the default under the user's home is used when unset. |
-
-Free-form tasks declare only `script`, so neither variable is set for them;
-they read run-level environment variables instead (see the task docs).
+Hugging Face authentication is not the image's job: a definition that needs it
+maps its `token` input to `HF_TOKEN` via its own `exec.env` (an omitted token
+resolves to an empty `HF_TOKEN`, which the Hugging Face stack treats as no
+token).
 
 ## GPU
 

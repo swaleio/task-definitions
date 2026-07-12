@@ -17,6 +17,8 @@ inputs:
 exec:
   # docker.io/swaleio/vllm-tools:1-0-0
   image: docker.io/swaleio/vllm-tools@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  env:
+    HF_TOKEN: ${{inputs.token}}
   args:
     - lm_eval
     - "--model"
@@ -76,8 +78,9 @@ re-downloading multi-gigabyte weights from the Hub on every run.
 ## Gated and private models
 
 When `model_dir` is a gated or private Hub repo id, pass a Hugging Face access
-token via `token` (as a secret). The image entrypoint exports it as `HF_TOKEN`
-before the harness starts.
+token via `token` (as a secret) — the definition's `exec.env` delivers it to
+the harness as `HF_TOKEN` (an omitted token resolves to an empty value, which
+the Hugging Face stack treats as no token).
 
 ## Example
 

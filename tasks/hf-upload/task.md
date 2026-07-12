@@ -20,6 +20,8 @@ inputs:
 exec:
   # docker.io/swaleio/hf-cli:1-0-0
   image: docker.io/swaleio/hf-cli@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  env:
+    HF_TOKEN: ${{inputs.token}}
   args:
     - upload
     - "--repo-type"
@@ -31,9 +33,9 @@ exec:
 # HF upload
 
 Uploads the directory given by `source` to the Hugging Face Hub repository
-`repo`. Authentication uses the `token` secret, injected as the
-`INPUT_TOKEN` environment variable; `path_in_repo` selects the destination
-folder within the repository (root by default).
+`repo`. Authentication uses the `token` secret, delivered to the CLI as
+`HF_TOKEN` via the definition's `exec.env`; `path_in_repo` selects the
+destination folder within the repository (root by default).
 
 ## Inputs
 

@@ -5,9 +5,14 @@ inputs:
   config:
     description: Absolute path inside the container to the Axolotl config YAML. Point it at the mounted workspace (e.g. /mnt/workspace/axolotl.yaml) so an earlier task can write it there, or any other container-local path.
     required: true
+  token:
+    description: Hugging Face access token for gated or private base models (pass a secret). Omit for public base models or local model directories.
+    default: ""
 exec:
   # docker.io/axolotlai/axolotl:main-20260712-py3.12-cu130-2.12.0
   image: docker.io/axolotlai/axolotl@sha256:c33b21ad322e49fcc2db6116042cc206c69f26716482fc2902179fa303dd60b4
+  env:
+    HF_TOKEN: ${{inputs.token}}
   args:
     - axolotl
     - train
@@ -20,13 +25,14 @@ Runs `axolotl train` on the official Axolotl image against the config file you
 point it at. Everything about the run — base model, dataset, adapter type
 (full fine-tune, LoRA, QLoRA), hyperparameters, and where artifacts are
 written — lives in that one Axolotl config YAML, so the task itself takes a
-single input.
+single required input.
 
 ## Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `config` | yes | — | Absolute path to the Axolotl config YAML inside the container. Point it at the mounted workspace (e.g. `/mnt/workspace/axolotl.yaml`) so an earlier task can write it there, or any other container-local path. |
+| `token` | no | — | HF access token for gated/private base models (pass a secret); delivered to the container as `HF_TOKEN` via the definition's `exec.env`. Unneeded for public base models or local model directories. |
 
 ## Training artifacts
 
@@ -55,28 +61,13 @@ a GPU.
 
 ## Gated base models
 
-This task runs a vendor image, so it cannot export `HF_TOKEN` from a task
-input. To fine-tune a gated base model (e.g. the Llama family), publish the
-token as a **run-level environment variable** before this task runs: any
-earlier task can append `HF_TOKEN=...` to the file at `$WORKFLOW_ENV`, and
-run-level variables are injected into every later container in the run —
-including this one, where Axolotl's Hub client picks `HF_TOKEN` up
-automatically.
-
-```yaml
-  publish_token:
-    name: Publish HF token
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        printf 'HF_TOKEN=%s\n' '${{secrets.hf_token}}' >> "$WORKFLOW_ENV"
-```
-
-List `publish_token` in the training task's `start_on` so the variable is
-published before training starts. The interpolated `${{secrets.hf_token}}` is
-a trusted workflow expression (a secret you configured) — the only kind of
-value that may be interpolated into a script.
+To fine-tune a gated base model (e.g. the Llama family), pass a Hub access
+token through the `token` input — the definition's `exec.env` delivers it to
+the container as `HF_TOKEN`, which Axolotl's Hub client picks up automatically
+(an omitted token resolves to an empty value, which the Hugging Face stack
+treats as no token). Alternatively, fetch the gated model with
+`swaleio/hf-download` and reference the local directory as the config's
+`base_model` — then training never touches the Hub at all.
 
 ## Example
 

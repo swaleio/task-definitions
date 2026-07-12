@@ -17,6 +17,8 @@ inputs:
 exec:
   # docker.io/swaleio/vllm-tools:1-0-0
   image: docker.io/swaleio/vllm-tools@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  env:
+    HF_TOKEN: ${{inputs.token}}
   args:
     - vllm
     - run-batch
@@ -76,8 +78,9 @@ loads straight from the workspace.
 ## Gated and private models
 
 When `model` is a gated or private Hub repo id, pass a Hugging Face access
-token via `token` (as a secret). The image entrypoint exports it as `HF_TOKEN`
-before the engine starts.
+token via `token` (as a secret) — the definition's `exec.env` delivers it to
+the engine as `HF_TOKEN` (an omitted token resolves to an empty value, which
+the Hugging Face stack treats as no token).
 
 ## Example
 

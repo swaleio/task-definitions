@@ -11,27 +11,26 @@ model evaluation.
   bundled vLLM engine as its inference backend
 - **User:** non-root `swale` (uid 1000; replaces the Ubuntu base image's
   default uid-1000 user)
-- **`WORKDIR /mnt/workspace`**, **`ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]`**
+- **`WORKDIR /mnt/workspace`**, **`ENTRYPOINT []`**
 
 ## Entrypoint
 
 The base image's ENTRYPOINT launches the OpenAI-compatible API server; this
-image **resets** it. `entrypoint.sh` exports environment from task inputs and
-then runs `exec "$@"`, so a task definition's `exec.args` form the **full**
-command line:
+image **resets it to empty** (`ENTRYPOINT []`), so a task definition's
+`exec.args` form the **full** command line:
 
 - `["vllm", "run-batch", ...]` — offline batch inference (the `vllm-batch` task)
 - `["lm_eval", ...]` — benchmark evaluation (the `lm-eval` task)
 
-| Input env | Effect |
-|-----------|--------|
-| `INPUT_TOKEN` | Exported as `HF_TOKEN` to authenticate against the Hugging Face Hub for gated or private repos. Pass a secret. |
-| `INPUT_HF_HOME` | Exported as `HF_HOME` to relocate the Hub cache (e.g. onto the mounted workspace so downloaded blobs persist across tasks in a run). Optional; the default under the user's home is used when unset. |
+Hugging Face authentication is not the image's job: a definition that needs it
+maps its `token` input to `HF_TOKEN` via its own `exec.env` (an omitted token
+resolves to an empty `HF_TOKEN`, which the Hugging Face stack treats as no
+token).
 
 ## Outputs
 
 Neither backed task declares outputs — results are written to caller-supplied
-file paths — so the entrypoint appends nothing to `$WORKFLOW_TASK_OUTPUT`.
+file paths — so nothing is appended to `$WORKFLOW_TASK_OUTPUT`.
 
 ## Shared memory
 

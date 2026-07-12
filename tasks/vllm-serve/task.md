@@ -8,9 +8,14 @@ inputs:
   port:
     description: TCP port the API server listens on. 8000 is the conventional value. Required because definition defaults are not applied at runtime — pass it explicitly.
     required: true
+  token:
+    description: Hugging Face access token for gated or private Hub models (pass a secret). Omit for public models or local model directories.
+    default: ""
 exec:
   # docker.io/vllm/vllm-openai:v0.25.0-cu129-ubuntu2404
   image: docker.io/vllm/vllm-openai@sha256:45fb56697a60265776fde7aed64f09b1368987d1d1cfdd1f6692a493548fa5ee
+  env:
+    HF_TOKEN: ${{inputs.token}}
   args:
     - "--model"
     - ${{inputs.model}}
@@ -38,6 +43,7 @@ starts this task without wiring `terminate_on` never finishes.
 |-------|----------|---------|-------------|
 | `model` | yes | — | Hub repo id (e.g. `meta-llama/Llama-3.1-8B-Instruct`) or a full local model directory path (e.g. `/mnt/workspace/llama` from `swaleio/hf-download`). A local path skips the Hub download. |
 | `port` | yes | — | Port the server listens on. `8000` is the conventional value; it is required because definition defaults are not applied at runtime. Consumers combine it with the runner's ip-address. |
+| `token` | no | — | HF access token for gated/private Hub models (pass a secret); delivered to the server as `HF_TOKEN` via the definition's `exec.env`. Unneeded for public models or local directories. |
 
 ## Outputs
 
@@ -71,27 +77,11 @@ at submission — it fails at runtime with CUDA errors when vLLM finds no GPU.
 
 ## Gated models
 
-This task runs a **vendor image**, so it cannot set environment variables from
-inputs (there is no wrapper entrypoint to export a `token` input). To serve a
-gated or private Hub model, publish `HF_TOKEN` through the run-level
-environment channel: a prior task appends it to `$WORKFLOW_ENV`, and run-level
-environment variables are injected into every later container — including this
-one.
-
-```yaml
-tasks:
-  hub_auth:
-    name: Publish HF token
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        echo "HF_TOKEN=${{secrets.hf_token}}" >> "$WORKFLOW_ENV"
-```
-
-Start the serve task after it (`start_on: [hub_auth]`). Alternatively, fetch
-the gated model with `swaleio/hf-download` (which takes a `token` input
-directly) and pass the local directory as `model` — then the server never
-touches the Hub at all.
+Pass a Hub access token through the `token` input — the definition's `exec.env`
+delivers it to the server as `HF_TOKEN` (an omitted token resolves to an empty
+value, which the Hugging Face stack treats as no token). Alternatively, fetch
+the gated model with `swaleio/hf-download` and pass the local directory as
+`model` — then the server never touches the Hub at all.
 
 ## Example
 

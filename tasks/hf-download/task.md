@@ -1,0 +1,79 @@
+---
+name: Hugging Face download
+description: Downloads a model, dataset, or space snapshot from the Hugging Face Hub into a caller-chosen local directory, with optional revision, glob filtering, and token auth for gated/private repos.
+inputs:
+  repo:
+    description: The Hugging Face repo id to download, e.g. meta-llama/Llama-3.1-8B-Instruct.
+    required: true
+  repo_type:
+    description: Repository type — model, dataset, or space.
+    default: model
+  revision:
+    description: Git revision (branch, tag, or commit) to download. Defaults to the repo's main revision.
+    default: ""
+  include:
+    description: Comma-separated glob patterns to download (e.g. "*.safetensors,*.json"). Empty downloads everything.
+    default: ""
+  dest:
+    description: Absolute path inside the container. Point it at the mounted workspace (e.g. /mnt/workspace/llama) to share the result with later tasks, or any other container-local path.
+    required: true
+  token:
+    description: Hugging Face access token for gated or private repos (pass a secret). Omit for public repos.
+    default: ""
+outputs:
+  path:
+    description: The local directory the content was downloaded to, i.e. the value of the dest input.
+exec:
+  # docker.io/swaleio/hf-cli:1-0-0
+  image: docker.io/swaleio/hf-cli@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  args:
+    - download
+    - "--repo-type"
+    - ${{inputs.repo_type}}
+    - ${{inputs.repo}}
+    - "--local-dir"
+    - ${{inputs.dest}}
+---
+
+# Hugging Face download
+
+Downloads `repo` from the Hugging Face Hub into the directory given by `dest` and
+emits that local `path` for downstream tasks. The wrapper exports `HF_TOKEN` from the
+`token` input (for gated or private repos), appends `--revision` when `revision`
+is set, and splits `include` on commas into repeated `--include` glob filters —
+so a single string input drives multiple download patterns without word-splitting
+in `args`.
+
+## Inputs
+
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `repo` | yes | — | Repo id to download, e.g. `meta-llama/Llama-3.1-8B-Instruct`. |
+| `repo_type` | no | `model` | Repository type: `model`, `dataset`, or `space`. |
+| `revision` | no | main revision | Branch, tag, or commit to download. |
+| `include` | no | everything | Comma-separated glob patterns (e.g. `*.safetensors,*.json`). |
+| `dest` | yes | — | Absolute path to the download directory inside the container (e.g. `/mnt/workspace/llama` to share it with later tasks). |
+| `token` | no | — | HF access token for gated/private repos (pass a secret). |
+
+## Outputs
+
+| Output | Description |
+|--------|-------------|
+| `path` | The local directory the content was downloaded to — the `dest` you passed (e.g. `/mnt/workspace/llama`). |
+
+## Example
+
+```yaml
+tasks:
+  weights:
+    name: Fetch weights
+    uses: swaleio/hf-download@1-0-0
+    args:
+      repo: meta-llama/Llama-3.1-8B-Instruct
+      include: "*.safetensors,*.json,tokenizer.*"
+      dest: /mnt/workspace/llama
+      token: ${{secrets.hf_token}}
+```
+
+Downstream tasks read the files at `/mnt/workspace/llama`, or reference the
+resolved location via `${{tasks.weights.outputs.path}}`.

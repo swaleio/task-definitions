@@ -153,9 +153,18 @@ images/<name>/README.md      # synced to the Docker Hub page by CI
 Publish CI builds changed images, pushes `docker.io/swaleio/<name>`, attests
 build provenance, and syncs the image README to Docker Hub.
 
-## CI checks (run on every PR)
+## CI checks
+
+On every PR (`lint.yml`):
 
 - Frontmatter parses; only known keys; `exec.image` present.
-- `name`/`version`/identifiers match the regex and are snake_case.
+- Task name and input/output identifiers match the regex and are snake_case.
 - Images are digest-pinned.
 - Non-empty body.
+
+On every release tag (`release-task.yml`):
+
+- Tag matches `<name>/<version>` with both parts regex-valid (no dots).
+- `tasks/<name>/task.md` exists at the tag and lints.
+- No placeholder digests — an image must be published and pinned before its
+  task can be released.

@@ -67,6 +67,11 @@ equally to vendor images (which must already satisfy it) and swale-built images
 
 - The public internet is reachable; DNS resolves.
 - Private ranges (RFC 1918) and cloud metadata endpoints are blocked.
+- **Within a run, every port of every task container is reachable by the run's
+  other tasks** — there is nothing to declare or expose. Traffic from outside
+  the run (including other runs) is blocked entirely. A runner listening on any
+  port is therefore reachable at `${{tasks.<id>.ip-address}}:<port>` with no
+  further configuration.
 
 ## Long-running "runner" tasks
 

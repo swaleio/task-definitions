@@ -20,17 +20,27 @@ equally to vendor images (which must already satisfy it) and swale-built images
   (`repository_url` → `INPUT_REPOSITORY_URL`).
 - The same values are also available for interpolation into `exec.args` as
   `${{inputs.<name>}}`.
-- **Free-form (script) tasks** receive the user's program as `INPUT_SCRIPT`,
-  write it to a file, and execute it — so values are referenced inside scripts
-  via `$INPUT_*`, never substituted into the script text.
+- **Free-form (script) tasks** declare only `script`, delivered as `INPUT_SCRIPT`,
+  which the image writes to a file and executes. Such a task declares no other
+  inputs, so there are no extra `$INPUT_*` values to read: parameterize the script
+  by interpolating a **trusted** workflow expression (`${{…}}`) into it, or by
+  reading a run-level environment variable — never by interpolating an untrusted
+  value into the script text. (For fixed tasks, each declared input arrives as
+  `$INPUT_*`, safe to read as data.)
 
 ## Workspace
 
 - A single per-run volume is mounted at **`/mnt/workspace`**, shared by every
   task in the run. This is how tasks exchange files: a producer writes to a path,
-  a consumer reads it.
-- File-producing tasks take a destination-path input and **must** use distinct
-  subpaths, since the volume is shared across concurrent tasks.
+  a consumer reads the same path in a later task.
+- **Tasks must not hardcode `/mnt/workspace`.** A path a task reads or writes is
+  a consumer-supplied input holding the **full** path — required when a
+  downstream task consumes the result, so the consumer chooses where it lands.
+  The consumer MAY point that path at the mounted workspace (e.g.
+  `/mnt/workspace/repo`) to share it with later tasks, or at any other
+  container-local path; the task must not force the workspace prefix.
+- Because the volume is shared across concurrent tasks, consumers that write to
+  the workspace **must** use distinct subpaths.
 - The workspace path is also available as `$WORKFLOW_STORAGE`.
 
 ## Outputs

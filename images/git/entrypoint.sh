@@ -14,9 +14,9 @@ git config --global --add safe.directory '*'
 git "$@"
 
 # Emit the declared `commit_sha` output after a clone, for downstream tasks.
-if [ "$1" = "clone" ] && [ -n "$WORKFLOW_TASK_OUTPUT" ]; then
-  dest="/mnt/workspace/${INPUT_DEST:-repo}"
-  if [ -d "$dest/.git" ]; then
-    printf 'commit_sha=%s\n' "$(git -C "$dest" rev-parse HEAD)" >> "$WORKFLOW_TASK_OUTPUT"
+# INPUT_DEST is the full consumer-supplied clone path; resolve the repo from it.
+if [ "$1" = "clone" ] && [ -n "$WORKFLOW_TASK_OUTPUT" ] && [ -n "$INPUT_DEST" ]; then
+  if [ -d "$INPUT_DEST/.git" ]; then
+    printf 'commit_sha=%s\n' "$(git -C "$INPUT_DEST" rev-parse HEAD)" >> "$WORKFLOW_TASK_OUTPUT"
   fi
 fi

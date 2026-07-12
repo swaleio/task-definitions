@@ -11,6 +11,13 @@ if [ -n "$INPUT_TOKEN" ]; then
   export HF_TOKEN="$INPUT_TOKEN"
 fi
 
+# The Hub cache stays at the image default (under the user's home) unless the
+# caller relocates it. Set INPUT_HF_HOME to, for example, a path on the mounted
+# workspace to persist downloaded blobs across tasks in a run.
+if [ -n "$INPUT_HF_HOME" ]; then
+  export HF_HOME="$INPUT_HF_HOME"
+fi
+
 # For downloads, restrict to matching files. INPUT_INCLUDE is a comma-separated
 # list of glob patterns, each appended as its own --include flag. Disable
 # pathname expansion (set -f) so a pattern like *.safetensors is passed through
@@ -42,8 +49,8 @@ fi
 hf "$@"
 
 # After a successful download, publish the destination path so downstream tasks
-# can read the fetched files. dest defaults to `model` and mirrors INPUT_DEST.
+# can read the fetched files. INPUT_DEST is the full local path the caller chose
+# via the `dest` input (a required input), so emit it verbatim.
 if [ "$cmd" = "download" ] && [ -n "$WORKFLOW_TASK_OUTPUT" ]; then
-  dest="${INPUT_DEST:-model}"
-  printf 'path=/mnt/workspace/%s\n' "$dest" >> "$WORKFLOW_TASK_OUTPUT"
+  printf 'path=%s\n' "$INPUT_DEST" >> "$WORKFLOW_TASK_OUTPUT"
 fi

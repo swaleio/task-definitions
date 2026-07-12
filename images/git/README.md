@@ -12,14 +12,14 @@ commit SHA as a task output.
 ## Invocation
 
 The task definition's `exec.args` are the `git` command line (e.g.
-`["clone", "--depth=1", "${{inputs.repository_url}}", "/mnt/workspace/${{inputs.dest}}"]`).
+`["clone", "--depth=1", "${{inputs.repository_url}}", "${{inputs.dest}}"]`).
 The entrypoint runs `git "$@"` and augments it from these inputs:
 
 | Input env | Effect |
 |-----------|--------|
 | `INPUT_GIT_TOKEN` | Configures HTTPS credential storage so a private repo can be cloned over `https://oauth2:<token>@host`. Pass a secret. |
 | `INPUT_REPOSITORY_URL` | Used to derive the credential host. |
-| `INPUT_DEST` | Names the clone destination under the workspace; used to emit the `commit_sha` output. Defaults to `repo`. |
+| `INPUT_DEST` | The full consumer-supplied clone path; used to locate the repo when emitting the `commit_sha` output. |
 
 ## Output
 

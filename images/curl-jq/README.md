@@ -7,8 +7,9 @@ the Swale container contract expects. It is the swale-built image behind Swale's
 
 The entry point assembles the curl invocation from `INPUT_*` environment
 variables (injected by the platform from task inputs), writes the response body
-to a file on the shared `/mnt/workspace` volume, and appends the HTTP status and
-body path to `$WORKFLOW_TASK_OUTPUT`. Arguments are built as a quoted argument
+to the file named by `INPUT_RESPONSE_PATH` (defaulting to `response.json` in the
+working directory — `/mnt/workspace` unless overridden), and appends the HTTP
+status and body path to `$WORKFLOW_TASK_OUTPUT`. Arguments are built as a quoted argument
 vector -- never via string concatenation or `eval` -- so header values, request
 bodies, and URLs are always passed as opaque tokens.
 
@@ -26,7 +27,7 @@ response the request leaves in the workspace.
 | `INPUT_BODY_FILE` | no | — | Path to a body file (sent with `--data-binary @<path>`); takes precedence over `INPUT_BODY`. |
 | `INPUT_RETRY` | no | `3` | Retry count passed to curl `--retry`. |
 | `INPUT_RETRY_ON_CONNREFUSED` | no | `true` | When `true`, adds `--retry-connrefused`. |
-| `INPUT_RESPONSE_PATH` | no | `/mnt/workspace/response.json` | Where the response body is written. |
+| `INPUT_RESPONSE_PATH` | no | `response.json` | Where the response body is written (relative paths land in the working directory; pass an absolute path to place it elsewhere). |
 | `INPUT_EXPECTED_STATUS` | no | — | If set and the actual status differs, the task exits non-zero. |
 
 ## Outputs it emits
@@ -36,7 +37,7 @@ Appended to `$WORKFLOW_TASK_OUTPUT` as `key=value` lines:
 | Output | Description |
 |--------|-------------|
 | `status` | The HTTP status code returned by the request. |
-| `body_file` | The workspace path of the written response body. |
+| `body_file` | The path of the written response body. |
 
 ## Behavior notes
 

@@ -10,7 +10,7 @@ url="$INPUT_URL"
 method="${INPUT_METHOD:-GET}"
 retry="${INPUT_RETRY:-3}"
 retry_connrefused="${INPUT_RETRY_ON_CONNREFUSED:-true}"
-response_path="${INPUT_RESPONSE_PATH:-/mnt/workspace/response.json}"
+response_path="${INPUT_RESPONSE_PATH:-response.json}"
 
 if [ -z "$url" ]; then
   echo "http-request: INPUT_URL is required" >&2

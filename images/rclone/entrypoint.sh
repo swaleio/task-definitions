@@ -34,10 +34,6 @@ if [ -n "${INPUT_TOKEN:-}" ]; then
   RCLONE_CONFIG_REMOTE_TOKEN="$INPUT_TOKEN"
   export RCLONE_CONFIG_REMOTE_TOKEN
 fi
-if [ -n "${INPUT_ENDPOINT:-}" ]; then
-  RCLONE_CONFIG_REMOTE_ENDPOINT="$INPUT_ENDPOINT"
-  export RCLONE_CONFIG_REMOTE_ENDPOINT
-fi
 
 # Copy source -> dest. Both use rclone's "remote:path" form (e.g.
 # "remote:my-bucket/data"); use a local path such as /mnt/workspace/out on one

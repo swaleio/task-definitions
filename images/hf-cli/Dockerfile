@@ -7,9 +7,9 @@ RUN pip install --no-cache-dir "huggingface_hub[cli,hf_xet]" \
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Keep the Hub cache on the shared workspace volume so blobs survive across
-# tasks in a run instead of filling the container's ephemeral layer.
-ENV HF_HOME=/mnt/workspace/.hf-cache
+# The Hub cache stays at its default under the user's home. A caller that wants
+# blobs to survive across tasks can relocate it onto the mounted workspace via
+# the INPUT_HF_HOME input (see entrypoint.sh); the image does not force it.
 
 USER swale
 WORKDIR /mnt/workspace

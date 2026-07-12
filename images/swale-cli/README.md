@@ -21,12 +21,16 @@ finalized install that lands an executable at `/usr/local/bin/swale` and pins it
 version plus checksum/digest. Until then the image builds without `swale` and
 fails at runtime — that is intentional, and this image is not shippable as-is.
 
-## Token handling
+## Authentication
 
-`entrypoint.sh` re-exports the task's `INPUT_TOKEN` (from the `token` input) as
-`SWALE_TOKEN` for the CLI. The env var name `SWALE_TOKEN` is a **placeholder to
-confirm** against the real CLI — update the entrypoint if the CLI expects a
-different name.
+`entrypoint.sh` re-exports the task's credential inputs under the environment
+variable names the Swale CLI reads:
+
+- `INPUT_ACCOUNT` (from the `account` input) → `SWALE_ACCOUNT_NAME`
+- `INPUT_TOKEN` (from the `token` input) → `SWALE_ACCOUNT_TOKEN`
+
+Pass `token` as a secret so it stays out of the container argv, pod spec, and run
+logs.
 
 ## Contract
 

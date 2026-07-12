@@ -27,19 +27,23 @@ override.
 
 ```yaml
 exec:
-  image: docker.io/swaleio/git@sha256:<digest>   # digest-pinned; tag in a comment above
+  # docker.io/swaleio/git:1-0-0 (image version matches this task version)
+  image: docker.io/swaleio/git@sha256:<digest>   # digest-pinned
   args:
     - clone
     - ${{inputs.repository_url}}
-    - /mnt/workspace/${{inputs.dest}}
+    - ${{inputs.dest}}
 ```
 
 - `args` become the container's argv, appended to the image's ENTRYPOINT. Each
   element is **one token**; `${{inputs.x}}` interpolates inside a single token
   (no word-splitting — inputs are strings).
 - **Images are digest-pinned** (`repo@sha256:…`). Keep the human-readable tag in
-  a comment on the line above. Swale-built images live at
-  `docker.io/swaleio/<name>`; vendor images stay on their own registries.
+  a comment on the line **directly above** `image:`. For a swale-built image the
+  tag version must equal this task's version — write it as
+  `# docker.io/swaleio/<name>:1-0-0 (image version matches this task version)`.
+  Swale-built images live at `docker.io/swaleio/<name>`; vendor images keep their
+  own registry and tag (`# <full ref>:<tag>`).
 
 ### Inputs and outputs
 
@@ -49,8 +53,11 @@ inputs:
     description: HTTPS URL of the repository to clone.
     required: true
   dest:
-    description: Destination directory, relative to the workspace root.
-    default: repo
+    description: >-
+      Absolute path inside the container. Point it at the mounted workspace
+      (e.g. /mnt/workspace/repo) to share the result with later tasks, or any
+      other container-local path.
+    required: true
 outputs:
   commit_sha:
     description: The resolved HEAD commit SHA.
@@ -60,14 +67,41 @@ Inputs are strings. A task emits a declared output by appending `key=value` to
 the file at `$WORKFLOW_TASK_OUTPUT` (see the container contract). Emitting an
 **undeclared** key fails the task.
 
+### Paths
+
+- **Never hardcode `/mnt/workspace`** — not in `exec.args`, not in an input
+  default, not in an image entrypoint. A filesystem path a task reads or writes
+  is a consumer-supplied input holding the **full** path.
+- A path whose result a downstream task consumes (a clone destination, a download
+  directory, an upload source) is a **required** input with no default — the
+  consumer supplies it. The platform mounts the shared workspace at
+  `/mnt/workspace`, which the consumer MAY target (e.g. `/mnt/workspace/repo`) to
+  share the result with later tasks, but the task must not force that prefix.
+- An incidental output path the task just needs somewhere to put (e.g. a response
+  file) may stay optional with a bare **relative** default (e.g. `response.json`)
+  — never a `/mnt/workspace`-prefixed default. Note that the consumer can pass an
+  absolute workspace path to share it downstream.
+
 ## The two task forms
 
 - **Fixed** — one bounded operation; the user supplies typed inputs that fill
-  fixed argv placeholders. The default. Safe, discoverable, composable.
+  fixed argv placeholders. The default. Safe, discoverable, composable. Each
+  declared input also arrives in the container as `$INPUT_*`, safe to read as
+  data.
 - **Free-form** — a per-runtime escape hatch (`bash`, `powershell`, `python`, …)
-  that takes a multiline `script` input, writes it to a file, and executes it.
-  Reference values inside the script via `$INPUT_*` environment variables —
-  never paste `${{…}}` into the script body.
+  that takes a single multiline `script` input, writes it to a file, and executes
+  it. A free-form task declares **only** `script` (and no outputs), so there are
+  no extra `$INPUT_*` values. Parameterize it by interpolating a **trusted**
+  workflow expression (`${{inputs.x}}`, `${{tasks.x.outputs.y}}`) into the script,
+  or by reading a run-level environment variable — never interpolate an untrusted
+  value into the script text.
+
+### Workflow examples in the body
+
+Examples must use only inputs declared in the task's frontmatter — the platform
+does not currently reject undeclared args, but the declared inputs are the task's
+contract. A free-form example therefore passes only `script`, and that script
+must be self-contained (see above).
 
 ## The container contract
 

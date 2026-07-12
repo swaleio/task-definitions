@@ -4,16 +4,24 @@
 
 A task definition is a Markdown file with a YAML frontmatter block:
 
-- Path: `tasks/<name>/<version>.md` — e.g. `tasks/git-clone/1-0-0.md`.
+- Path: `tasks/<name>/task.md` — one file per task, edited in place on `main`.
 - Extension `.md`, size ≤ 1 MiB, frontmatter starting at byte 0, **non-empty body**.
 - The body is the task's rendered documentation page — write it for the person
   who will use the task.
 
 ### Names and versions
 
-- Both match `^[A-Za-z0-9_-]{1,100}$`. **No dots** — use `1-0-0`, not `1.0.0`.
-- A task **version is immutable** once published. Any change (including a rebuilt
-  image) is a new `<version>.md` file, never an edit to an existing one.
+- Names and versions match `^[A-Za-z0-9_-]{1,100}$`. **No dots** — use `1-0-0`,
+  not `1.0.0`.
+- **Versions are git tags**, GitHub-Actions-style: releasing a version means
+  pushing a tag named `<name>/<version>` (e.g. `git-clone/1-0-0`). The tag
+  freezes `tasks/<name>/task.md` as that immutable version and triggers the
+  release workflow, which imports the frozen file into the platform under the
+  version from the tag name. The file on `main` keeps evolving toward the next
+  release — doc typo fixes don't mint versions.
+- A published version is **immutable** on the platform (and the release tag
+  should never be moved). Compare two versions with
+  `git diff git-clone/1-0-0..git-clone/1-1-0 -- tasks/git-clone/task.md`.
 
 ### YAML is snake_case
 
@@ -39,11 +47,12 @@ exec:
   element is **one token**; `${{inputs.x}}` interpolates inside a single token
   (no word-splitting — inputs are strings).
 - **Images are digest-pinned** (`repo@sha256:…`). Keep the human-readable tag in
-  a comment on the line **directly above** `image:`. For a swale-built image the
-  tag version must equal this task's version — write it as
-  `# docker.io/swaleio/<name>:1-0-0 (image version matches this task version)`.
+  a comment on the line **directly above** `image:` (`# <full ref>:<tag>`), so a
+  reader knows what the digest points to. The **task version pins the digest** —
+  the image's own tag versions independently (several tasks may share one image),
+  exactly as a GitHub Action's tag freezes the image reference inside it.
   Swale-built images live at `docker.io/swaleio/<name>`; vendor images keep their
-  own registry and tag (`# <full ref>:<tag>`).
+  own registry and tag.
 
 ### Inputs and outputs
 

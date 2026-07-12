@@ -18,7 +18,7 @@ inputs:
     description: Swale access token for authentication (pass a secret). Read from the INPUT_TOKEN environment variable and exported to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
     required: true
 exec:
-  # docker.io/swaleio/swale-cli:1-0-0 (image version matches this task version)
+  # docker.io/swaleio/swale-cli:1-0-0
   image: docker.io/swaleio/swale-cli@sha256:0000000000000000000000000000000000000000000000000000000000000000
   # Flag names (--project, --message) are provisional — verify against the swale CLI.
   # `account` and `token` are intentionally NOT args: the image reads them from

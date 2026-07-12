@@ -18,7 +18,7 @@ inputs:
     description: Hugging Face access token with write scope (pass a secret).
     required: true
 exec:
-  # docker.io/swaleio/hf-cli:1-0-0 (image version matches this task version)
+  # docker.io/swaleio/hf-cli:1-0-0
   image: docker.io/swaleio/hf-cli@sha256:0000000000000000000000000000000000000000000000000000000000000000
   args:
     - upload

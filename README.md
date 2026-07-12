@@ -29,11 +29,15 @@ blocks:
 ## Repository layout
 
 ```
-tasks/<name>/<version>.md      # one file per immutable task version
+tasks/<name>/task.md           # one file per task; versions are git tags '<name>/<version>'
 images/<name>/                 # Dockerfile + entrypoint + README for swale-built images
 docs/container-contract.md     # the runtime contract every image must honor
-.github/workflows/             # lint (tasks) + publish (images) CI
+.github/workflows/             # lint (PRs) + release (tags) + publish images (main)
 ```
+
+A task version is released by pushing a tag `<name>/<version>` (e.g.
+`git-clone/1-0-0`), which freezes `tasks/<name>/task.md` as that immutable
+version and imports it into the platform.
 
 ## Contributing
 

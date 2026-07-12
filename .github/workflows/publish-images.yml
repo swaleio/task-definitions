@@ -15,6 +15,10 @@ on:
         description: "Single image name to (re)publish (e.g. git). Empty = all changed."
         required: false
         default: ""
+      tag:
+        description: "Explicit tag for the published image (e.g. 1-0-0). Empty = <run>-<sha>."
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -67,7 +71,7 @@ jobs:
         with:
           images: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
           tags: |
-            type=raw,value=${{ github.run_number }}-{{sha}}
+            type=raw,value=${{ github.event.inputs.tag || format('{0}-{1}', github.run_number, github.sha) }}
             type=raw,value=latest
 
       - id: build

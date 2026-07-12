@@ -1,0 +1,75 @@
+name: Release task version
+
+# A task version is released by pushing a tag named `<task-name>/<version>`
+# (e.g. `git-clone/1-0-0`). The tag freezes tasks/<task-name>/task.md as that
+# immutable version — the same file on main keeps evolving toward the next one.
+# This workflow validates the tag and imports the frozen file into the Swale
+# platform under the version from the tag name.
+
+on:
+  push:
+    tags:
+      - "*/*"
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Parse and validate tag
+        id: tag
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          name="${tag%%/*}"
+          version="${tag#*/}"
+          if [ -z "$name" ] || [ -z "$version" ] || [ "$name/$version" != "$tag" ]; then
+            echo "::error::Tag '$tag' must be '<task-name>/<version>'"; exit 1
+          fi
+          for field in "$name" "$version"; do
+            if ! printf '%s' "$field" | grep -Eq '^[A-Za-z0-9_-]{1,100}$'; then
+              echo "::error::'$field' must match ^[A-Za-z0-9_-]{1,100}$ (no dots)"; exit 1
+            fi
+          done
+          if [ ! -f "tasks/$name/task.md" ]; then
+            echo "::error::tasks/$name/task.md does not exist at tag '$tag'"; exit 1
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - run: pip install "pyyaml==6.0.2"
+      - name: Lint the released definition
+        run: python tools/lint_definitions.py
+
+      - name: Refuse unpinned swale image digests
+        shell: bash
+        run: |
+          if grep -q "sha256:0000000000000000000000000000000000000000000000000000000000000000" \
+            "tasks/${{ steps.tag.outputs.name }}/task.md"; then
+            echo "::error::tasks/${{ steps.tag.outputs.name }}/task.md still pins a placeholder digest — publish the image and pin the real digest before releasing"; exit 1
+          fi
+
+      # TODO: switch to automated import once a platform service account exists.
+      # Requires SWALE_ACCOUNT_NAME / SWALE_ACCOUNT_TOKEN secrets and the swale
+      # CLI (or the HTTP API): create-if-needed, then add the version from file.
+      - name: Import instructions
+        shell: bash
+        run: |
+          {
+            echo "## Release ${{ steps.tag.outputs.name }}@${{ steps.tag.outputs.version }}"
+            echo
+            echo "Import this frozen file into the platform:"
+            echo
+            echo '```sh'
+            echo "swale task-definition create --name ${{ steps.tag.outputs.name }} --version ${{ steps.tag.outputs.version }} --file tasks/${{ steps.tag.outputs.name }}/task.md --public"
+            echo "# or, if the definition already exists:"
+            echo "swale task-definition add-version ${{ steps.tag.outputs.name }} --version ${{ steps.tag.outputs.version }} --file tasks/${{ steps.tag.outputs.name }}/task.md"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

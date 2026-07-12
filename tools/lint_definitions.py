@@ -39,16 +39,13 @@ def lint_file(path: str) -> list[str]:
     rel = os.path.relpath(path).replace("\\", "/")
 
     parts = rel.split("/")
-    if len(parts) != 3 or parts[0] != "tasks":
-        errors.append(f"{rel}: must live at tasks/<name>/<version>.md")
+    if len(parts) != 3 or parts[0] != "tasks" or parts[2] != "task.md":
+        errors.append(f"{rel}: must live at tasks/<name>/task.md (versions are git tags '<name>/<version>')")
         return errors
-    name, filename = parts[1], parts[2]
-    version = filename[:-3] if filename.endswith(".md") else filename
+    name = parts[1]
 
     if not NAME_RE.match(name):
         errors.append(f"{rel}: task name '{name}' must match {NAME_RE.pattern} (no dots)")
-    if not NAME_RE.match(version):
-        errors.append(f"{rel}: version '{version}' must match {NAME_RE.pattern} (no dots)")
 
     with open(path, "r", encoding="utf-8") as handle:
         text = handle.read()

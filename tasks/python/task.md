@@ -55,6 +55,10 @@ this generic `python` task declares none, so emitting a key here would fail the
 task — exchange results through files instead: write to the working directory,
 or to a shared mount such as `/mnt/workspace` when a later task must read them).
 
+## Compute
+
+**CPU.** No GPU is needed and scheduling it on a GPU compute type wastes money; GPU workloads belong in the `transformers` task (the GPU Python lane).
+
 ## Example
 
 The task declares only `script`, so the example passes only `script` and the

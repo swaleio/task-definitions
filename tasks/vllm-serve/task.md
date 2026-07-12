@@ -47,11 +47,10 @@ server's responses over HTTP instead.
 
 ## Compute
 
-This task **requires a GPU compute type** — select it in the workflow via
-`compute_type` (the definition does not choose compute). Rough VRAM guidance
-for bf16/fp16 weights plus KV cache: 7–8B models want a 24 GB-class GPU,
-13B-class models want 40 GB, and 70B-class models want 80 GB-class hardware
-(or multiple GPUs). Scheduling this task on a CPU compute type does not fail
+**GPU required.** Rough VRAM guidance for bf16/fp16 weights plus KV cache:
+7–8B models want a 24 GB-class GPU, 13B-class models want 40 GB, and 70B-class
+models want 80 GB-class hardware (or multiple GPUs). The workflow selects the
+compute type via `compute_type`; on a CPU compute type the task does not fail
 at submission — it fails at runtime with CUDA errors when vLLM finds no GPU.
 
 ## Runner lifecycle and consumers

@@ -37,16 +37,17 @@ settings, precision, batch sizes, and where the result lands.
 This task declares **no outputs** — the fine-tuned model is written to the
 config's `output_dir`, wherever that points. Set `output_dir` to a path on the
 mounted workspace that you choose (e.g. `/mnt/workspace/sft-out`) so later
-tasks — evaluation, upload, serving — can read the checkpoint directly from
-that path.
+tasks — evaluation, publishing, serving — can read the checkpoint directly from
+that path. To publish the checkpoint, use `swaleio/swale-push@1-0-0` (the
+platform's own store) or `swaleio/hf-upload` for the Hugging Face Hub.
 
 ## Compute
 
-This task requires a **GPU compute type** — the workflow selects it via
-`compute_type`; the definition does not. As rough guidance, a LoRA/QLoRA
-fine-tune of a 0.5–8B model fits on 16–24 GB-class GPUs; full-parameter
-fine-tunes of 7–8B models want 80 GB-class hardware. Scheduling this task on a
-CPU compute type fails at runtime with CUDA errors.
+**GPU required.** As rough guidance, a LoRA/QLoRA fine-tune of a 0.5–8B model
+fits on 16–24 GB-class GPUs; full-parameter fine-tunes of 7–8B models want
+80 GB-class hardware. The workflow selects the compute type via
+`compute_type`; on a CPU compute type the task fails at runtime with CUDA
+errors.
 
 ## Example
 

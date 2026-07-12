@@ -53,6 +53,10 @@ Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
 this generic `node` task declares none).
 
+## Compute
+
+**CPU.** No GPU is needed and scheduling it on a GPU compute type wastes money; GPU workloads belong in the `transformers` task (the GPU Python lane).
+
 ## Example
 
 The task declares only `script`, so the example passes only `script` and the

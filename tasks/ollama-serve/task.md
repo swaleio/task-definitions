@@ -32,14 +32,14 @@ output-tracking sidecar, so results flow over HTTP rather than through
 
 ## Compute
 
-Select a **GPU compute type** in your workflow (`compute_type` — the workflow
-chooses the compute, not this definition) for any real model. Ollama falls back
-to CPU inference when no GPU is present, so the task will not crash on a
-CPU-only compute type, but generation is orders of magnitude slower and only
-tolerable for the smallest models. Rough VRAM guidance for Ollama's default
+**GPU recommended.** Ollama falls back to CPU inference when no GPU is
+present, so the task will not crash on a CPU-only compute type, but generation
+is orders of magnitude slower and only tolerable for the smallest models — a
+GPU compute type makes it usable. Rough VRAM guidance for Ollama's default
 4-bit quantizations: ~3 GB for a 3B model, ~6–8 GB for a 7–8B model, 40 GB+ for
 70B-class models; a model that does not fit in VRAM spills to CPU and slows
-down.
+down. The workflow selects the compute type via `compute_type`, not this
+definition.
 
 ## Runner semantics
 

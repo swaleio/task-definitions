@@ -47,6 +47,10 @@ the resolved `commit_sha` for downstream tasks.
 |--------|-------------|
 | `commit_sha` | The resolved HEAD commit SHA. |
 
+## Compute
+
+**CPU.** Data movement only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
+
 ## Example
 
 ```yaml

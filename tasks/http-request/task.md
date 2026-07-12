@@ -72,6 +72,10 @@ workspace, and to poll a not-yet-ready runner until it starts answering.
 | `status` | The HTTP status code of the final response. |
 | `body_file` | Path of the written response body (equals `response_path`). |
 
+## Compute
+
+**CPU.** HTTP I/O only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
+
 ## Example
 
 ```yaml

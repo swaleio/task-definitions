@@ -61,6 +61,10 @@ in `args`.
 |--------|-------------|
 | `path` | The local directory the content was downloaded to — the `dest` you passed (e.g. `/mnt/workspace/llama`). |
 
+## Compute
+
+**CPU.** Data movement only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
+
 ## Example
 
 ```yaml

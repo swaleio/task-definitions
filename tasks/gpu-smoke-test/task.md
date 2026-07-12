@@ -48,12 +48,11 @@ None — the task takes no parameters.
 
 ## Compute
 
-This task requires a **GPU compute type** — the workflow selects it via
-`compute_type`; the definition does not. Any VRAM size passes (it allocates
-only a few MB). Scheduling it on a CPU compute type **fails** — `nvidia-smi`
-is absent and `torch.cuda.is_available()` is `False`, so the task exits
-non-zero. That is the point: a mis-typed compute selection surfaces here in
-seconds instead of deep inside a training job.
+**GPU required.** Any VRAM size passes (it allocates only a few MB); the
+workflow selects the compute type via `compute_type`. On a CPU compute type
+the task **fails** — `nvidia-smi` is absent and `torch.cuda.is_available()`
+is `False` — and that is by design: a mis-typed compute selection surfaces
+here in seconds instead of deep inside a training job.
 
 ## Example
 

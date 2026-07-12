@@ -31,11 +31,11 @@ programs behave exactly as they do in a normal interpreter.
 
 ## Compute
 
-This task requires a **GPU compute type** — the workflow selects it via
-`compute_type`; the definition does not. Small pipeline inference fits in a few
-GB of VRAM; 7–8B models in bf16 want 16–24 GB; larger models scale from there.
-Scheduling this task on a CPU compute type fails at runtime with CUDA errors
-(`torch.cuda.is_available()` is `False`, and any `.to("cuda")` raises).
+**GPU required.** Small pipeline inference fits in a few GB of VRAM; 7–8B
+models in bf16 want 16–24 GB; larger models scale from there. The workflow
+selects the compute type via `compute_type`; on a CPU compute type the task
+fails at runtime with CUDA errors (`torch.cuda.is_available()` is `False`,
+and any `.to("cuda")` raises).
 
 ## Example
 

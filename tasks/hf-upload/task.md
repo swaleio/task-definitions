@@ -45,6 +45,10 @@ folder within the repository (root by default).
 | `path_in_repo` | no | repo root | Destination path inside the repository. |
 | `token` | yes | — | Hugging Face write token (pass a project/account secret). |
 
+## Compute
+
+**CPU.** Data movement only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
+
 ## Example
 
 ```yaml

@@ -53,11 +53,10 @@ trades size for quality, and `Q8_0` is near-lossless but largest.
 
 ## Compute
 
-This task needs **no GPU** — schedule it on a CPU `compute_type`.
-`llama-quantize` is a multi-threaded CPU program, so more cores make it faster;
-no CUDA is involved. Budget disk rather than VRAM: the workspace must hold the
-source and quantized files side by side (a `Q4_K_M` file is roughly a third the
-size of its `f16` source).
+**CPU.** `llama-quantize` is a multi-threaded CPU program — more cores make it
+faster, and a GPU adds nothing. Budget disk rather than VRAM: the workspace
+must hold the source and quantized files side by side (a `Q4_K_M` file is
+roughly a third the size of its `f16` source).
 
 ## Example
 

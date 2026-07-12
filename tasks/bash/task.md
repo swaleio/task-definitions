@@ -20,6 +20,10 @@ Writes your `script` to a file and executes it with `bash`, so shebangs,
 `set -euo pipefail`, multi-line scripts, and error line numbers all behave
 exactly as they do in a normal shell.
 
+## Compute
+
+**CPU.** No GPU is needed and scheduling it on a GPU compute type wastes money; GPU workloads belong in the `transformers` task (the GPU Python lane).
+
 ## Example
 
 The task declares only `script`, so the example passes only `script` and the

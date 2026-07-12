@@ -35,22 +35,23 @@ Everything the run produces (adapter weights or full checkpoints, tokenizer
 files, training logs) is written to the config's `output_dir`. Point
 `output_dir` at a path a later task can consume — e.g.
 `/mnt/workspace/lora-out` on the shared workspace — so downstream tasks such
-as `swaleio/axolotl-merge-lora` or an upload task can pick the artifacts up
+as `swaleio/axolotl-merge-lora` or a publish task — `swaleio/swale-push@1-0-0`
+(the platform's own store) or `swaleio/hf-upload` — can pick the artifacts up
 from there.
 
 ## Compute
 
-Training requires a **GPU compute type**, which your workflow selects on the
-task (`compute_type`) — the definition does not pin one. Rough sizing:
+**GPU required.** Rough sizing:
 
 - **Full fine-tune** of a 7–8B model wants an A100/H100-class card (80 GB
   VRAM).
 - **QLoRA** of the same models fits in 24–48 GB; the example below runs
   comfortably at the low end.
 
-Scheduling this task on a CPU compute type does not fail fast — the container
+The workflow selects the compute type via `compute_type`; the definition does
+not pin one. On a CPU compute type the task does not fail fast — the container
 starts, then crashes at runtime with CUDA errors once training tries to reach
-a GPU. Make sure the workflow assigns a GPU compute type.
+a GPU.
 
 ## Gated base models
 
@@ -122,4 +123,5 @@ tasks:
 ```
 
 The trained adapter lands at `/mnt/workspace/lora-out` (the config's
-`output_dir`), ready for `swaleio/axolotl-merge-lora` or an upload task.
+`output_dir`), ready for `swaleio/axolotl-merge-lora`, `swaleio/swale-push`,
+or `swaleio/hf-upload`.

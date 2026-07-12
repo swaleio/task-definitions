@@ -44,12 +44,12 @@ workspace so later tasks can reach the result.
 
 ## Compute
 
-Merging runs fine on a **CPU compute type** — it loads the base model weights,
-applies the adapter deltas, and saves the result; no training kernels are
-involved. What it does need is **RAM at least the size of the model weights**
-(a 7–8B model in bf16 is roughly 16 GB). A GPU compute type speeds the merge
-up but is not required. As always, the compute type is selected by the
-workflow (`compute_type`), not by this definition.
+**GPU recommended.** Merging runs on a CPU compute type — it loads the base
+model weights, applies the adapter deltas, and saves the result; no training
+kernels are involved — but it needs **RAM at least the size of the model
+weights** (a 7–8B model in bf16 is roughly 16 GB), and a GPU compute type
+makes the merge faster. The workflow selects the compute type via
+`compute_type`, not this definition.
 
 ## Gated base models
 
@@ -113,4 +113,5 @@ tasks:
 ```
 
 After the run, the merged model is at `/mnt/workspace/lora-out/merged`, ready
-for `swaleio/hf-upload` or a serving task.
+for `swaleio/swale-push@1-0-0` (the platform's own store), `swaleio/hf-upload`,
+or a serving task.

@@ -35,7 +35,7 @@ override.
 
 ```yaml
 exec:
-  # docker.io/swaleio/git:1-0-0 (image version matches this task version)
+  # docker.io/swaleio/git:1-0-0
   image: docker.io/swaleio/git@sha256:<digest>   # digest-pinned
   args:
     - clone
@@ -91,6 +91,22 @@ the file at `$WORKFLOW_TASK_OUTPUT` (see the container contract). Emitting an
   — never a `/mnt/workspace`-prefixed default. Note that the consumer can pass an
   absolute workspace path to share it downstream.
 
+### Compute
+
+Every task body has a `## Compute` section, placed **after the Inputs/Outputs
+tables and before the Example section**. Its first bolded phrase is **exactly
+one** of three levels:
+
+- `**GPU required.**` — the task fails or is unusable on CPU compute types.
+  Follow with brief VRAM guidance and note that the workflow selects
+  `compute_type`.
+- `**GPU recommended.**` — the task runs on CPU but degraded; state what
+  degrades (speed, feasible model sizes). The workflow selects `compute_type`.
+- `**CPU.**` — no GPU needed; scheduling the task on a GPU compute type wastes
+  money. One or two sentences max.
+
+Keep the section short — it is a scannable label, not an essay.
+
 ## The two task forms
 
 - **Fixed** — one bounded operation; the user supplies typed inputs that fill
@@ -111,6 +127,10 @@ Examples must use only inputs declared in the task's frontmatter — the platfor
 does not currently reject undeclared args, but the declared inputs are the task's
 contract. A free-form example therefore passes only `script`, and that script
 must be self-contained (see above).
+
+When an example demonstrates publishing run artifacts, show swale-push (the
+platform's own store) first; external stores (hf-upload, rclone-copy) come
+after.
 
 ## The container contract
 

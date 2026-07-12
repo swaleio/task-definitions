@@ -56,11 +56,10 @@ get an 8-bit file directly from conversion.
 
 ## Compute
 
-This task needs **no GPU** — schedule it on a CPU `compute_type`. Conversion is
-CPU- and RAM-bound: it reads the source tensors and rewrites them in GGUF
-layout, with no CUDA involved. Budget disk rather than VRAM: the workspace must
-hold the source directory and the converted file side by side (an `f16` GGUF is
-roughly 2 bytes per parameter).
+**CPU.** Conversion is CPU- and RAM-bound — no CUDA is involved, so a GPU
+compute type adds nothing. Budget disk rather than VRAM: the workspace must
+hold the source directory and the converted file side by side (an `f16` GGUF
+is roughly 2 bytes per parameter).
 
 ## Example
 

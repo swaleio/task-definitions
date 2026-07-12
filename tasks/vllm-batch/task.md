@@ -58,15 +58,13 @@ tasks can read them; the task emits no output keys.
 
 ## Compute
 
-This task requires a **GPU compute type**, selected by the workflow via
-`compute_type` — the definition does not choose hardware. The GPU's VRAM must
-fit the model: roughly 2 GB per billion parameters for bf16 weights, plus
-headroom for the KV cache (vLLM preallocates most of the remaining VRAM), so a
-7–8B model wants a 24 GB+ GPU. Models larger than a single GPU are normally
-sharded with tensor parallelism across a multi-GPU compute type; this task's
-fixed command line keeps vLLM's default engine settings, so size the compute
-type so that one GPU fits the model. Scheduling this task on a CPU compute type
-fails at runtime with CUDA errors.
+**GPU required.** The GPU's VRAM must fit the model: roughly 2 GB per billion
+parameters for bf16 weights, plus headroom for the KV cache (vLLM preallocates
+most of the remaining VRAM), so a 7–8B model wants a 24 GB+ GPU. This task's
+fixed command line keeps vLLM's default engine settings (no tensor
+parallelism), so size the compute type so that one GPU fits the model. The
+workflow selects the compute type via `compute_type`; on a CPU compute type
+the task fails at runtime with CUDA errors.
 
 ## Reusing downloaded weights
 

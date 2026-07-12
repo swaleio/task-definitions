@@ -67,6 +67,10 @@ never appears in the container's argv or run logs.
 Because the workspace is shared across concurrent tasks, give parallel pulls
 distinct `dest` paths so they don't overwrite each other.
 
+## Compute
+
+**CPU.** Data movement only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
+
 ## Example
 
 ```yaml

@@ -91,6 +91,10 @@ None. The task writes the copied files to the destination (typically a
 `/mnt/workspace/…` subpath) for downstream tasks to read; it emits no output
 keys.
 
+## Compute
+
+**CPU.** Data movement only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
+
 ## Example
 
 Download an S3 prefix into the workspace so later tasks can process it:

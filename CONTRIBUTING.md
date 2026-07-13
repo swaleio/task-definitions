@@ -30,13 +30,15 @@ Field names and identifiers are snake_case: `compute_type`, `entry_point`,
 
 ### The `exec` block
 
-`exec` is `{ image, args }` — **only**. There is no command/workingdir/env
+`exec` is `{ image, args, env }` — **only**. There is no command/workingdir
 override.
 
 ```yaml
 exec:
-  # docker.io/swaleio/git:1-0-0 (image version matches this task version)
+  # docker.io/swaleio/git:1-0-0
   image: docker.io/swaleio/git@sha256:<digest>   # digest-pinned
+  env:
+    GIT_TOKEN: ${{inputs.token}}
   args:
     - clone
     - ${{inputs.repository_url}}
@@ -46,6 +48,19 @@ exec:
 - `args` become the container's argv, appended to the image's ENTRYPOINT. Each
   element is **one token**; `${{inputs.x}}` interpolates inside a single token
   (no word-splitting — inputs are strings).
+- `env` is a map of environment variables injected into the container. Names
+  are **UPPER_SNAKE**, used verbatim, and must match
+  `^[A-Za-z_][A-Za-z0-9_]*$`; the `WORKFLOW_` and `INPUT_` prefixes are
+  reserved. Values may embed `${{inputs.*}}` expressions. `exec.env` is
+  injected at the **lowest** precedence:
+  `exec.env` < `INPUT_*` < run-level env < reserved `WORKFLOW_*` variables
+  (which cannot be overridden).
+- **Empty-string caveat**: an `env` value referencing an omitted optional input
+  resolves to the empty string — the variable **is set**, just empty. That is
+  fine for tokens the tool treats as absent-when-empty (e.g. `HF_TOKEN`), and
+  wrong for path-like variables (e.g. `HF_HOME`), where a set-but-empty value
+  breaks path resolution — those belong in a wrapper conditional that sets the
+  variable only when the input is non-empty, not in `exec.env`.
 - **Images are digest-pinned** (`repo@sha256:…`). Keep the human-readable tag in
   a comment on the line **directly above** `image:` (`# <full ref>:<tag>`), so a
   reader knows what the digest points to. The **task version pins the digest** —
@@ -91,6 +106,22 @@ the file at `$WORKFLOW_TASK_OUTPUT` (see the container contract). Emitting an
   — never a `/mnt/workspace`-prefixed default. Note that the consumer can pass an
   absolute workspace path to share it downstream.
 
+### Compute
+
+Every task body has a `## Compute` section, placed **after the Inputs/Outputs
+tables and before the Example section**. Its first bolded phrase is **exactly
+one** of three levels:
+
+- `**GPU required.**` — the task fails or is unusable on CPU compute types.
+  Follow with brief VRAM guidance and note that the workflow selects
+  `compute_type`.
+- `**GPU recommended.**` — the task runs on CPU but degraded; state what
+  degrades (speed, feasible model sizes). The workflow selects `compute_type`.
+- `**CPU.**` — no GPU needed; scheduling the task on a GPU compute type wastes
+  money. One or two sentences max.
+
+Keep the section short — it is a scannable label, not an essay.
+
 ## The two task forms
 
 - **Fixed** — one bounded operation; the user supplies typed inputs that fill
@@ -107,10 +138,15 @@ the file at `$WORKFLOW_TASK_OUTPUT` (see the container contract). Emitting an
 
 ### Workflow examples in the body
 
-Examples must use only inputs declared in the task's frontmatter — the platform
-does not currently reject undeclared args, but the declared inputs are the task's
-contract. A free-form example therefore passes only `script`, and that script
+Examples must use only inputs declared in the task's frontmatter — when a step
+passes args not declared as inputs, the platform warns in the task's first
+run-log entry (the args are still passed through), and the declared inputs are
+the task's contract. A free-form example therefore passes only `script`, and that script
 must be self-contained (see above).
+
+When an example demonstrates publishing run artifacts, show swale-push (the
+platform's own store) first; external stores (hf-upload, rclone-copy) come
+after.
 
 ## The container contract
 
@@ -133,9 +169,18 @@ images/<name>/README.md      # synced to the Docker Hub page by CI
 Publish CI builds changed images, pushes `docker.io/swaleio/<name>`, attests
 build provenance, and syncs the image README to Docker Hub.
 
-## CI checks (run on every PR)
+## CI checks
+
+On every PR (`lint.yml`):
 
 - Frontmatter parses; only known keys; `exec.image` present.
-- `name`/`version`/identifiers match the regex and are snake_case.
+- Task name and input/output identifiers match the regex and are snake_case.
 - Images are digest-pinned.
 - Non-empty body.
+
+On every release tag (`release-task.yml`):
+
+- Tag matches `<name>/<version>` with both parts regex-valid (no dots).
+- `tasks/<name>/task.md` exists at the tag and lints.
+- No placeholder digests — an image must be published and pinned before its
+  task can be released.

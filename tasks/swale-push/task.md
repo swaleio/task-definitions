@@ -57,6 +57,10 @@ secret so it never appears in the task's argv, pod spec, or run logs.
 > The `swale push` flag names above (`--project`, `--message`) are provisional
 > and should be verified against the swale CLI before this version is published.
 
+## Compute
+
+**CPU.** Data movement only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
+
 ## Example
 
 ```yaml

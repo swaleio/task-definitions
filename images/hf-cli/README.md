@@ -23,7 +23,7 @@ inputs before running `hf "$@"`:
 
 | Input env | Applies to | Effect |
 |-----------|------------|--------|
-| `INPUT_TOKEN` | all | Exported as `HF_TOKEN` to authenticate against the Hub. Pass a secret. |
+| `INPUT_TOKEN` | — | No longer read by the entrypoint — the task definitions deliver `HF_TOKEN` via `exec.env`. |
 | `INPUT_HF_HOME` | all | Exported as `HF_HOME` to relocate the Hub cache (e.g. onto the mounted workspace). Optional; the default under the user's home is used when unset. |
 | `INPUT_INCLUDE` | `download` | Comma-separated glob patterns; each becomes a repeated `--include <glob>`. Patterns are passed literally (no shell globbing). |
 | `INPUT_REVISION` | all | Appended as `--revision <ref>` to pin a branch, tag, or commit. |

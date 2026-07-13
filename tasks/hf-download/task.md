@@ -26,6 +26,8 @@ outputs:
 exec:
   # docker.io/swaleio/hf-cli:1-0-0
   image: docker.io/swaleio/hf-cli@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  env:
+    HF_TOKEN: ${{inputs.token}}
   args:
     - download
     - "--repo-type"
@@ -38,11 +40,12 @@ exec:
 # Hugging Face download
 
 Downloads `repo` from the Hugging Face Hub into the directory given by `dest` and
-emits that local `path` for downstream tasks. The wrapper exports `HF_TOKEN` from the
-`token` input (for gated or private repos), appends `--revision` when `revision`
-is set, and splits `include` on commas into repeated `--include` glob filters —
-so a single string input drives multiple download patterns without word-splitting
-in `args`.
+emits that local `path` for downstream tasks. The definition's `exec.env` delivers
+the `token` input as `HF_TOKEN` for gated or private repos (an omitted token
+resolves to an empty value, which the Hugging Face stack treats as no token). The
+wrapper appends `--revision` when `revision` is set and splits `include` on commas
+into repeated `--include` glob filters — so a single string input drives multiple
+download patterns without word-splitting in `args`.
 
 ## Inputs
 
@@ -60,6 +63,10 @@ in `args`.
 | Output | Description |
 |--------|-------------|
 | `path` | The local directory the content was downloaded to — the `dest` you passed (e.g. `/mnt/workspace/llama`). |
+
+## Compute
+
+**CPU.** Data movement only — no GPU is needed, and scheduling it on a GPU compute type wastes money.
 
 ## Example
 

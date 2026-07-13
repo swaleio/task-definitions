@@ -12,9 +12,9 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: "Single image name to (re)publish (e.g. git). Empty = all changed."
+        description: "Image to (re)publish: a single name (e.g. git), 'all' for every image under images/, or empty to fall back to changed-since-last-push."
         required: false
-        default: ""
+        default: "all"
       tag:
         description: "Explicit tag for the published image (e.g. 1-0-0). Empty = <run>-<sha>."
         required: false
@@ -40,13 +40,16 @@ jobs:
       - id: list
         shell: bash
         run: |
-          if [ -n "${{ github.event.inputs.image }}" ]; then
-            echo "images=[\"${{ github.event.inputs.image }}\"]" >> "$GITHUB_OUTPUT"
-            exit 0
+          image="${{ github.event.inputs.image }}"
+          if [ "$image" = "all" ]; then
+            names=$(find images -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
+          elif [ -n "$image" ]; then
+            names="$image"
+          else
+            names=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- images/ \
+              | awk -F/ '{print $2}' | sort -u)
           fi
-          changed=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- images/ \
-            | awk -F/ '{print $2}' | sort -u | grep -v '^$' || true)
-          json=$(printf '%s\n' "$changed" | grep -v '^$' | jq -R . | jq -cs .)
+          json=$(printf '%s\n' "$names" | grep -v '^$' | jq -R . | jq -cs .)
           echo "images=${json:-[]}" >> "$GITHUB_OUTPUT"
 
   publish:

@@ -1,0 +1,63 @@
+# Showcase: download a model, run a batch of prompts through it offline with
+# vLLM, and publish the results. Pointing vllm-batch at the downloaded local
+# directory skips a second download of the weights.
+name: Offline batch inference
+description: hf-download -> (write requests) -> vllm-batch -> swale-push
+compute_type: gpu
+
+inputs:
+  model:
+    description: Hugging Face repo id of the model to run.
+    default: meta-llama/Llama-3.1-8B-Instruct
+  project:
+    description: Swale project to publish the results to.
+    required: true
+
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      fetch_model:
+        name: Fetch model
+        uses: swaleio/hf-download@1-0-0
+        args:
+          repo: ${{inputs.model}}
+          include: '*.safetensors,*.json,tokenizer.*'
+          dest: /mnt/workspace/model
+          token: ${{secrets.hf_token}}
+
+      write_requests:
+        name: Write batch requests
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            cat > /mnt/workspace/requests.jsonl <<'JSONL'
+            {"custom_id":"1","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/model","messages":[{"role":"user","content":"Summarize the plot of Hamlet in one sentence."}]}}
+            {"custom_id":"2","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/model","messages":[{"role":"user","content":"List three uses for a paperclip."}]}}
+            JSONL
+
+      infer:
+        name: Batch inference
+        uses: swaleio/vllm-batch@1-0-0
+        start_on:
+          - fetch_model
+          - write_requests
+        args:
+          input_file: /mnt/workspace/requests.jsonl
+          output_file: /mnt/workspace/results.jsonl
+          model: ${{tasks.fetch_model.outputs.path}}
+          token: ${{secrets.hf_token}}
+
+      publish:
+        name: Publish results
+        uses: swaleio/swale-push@1-0-0
+        compute_type: cpu
+        start_on:
+          - infer
+        args:
+          account: swaleio
+          project: ${{inputs.project}}
+          source: /mnt/workspace/results.jsonl
+          token: ${{secrets.swale_token}}

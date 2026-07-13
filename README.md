@@ -31,9 +31,14 @@ blocks:
 ```
 tasks/<name>/task.md           # one file per task; versions are git tags '<name>/<version>'
 images/<name>/                 # Dockerfile + entrypoint + README for swale-built images
+examples/                      # end-to-end workflow definitions that compose the tasks
 docs/container-contract.md     # the runtime contract every image must honor
 .github/workflows/             # lint (PRs) + release (tags) + publish images (main)
 ```
+
+See [`examples/`](examples/) for complete workflow definitions that chain these
+tasks (fine-tune → GGUF → publish, offline batch inference, clone → build →
+publish).
 
 A task version is released by pushing a tag `<name>/<version>` (e.g.
 `git-clone/1-0-0`), which freezes `tasks/<name>/task.md` as that immutable

@@ -1,0 +1,52 @@
+# Showcase: clone a repository, build it, and publish the build output to Swale
+# storage. A CPU-only pipeline that uses the utility spine.
+name: Clone build and publish
+description: git-clone -> bash build -> swale-push
+compute_type: cpu
+
+inputs:
+  repository_url:
+    description: HTTPS URL of the repository to build.
+    required: true
+  project:
+    description: Swale project to publish the build output to.
+    required: true
+
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      checkout:
+        name: Checkout
+        uses: swaleio/git-clone@1-0-0
+        args:
+          repository_url: ${{inputs.repository_url}}
+          dest: /mnt/workspace/repo
+          git_token: ${{secrets.git_token}}
+
+      build:
+        name: Build
+        uses: swaleio/bash@1-0-0
+        start_on:
+          - checkout
+        args:
+          script: |
+            set -euo pipefail
+            cd /mnt/workspace/repo
+            mkdir -p /mnt/workspace/dist
+            # Replace with your project's build; this stages the repo tree as an
+            # artifact so the publish step has something to push.
+            tar -czf /mnt/workspace/dist/source.tgz --exclude=.git .
+            ls -l /mnt/workspace/dist
+
+      publish:
+        name: Publish build output
+        uses: swaleio/swale-push@1-0-0
+        start_on:
+          - build
+        args:
+          account: swaleio
+          project: ${{inputs.project}}
+          source: /mnt/workspace/dist
+          token: ${{secrets.swale_token}}

@@ -1,0 +1,103 @@
+# Showcase: fine-tune Llama with QLoRA, merge the adapter, convert and quantize
+# to GGUF, and publish the result to Swale storage.
+#
+# The GPU steps (fetch, train, merge) run on a GPU compute type; the llama.cpp
+# conversion and quantization are CPU-bound and override compute_type to cpu.
+# Files move between tasks through the shared workspace at /mnt/workspace.
+name: Fine-tune Llama and ship a GGUF
+description: hf-download -> axolotl-train (QLoRA) -> merge -> gguf convert+quantize -> swale-push
+compute_type: gpu
+
+inputs:
+  base_model:
+    description: Hugging Face repo id of the base model to fine-tune.
+    default: meta-llama/Llama-3.1-8B-Instruct
+  project:
+    description: Swale project to publish the quantized model to.
+    required: true
+
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      write_config:
+        name: Write axolotl config
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            cat > /mnt/workspace/axolotl.yaml <<'YAML'
+            base_model: /mnt/workspace/base
+            load_in_4bit: true
+            adapter: qlora
+            datasets:
+              - path: mhenrichsen/alpaca_2k_test
+                type: alpaca
+            output_dir: /mnt/workspace/out
+            sequence_len: 2048
+            micro_batch_size: 1
+            num_epochs: 1
+            YAML
+
+      fetch_base:
+        name: Fetch base model
+        uses: swaleio/hf-download@1-0-0
+        args:
+          repo: ${{inputs.base_model}}
+          dest: /mnt/workspace/base
+          token: ${{secrets.hf_token}}
+
+      train:
+        name: Fine-tune (QLoRA)
+        uses: swaleio/axolotl-train@1-0-0
+        start_on:
+          - write_config
+          - fetch_base
+        args:
+          config: /mnt/workspace/axolotl.yaml
+          token: ${{secrets.hf_token}}
+
+      merge:
+        name: Merge LoRA adapter
+        uses: swaleio/axolotl-merge-lora@1-0-0
+        start_on:
+          - train
+        args:
+          config: /mnt/workspace/axolotl.yaml
+          adapter_dir: /mnt/workspace/out
+
+      convert:
+        name: Convert to GGUF (f16)
+        uses: swaleio/llamacpp-convert@1-0-0
+        compute_type: cpu
+        start_on:
+          - merge
+        args:
+          model_dir: /mnt/workspace/out/merged
+          outfile: /mnt/workspace/model-f16.gguf
+          outtype: f16
+
+      quantize:
+        name: Quantize to Q4_K_M
+        uses: swaleio/llamacpp-quantize@1-0-0
+        compute_type: cpu
+        start_on:
+          - convert
+        args:
+          input_gguf: /mnt/workspace/model-f16.gguf
+          output_gguf: /mnt/workspace/model-Q4_K_M.gguf
+          preset: Q4_K_M
+
+      publish:
+        name: Publish the quantized model
+        uses: swaleio/swale-push@1-0-0
+        compute_type: cpu
+        start_on:
+          - quantize
+        args:
+          account: swaleio
+          project: ${{inputs.project}}
+          source: /mnt/workspace/model-Q4_K_M.gguf
+          message: QLoRA fine-tune, Q4_K_M GGUF
+          token: ${{secrets.swale_token}}

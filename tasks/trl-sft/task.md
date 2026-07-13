@@ -40,7 +40,7 @@ This task declares **no outputs** — the fine-tuned model is written to the
 config's `output_dir`, wherever that points. Set `output_dir` to a path on the
 mounted workspace that you choose (e.g. `/mnt/workspace/sft-out`) so later
 tasks — evaluation, publishing, serving — can read the checkpoint directly from
-that path. To publish the checkpoint, use `swaleio/swale-push@1-0-0` (the
+that path. To publish the checkpoint, use `swaleio/swale-push` (the
 platform's own store) or `swaleio/hf-upload` for the Hugging Face Hub.
 
 ## Compute

@@ -41,7 +41,7 @@ Everything the run produces (adapter weights or full checkpoints, tokenizer
 files, training logs) is written to the config's `output_dir`. Point
 `output_dir` at a path a later task can consume — e.g.
 `/mnt/workspace/lora-out` on the shared workspace — so downstream tasks such
-as `swaleio/axolotl-merge-lora` or a publish task — `swaleio/swale-push@1-0-0`
+as `swaleio/axolotl-merge-lora` or a publish task — `swaleio/swale-push`
 (the platform's own store) or `swaleio/hf-upload` — can pick the artifacts up
 from there.
 

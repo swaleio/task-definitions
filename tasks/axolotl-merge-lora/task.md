@@ -113,5 +113,5 @@ tasks:
 ```
 
 After the run, the merged model is at `/mnt/workspace/lora-out/merged`, ready
-for `swaleio/swale-push@1-0-0` (the platform's own store), `swaleio/hf-upload`,
+for `swaleio/swale-push` (the platform's own store), `swaleio/hf-upload`,
 or a serving task.

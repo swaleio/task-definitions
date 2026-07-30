@@ -6,8 +6,8 @@ inputs:
     description: Model to serve — a Hugging Face Hub repo id (e.g. meta-llama/Llama-3.1-8B-Instruct) or a full local directory path inside the container (e.g. a directory produced by swaleio/hf-download). A repo id is downloaded from the Hub at startup; a local path skips the download.
     required: true
   port:
-    description: TCP port the API server listens on. 8000 is the conventional value. Required because definition defaults are not applied at runtime — pass it explicitly.
-    required: true
+    description: TCP port the API server listens on. Defaults to 8000; pass a different value to serve elsewhere, and point every consumer URL at the same port.
+    default: "8000"
   token:
     description: Hugging Face access token for gated or private Hub models (pass a secret). Omit for public models or local model directories.
     default: ""
@@ -42,7 +42,7 @@ starts this task without wiring `terminate_on` never finishes.
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `model` | yes | — | Hub repo id (e.g. `meta-llama/Llama-3.1-8B-Instruct`) or a full local model directory path (e.g. `/mnt/workspace/llama` from `swaleio/hf-download`). A local path skips the Hub download. |
-| `port` | yes | — | Port the server listens on. `8000` is the conventional value; it is required because definition defaults are not applied at runtime. Consumers combine it with the runner's ip-address. |
+| `port` | no | `8000` | Port the server listens on. Consumers combine it with the runner's ip-address, so every consumer URL must use the same port. |
 | `token` | no | — | HF access token for gated/private Hub models (pass a secret); delivered to the server as `HF_TOKEN` via the definition's `exec.env`. Unneeded for public models or local directories. |
 
 ## Outputs
@@ -65,7 +65,8 @@ at submission — it fails at runtime with CUDA errors when vLLM finds no GPU.
   every task in that list completes, the platform terminates the runner. List
   the last task(s) that talk to the server.
 - **Address**: consumers reach the server at `${{tasks.<id>.ip-address}}` on
-  the `port` you passed.
+  the server's port — `8000` unless the step passed `port`. Every consumer URL
+  must use that same port.
 - **Ordering**: every consumer MUST list the runner in its own `start_on` —
   the address only exists once the runner task has started.
 - **Readiness**: the address is available at pod start, which is *before* the
@@ -86,9 +87,11 @@ the gated model with `swaleio/hf-download` and pass the local directory as
 ## Example
 
 Download weights, serve them, wait for readiness, run one OpenAI-compatible
-chat completion, and let the completion's finish terminate the server. Note
-that when `model` is a local directory, the served model name defaults to that
-path — the consumer's request body uses it as the `model` field.
+chat completion, and let the completion's finish terminate the server. The
+`serve` step leaves `port` unset, so the server listens on the default `8000` —
+the port every consumer URL below targets. Note that when `model` is a local
+directory, the served model name defaults to that path — the consumer's request
+body uses it as the `model` field.
 
 ```yaml
 tasks:
@@ -109,7 +112,6 @@ tasks:
     terminate_on: [generate]   # the runner is terminated when its consumers complete
     args:
       model: ${{tasks.weights.outputs.path}}
-      port: "8000"
 
   wait_ready:
     name: Wait for server

@@ -45,22 +45,24 @@ Pass the same path to the next task.
 | `output_gguf` | yes | — | Absolute path for the quantized `.gguf` file. Point it at the mounted workspace (e.g. `/mnt/workspace/model-q4_k_m.gguf`) to share it with later tasks, or any other container-local path. |
 | `preset` | yes | — | Quantization preset, e.g. `Q4_K_M`, `Q5_K_M`, `Q8_0`. |
 
-All three inputs are required. In particular `preset` carries no default,
-because definition defaults are not applied at runtime: an unset input would
-interpolate into the fixed argv as an empty token and break `llama-quantize`'s
-argument parsing. `Q4_K_M` is the usual quality-per-byte default, `Q5_K_M`
-trades size for quality, and `Q8_0` is near-lossless but largest.
+All three inputs are required. `input_gguf` and `output_gguf` are the paths you
+choose; `preset` has no default because `llama-quantize` has none either — it
+refuses to guess a quantization type, and neither does this task. The preset is
+the decision the task exists to make: every value is a different
+quality-per-byte trade, none of them a neutral setting. `Q4_K_M` is the usual
+choice, `Q5_K_M` trades size for quality, and `Q8_0` is near-lossless but
+largest.
 
 ## Compute
 
 **CPU.** `llama-quantize` is a multi-threaded CPU program — more cores make it
 faster, and a GPU adds nothing. Budget disk rather than VRAM: the workspace
 must hold the source and quantized files side by side (a `Q4_K_M` file is
-roughly a third the size of its `f16` source).
+roughly a third the size of its 16-bit source).
 
 ## Example
 
-Download a model from the Hugging Face Hub, convert it to an `f16` GGUF with
+Download a model from the Hugging Face Hub, convert it to a 16-bit GGUF with
 `llamacpp-convert`, then quantize it to `Q4_K_M`. Each task lists its
 predecessor in `start_on` so the steps run in order, and the files are
 exchanged through the shared workspace paths the consumer chose.
@@ -81,15 +83,14 @@ tasks:
       - weights
     args:
       model_dir: /mnt/workspace/qwen-hf
-      outfile: /mnt/workspace/qwen-f16.gguf
-      outtype: f16
+      outfile: /mnt/workspace/qwen-16bit.gguf
   quantize:
     name: Quantize
     uses: swaleio/llamacpp-quantize@1-0-0
     start_on:
       - convert
     args:
-      input_gguf: /mnt/workspace/qwen-f16.gguf
+      input_gguf: /mnt/workspace/qwen-16bit.gguf
       output_gguf: /mnt/workspace/qwen-q4_k_m.gguf
       preset: Q4_K_M
 ```

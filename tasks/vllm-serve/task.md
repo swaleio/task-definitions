@@ -133,10 +133,10 @@ tasks:
       body: '{"model":"/mnt/workspace/llama","messages":[{"role":"user","content":"Say hello."}]}'
       expected_status: "200"
       response_path: /mnt/workspace/completion.json
-
-termination: the `serve` runner's `terminate_on: [generate]` ends the server —
-and with it the workflow — once `generate` completes.
 ```
+
+The `serve` runner's `terminate_on: [generate]` ends the server — and with it
+the workflow — once `generate` completes.
 
 Later tasks read the completion at `/mnt/workspace/completion.json` (or via
 `${{tasks.generate.outputs.body_file}}`).

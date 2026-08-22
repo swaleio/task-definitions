@@ -63,6 +63,19 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
+      # The GPU bases unpack to tens of gigabytes and exhaust the runner's root
+      # volume (vllm-tools previously failed with 'No space left on device').
+      # Reclaim the preinstalled toolchains this workflow never uses.
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          before=$(df -BG --output=avail / | tail -n 1 | tr -d ' G')
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/boost /usr/local/share/powershell /usr/share/swift \
+            "$AGENT_TOOLSDIRECTORY" || true
+          after=$(df -BG --output=avail / | tail -n 1 | tr -d ' G')
+          echo "free space: ${before}G -> ${after}G"
+
       - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
 
       # Keyless push via the org's OIDC connection; its ruleset trusts only

@@ -169,6 +169,12 @@ images/<name>/README.md      # synced to the Docker Hub page by CI
 Publish CI builds changed images, pushes `docker.io/swaleio/<name>`, attests
 build provenance, and syncs the image README to Docker Hub.
 
+
+Images are pushed with the organization's OIDC connection; the Docker Hub
+credentials in repository secrets are used only to sync image READMEs. See the
+comments in `.github/workflows/publish-images.yml` if you are changing that
+workflow.
+
 ## CI checks
 
 On every PR (`lint.yml`):

@@ -57,6 +57,7 @@ jobs:
     if: needs.discover.outputs.images != '[]'
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         image: ${{ fromJson(needs.discover.outputs.images) }}
     steps:

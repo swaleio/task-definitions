@@ -10,7 +10,7 @@ inputs:
     default: ""
 exec:
   # docker.io/swaleio/ollama:1-0-0
-  image: docker.io/swaleio/ollama@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/ollama@sha256:0507a51f591416d1504088b99f2450440634d4ca5ec2739195f98b5d7bf75807
   args: []
 ---
 

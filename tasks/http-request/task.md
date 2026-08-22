@@ -36,7 +36,7 @@ outputs:
     description: Path of the written response body (equals response_path).
 exec:
   # docker.io/swaleio/curl-jq:1-0-0
-  image: docker.io/swaleio/curl-jq@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/curl-jq@sha256:16049754d520fe45f3b67b93cfca36398661bbc2b5911b0cdd7bfb9d5eb91d3f
   args: []
 ---
 

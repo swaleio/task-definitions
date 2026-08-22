@@ -6,11 +6,12 @@ set -e
 # inputs (INPUT_* env vars injected by the platform).
 cmd="$1"
 
-# The Hub cache stays at the image default (under the user's home) unless the
-# caller relocates it. Set INPUT_HF_HOME to, for example, a path on the mounted
-# workspace to persist downloaded blobs across tasks in a run.
-if [ -n "$INPUT_HF_HOME" ]; then
-  export HF_HOME="$INPUT_HF_HOME"
+# The Hub cache defaults to the home directory, which is per-task and discarded
+# with it. A caller that wants blobs reused by later tasks in the run points
+# cache_dir at the shared workspace instead. Set only when non-empty: an empty
+# HF_HOME breaks path resolution.
+if [ -n "$INPUT_CACHE_DIR" ]; then
+  export HF_HOME="$INPUT_CACHE_DIR"
 fi
 
 # For downloads, restrict to matching files. INPUT_INCLUDE is a comma-separated

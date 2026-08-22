@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+# Models default to the home directory, which is per-task and discarded with it.
+# A caller that wants a model store shared with other tasks in the run - one
+# populated by an earlier task, so this runner does not re-pull gigabytes -
+# points models_path at the shared workspace. Set only when non-empty.
+if [ -n "$INPUT_MODELS_PATH" ]; then
+  export OLLAMA_MODELS="$INPUT_MODELS_PATH"
+fi
+
 # Start the Ollama server in the background. The image bakes
 # OLLAMA_HOST=0.0.0.0:11434 so the API is reachable at the runner pod's
 # address (${{tasks.<id>.ip-address}}:11434); the server reads it from the
@@ -33,9 +41,8 @@ fi
 
 # Pull the requested model (INPUT_MODEL carries the required `model` input).
 # Multi-gigabyte pulls take minutes; consumers poll readiness against the API
-# (see the ollama-serve task docs for the pull-time caveat). Pulled layers
-# land on container-local disk under this user's home and live exactly as
-# long as the runner pod (OLLAMA_MODELS could relocate them later).
+# (see the ollama-serve task docs for the pull-time caveat). Pulled layers land
+# under the home directory and live exactly as long as the runner pod.
 if [ -n "$INPUT_MODEL" ]; then
   ollama pull "$INPUT_MODEL"
 fi

@@ -5,6 +5,9 @@ inputs:
   model:
     description: The model to pull before the server is considered ready, e.g. llama3.2:3b. Any model the configured Ollama registry serves.
     required: true
+  models_path:
+    description: Directory holding the Ollama model store. Point it at the workspace to share one store across tasks; defaults to the per-task home directory, which is discarded with the runner.
+    default: ""
 exec:
   # docker.io/swaleio/ollama:1-0-0
   image: docker.io/swaleio/ollama@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -18,13 +21,21 @@ Starts an [Ollama](https://ollama.com) server as a **long-lived runner**, pulls
 run until the workflow terminates it. Both Ollama's native API
 (`/api/generate`, `/api/chat`, `/api/tags`, …) and its OpenAI-compatible
 endpoints (`/v1/chat/completions`, …) are available. The image's wrapper
-entrypoint reads the `model` input (`INPUT_MODEL`), so `args` is empty.
+entrypoint reads the inputs from the environment, so `args` is empty.
+
+By default the model store lives in the per-task home directory and dies with the
+runner, so every run pulls `model` again. Point `models_path` at a workspace path
+to share one store: an earlier task in the run — another `ollama-serve`, or
+anything that writes Ollama's store layout — populates it, and this runner finds
+the model already present and starts serving without the pull. Concurrent tasks
+writing the same store path must not overlap.
 
 ## Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `model` | yes | — | The model to pull before the server is considered ready, e.g. `llama3.2:3b`. |
+| `models_path` | no | per-task home | Where the Ollama model store lives. Point it at a workspace path (e.g. `/mnt/workspace/ollama`) to reuse a store an earlier task populated instead of re-pulling. |
 
 This task declares **no outputs**: runner tasks are long-lived pods without an
 output-tracking sidecar, so results flow over HTTP rather than through
@@ -50,8 +61,9 @@ definition.
   list the runner in their own `start_on`**.
 - The address exists as soon as the pod starts — **before** the server inside
   answers — so consumers must poll for readiness (next section).
-- The pulled model lives on container-local disk inside the runner pod; nothing
-  persists after termination.
+- The pulled model lives in the runner pod's own home directory and is discarded
+  with it, unless `models_path` puts the store on the shared workspace — in which
+  case it outlives the runner and is available to the rest of the run.
 
 ## Readiness
 

@@ -64,11 +64,10 @@ jobs:
 
       - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
 
-      # Keyless push: the org's OIDC connection mints a short-lived token for
-      # this workflow, so no long-lived push credential is stored here. The
-      # connection's ruleset trusts only main of this repo and grants image
-      # push. The Docker Hub PAT below is used solely to sync the README, which
-      # the OIDC/registry token cannot do.
+      # Keyless push via the org's OIDC connection; its ruleset trusts only
+      # main of this repo and grants image push. The README-sync step below
+      # cannot use this token: Docker Hub's management API takes a user login,
+      # which is a separate auth path from the registry token issued here.
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         env:
           DOCKERHUB_OIDC_CONNECTIONID: ${{ vars.DOCKERHUB_OIDC_CONNECTIONID }}

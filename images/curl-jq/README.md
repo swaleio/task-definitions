@@ -52,5 +52,8 @@ Appended to `$WORKFLOW_TASK_OUTPUT` as `key=value` lines:
 ---
 
 Built from [`images/curl-jq`](https://github.com/swaleio/task-definitions/tree/main/images/curl-jq) in the
-[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository, and licensed under the
-[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository.
+
+The Dockerfile and entrypoint are covered by the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE). The software this image packages keeps
+its own licenses, which ship inside the image.

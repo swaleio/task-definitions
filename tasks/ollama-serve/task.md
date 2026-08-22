@@ -1,6 +1,6 @@
 ---
 name: Ollama serve
-description: Runs an Ollama server as a long-lived runner — pulls the requested model and serves the Ollama API on port 11434 to other tasks in the run until the workflow terminates it.
+description: Runs an Ollama server as a long-lived runner, pulling the requested model and serving its API.
 inputs:
   model:
     description: The model to pull before the server is considered ready, e.g. llama3.2:3b. Any model the configured Ollama registry serves.

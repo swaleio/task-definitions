@@ -1,0 +1,13 @@
+{
+  "name": "@swaleio/task-definitions-tools",
+  "private": true,
+  "type": "module",
+  "description": "Tooling for the Swale task-definition catalog",
+  "license": "MIT",
+  "scripts": {
+    "lint": "node tools/lint-definitions.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "4.1.0"
+  }
+}

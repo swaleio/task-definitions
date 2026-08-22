@@ -1,6 +1,6 @@
 ---
 name: Python
-description: Runs an arbitrary Python 3.13 script in the workspace. The escape hatch for anything without a dedicated task.
+description: Runs an arbitrary Python script. The escape hatch for anything without a dedicated task.
 inputs:
   script:
     description: The Python program to run. Parameterize it by interpolating a trusted workflow expression into the program text, or by reading a run-level environment variable via os.environ inside it.

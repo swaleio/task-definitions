@@ -1,6 +1,6 @@
 ---
 name: HTTP request
-description: Makes an HTTP request with curl, writes the response body to a workspace file, and emits the status code. Built-in retries, header lists, and status assertions.
+description: Makes an HTTP request with curl, writing the response body to a file and emitting the status.
 inputs:
   url:
     description: The request URL. The public internet is reachable; RFC 1918 and cloud metadata endpoints are blocked.

@@ -1,6 +1,6 @@
 ---
 name: LM evaluation harness
-description: Evaluates a model on lm-evaluation-harness benchmarks (mmlu, gsm8k, ...) using the vLLM backend, writing the results JSON under a caller-chosen path.
+description: Evaluates a model on lm-evaluation-harness benchmarks using the vLLM backend, writing JSON.
 inputs:
   model_dir:
     description: The model to evaluate — the full path of a local model directory such as one fetched by hf-download, or a Hugging Face repo id.

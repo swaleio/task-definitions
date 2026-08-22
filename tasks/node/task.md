@@ -1,6 +1,6 @@
 ---
 name: Node
-description: Runs an arbitrary shell script with Node.js, npm, npx, and corepack available. The escape hatch for JavaScript/TypeScript build tooling.
+description: Runs an arbitrary shell script with Node.js, npm, npx, and corepack available.
 inputs:
   script:
     description: The shell script to run. node, npm, and npx are on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.

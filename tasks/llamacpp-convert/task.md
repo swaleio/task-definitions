@@ -1,6 +1,6 @@
 ---
 name: llama.cpp convert
-description: Converts a Hugging Face format model directory into a single GGUF file with llama.cpp's convert_hf_to_gguf.py.
+description: Converts a Hugging Face model directory into a single GGUF file with llama.cpp.
 inputs:
   model_dir:
     description: Absolute path inside the container of the Hugging Face format model directory to convert. Point it at the mounted workspace (e.g. /mnt/workspace/model-hf) where an earlier task placed the model, or any other container-local path.

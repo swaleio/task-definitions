@@ -1,6 +1,6 @@
 ---
 name: Bash
-description: Runs an arbitrary Bash script in the workspace. The escape hatch for anything without a dedicated task.
+description: Runs an arbitrary Bash script. The escape hatch for anything without a dedicated task.
 inputs:
   script:
     description: The Bash script to run. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.

@@ -1,6 +1,6 @@
 ---
 name: vLLM batch inference
-description: Runs offline batch inference with vLLM over an OpenAI-batch-format JSONL request file, writing one result line per request to a caller-chosen path.
+description: Runs offline batch inference with vLLM over an OpenAI-batch-format JSONL request file.
 inputs:
   input_file:
     description: Absolute path inside the container of the OpenAI-batch-format JSONL request file. Point it at the mounted workspace (e.g. /mnt/workspace/batch/requests.jsonl) where an earlier task wrote it, or any other container-local path.

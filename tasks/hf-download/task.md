@@ -1,6 +1,6 @@
 ---
 name: Hugging Face download
-description: Downloads a model, dataset, or space snapshot from the Hugging Face Hub into a caller-chosen local directory, with optional revision, glob filtering, and token auth for gated/private repos.
+description: Downloads a model, dataset, or space from the Hugging Face Hub into a caller-chosen directory.
 inputs:
   repo:
     description: The Hugging Face repo id to download, e.g. meta-llama/Llama-3.1-8B-Instruct.

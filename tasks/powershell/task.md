@@ -1,6 +1,6 @@
 ---
 name: PowerShell
-description: Runs an arbitrary PowerShell (pwsh) script in the workspace. The escape hatch for anything without a dedicated task.
+description: Runs an arbitrary PowerShell (pwsh) script. The escape hatch for anything without a task.
 inputs:
   script:
     description: The PowerShell script to run. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable via $env inside it.

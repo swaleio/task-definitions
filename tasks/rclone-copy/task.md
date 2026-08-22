@@ -1,6 +1,6 @@
 ---
 name: Rclone copy
-description: Copies files between a cloud/remote storage backend and the workspace using rclone. Credentials arrive as inputs and are mapped to environment, never passed on the command line.
+description: Copies files between cloud/remote storage and the workspace with rclone, via credential inputs.
 inputs:
   source:
     description: Source to copy from. Use `remote:bucket/path` for the configured remote, or a workspace path like `/mnt/workspace/data`.

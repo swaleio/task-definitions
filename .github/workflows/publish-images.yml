@@ -78,6 +78,20 @@ jobs:
 
       - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
 
+      # Warm the builder cache BEFORE authenticating. Nearly all the build time
+      # is pulling the public base image, which needs no credentials, and the
+      # OIDC token is short-lived with no configurable lifetime. Building first
+      # keeps the authenticated window short: vllm-tools takes ~13 minutes and
+      # was failing at push with 401 because its token expired mid-build.
+      - name: Warm build cache
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
+        with:
+          context: images/${{ matrix.image }}
+          push: false
+          outputs: type=cacheonly
+          provenance: false
+          sbom: false
+
       # Keyless push via the org's OIDC connection; its ruleset trusts only
       # main of this repo and grants image push. The README-sync step below
       # cannot use this token: Docker Hub's management API takes a user login,

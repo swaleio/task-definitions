@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir \
       peft==0.18.0 \
       sentencepiece==0.2.1 \
       "huggingface_hub[hf_xet]==0.36.0" \
- && useradd --create-home --uid 1000 swale
+ && (userdel --remove ubuntu || true) && useradd --create-home --uid 1000 swale
 
 # The Hub cache stays at its default under the user's home; the image does not
 # force a location.

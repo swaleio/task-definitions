@@ -3,7 +3,10 @@ FROM pytorch/pytorch@sha256:db80a41f8428644cebcb3d75b0b62df334ab6c0e75785951eb25
 
 # The Hugging Face training stack, version-pinned so the image is reproducible.
 # torch/CUDA come from the base image and are not reinstalled here.
-RUN pip install --no-cache-dir \
+# The base marks its system Python externally managed (PEP 668), so pip
+# refuses to install without this. The container is the environment here,
+# so there is no separate virtualenv to protect.
+RUN pip install --no-cache-dir --break-system-packages \
       transformers==4.57.1 \
       accelerate==1.11.0 \
       datasets==4.4.1 \

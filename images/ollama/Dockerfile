@@ -1,7 +1,7 @@
 # Base: ollama/ollama:0.31.2 (digest-pinned; tag kept for humans)
 FROM ollama/ollama@sha256:509fdf54e23bd50d87af646cb51c0a7a203d6a83cc4d6695b3b08c5be1c62c0a
 
-RUN useradd --create-home --uid 1000 swale
+RUN (userdel --remove ubuntu || true) && useradd --create-home --uid 1000 swale
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

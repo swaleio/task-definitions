@@ -97,3 +97,7 @@ tasks:
 
 Downstream tasks read the quantized model at `/mnt/workspace/qwen-q4_k_m.gguf`
 — the path the workflow supplied, so no output lookup is needed.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

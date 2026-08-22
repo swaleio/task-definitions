@@ -69,3 +69,7 @@ Downstream tasks read the probed hardware via
 `${{tasks.gpu_check.outputs.gpu_name}}`,
 `${{tasks.gpu_check.outputs.vram_gb}}`, and
 `${{tasks.gpu_check.outputs.cuda_version}}`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

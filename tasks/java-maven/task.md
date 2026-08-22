@@ -77,3 +77,7 @@ consume the produced artifacts.
 Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks. This generic task declares no typed outputs; use a
 fixed task when you need a declared output contract.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

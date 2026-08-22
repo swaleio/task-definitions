@@ -78,3 +78,7 @@ tasks:
         node -e "require('fs').writeFileSync('hello.txt', 'built with node ' + process.version)"
         cat hello.txt
 ```
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

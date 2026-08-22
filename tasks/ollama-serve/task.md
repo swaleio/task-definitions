@@ -117,3 +117,7 @@ tasks:
 The runner is terminated once `generate` completes. The generated answer is
 available to later tasks at `/mnt/workspace/ollama-answer.json` (also exposed
 as `${{tasks.generate.outputs.body_file}}`).
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

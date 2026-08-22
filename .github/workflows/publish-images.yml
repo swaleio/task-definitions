@@ -98,6 +98,16 @@ jobs:
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
+      - id: shortdesc
+        shell: bash
+        run: |
+          file="images/${{ matrix.image }}/short-description.txt"
+          text=""
+          if [ -f "$file" ]; then
+            text=$(head -n 1 "$file")
+          fi
+          echo "text=$text" >> "$GITHUB_OUTPUT"
+
       - name: Sync README to Docker Hub
         if: hashFiles(format('images/{0}/README.md', matrix.image)) != ''
         uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4
@@ -106,6 +116,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
           readme-filepath: images/${{ matrix.image }}/README.md
+          short-description: ${{ steps.shortdesc.outputs.text }}
 
       - name: Report published digest
         run: |

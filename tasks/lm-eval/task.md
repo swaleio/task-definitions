@@ -108,3 +108,7 @@ tasks:
 The harness evaluates the downloaded checkpoint without re-fetching it and
 writes the results JSON under `/mnt/workspace/eval`, where a later task can
 read it — for example to gate a deployment on a minimum benchmark score.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

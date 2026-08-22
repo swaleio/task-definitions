@@ -88,3 +88,7 @@ tasks:
 ```
 
 Downstream tasks read the pulled files from `/mnt/workspace/data`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

@@ -78,3 +78,7 @@ tasks:
 
 This pushes `/mnt/workspace/outputs` to the `acme/model-artifacts` repository,
 authenticating with the `acme` account and the `swale_token` secret.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

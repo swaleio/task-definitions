@@ -1,0 +1,1 @@
+Hugging Face Hub CLI for Swale workflows. Backs the hf-download and hf-upload tasks.

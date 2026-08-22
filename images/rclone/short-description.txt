@@ -1,0 +1,1 @@
+rclone with credential mapping for Swale workflows. Backs the rclone-copy task.

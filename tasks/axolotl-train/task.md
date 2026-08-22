@@ -116,3 +116,7 @@ tasks:
 The trained adapter lands at `/mnt/workspace/lora-out` (the config's
 `output_dir`), ready for `swaleio/axolotl-merge-lora`, `swaleio/swale-push`,
 or `swaleio/hf-upload`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

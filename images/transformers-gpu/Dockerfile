@@ -21,3 +21,15 @@ RUN pip install --no-cache-dir \
 # `bash -lc <script>` — bash, trl, and python are all on PATH).
 USER swale
 WORKDIR /mnt/workspace
+
+# Per-image OCI metadata, and the single source of truth for it. The publish
+# workflow reads the title and description out of this file and feeds them to
+# docker/metadata-action, because a build --label always overrides a Dockerfile
+# LABEL - without that the generated repository-wide description would win.
+# The description also becomes the Docker Hub short description, which the
+# registry does not read from labels at all.
+LABEL org.opencontainers.image.title="Transformers GPU"
+LABEL org.opencontainers.image.description="PyTorch CUDA with the Hugging Face training stack for Swale GPU tasks."
+LABEL org.opencontainers.image.source="https://github.com/swaleio/task-definitions"
+LABEL org.opencontainers.image.documentation="https://github.com/swaleio/task-definitions/blob/main/images/transformers-gpu/README.md"
+LABEL org.opencontainers.image.licenses="MIT"

@@ -74,6 +74,18 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_ORGANIZATION }}
 
+      # The Dockerfile owns the per-image title and description. They are fed to
+      # metadata-action below because a build --label overrides a Dockerfile LABEL,
+      # so without this the generated repository-wide description would win.
+      - id: imagemeta
+        shell: bash
+        run: |
+          file="images/${{ matrix.image }}/Dockerfile"
+          title=$(grep -m1 '^LABEL org.opencontainers.image.title=' "$file" | cut -d'"' -f2)
+          description=$(grep -m1 '^LABEL org.opencontainers.image.description=' "$file" | cut -d'"' -f2)
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+          echo "description=$description" >> "$GITHUB_OUTPUT"
+
       - id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
@@ -81,6 +93,9 @@ jobs:
           tags: |
             type=raw,value=${{ github.event.inputs.tag || format('{0}-{1}', github.run_number, github.sha) }}
             type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=${{ steps.imagemeta.outputs.title }}
+            org.opencontainers.image.description=${{ steps.imagemeta.outputs.description }}
 
       - id: build
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
@@ -98,16 +113,6 @@ jobs:
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
-      - id: shortdesc
-        shell: bash
-        run: |
-          file="images/${{ matrix.image }}/short-description.txt"
-          text=""
-          if [ -f "$file" ]; then
-            text=$(head -n 1 "$file")
-          fi
-          echo "text=$text" >> "$GITHUB_OUTPUT"
-
       - name: Sync README to Docker Hub
         if: hashFiles(format('images/{0}/README.md', matrix.image)) != ''
         uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4
@@ -116,7 +121,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
           readme-filepath: images/${{ matrix.image }}/README.md
-          short-description: ${{ steps.shortdesc.outputs.text }}
+          short-description: ${{ steps.imagemeta.outputs.description }}
 
       - name: Report published digest
         run: |

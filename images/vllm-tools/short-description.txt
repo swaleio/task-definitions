@@ -1,1 +1,0 @@
-vLLM plus lm-evaluation-harness for Swale GPU tasks. Backs vllm-batch and lm-eval.

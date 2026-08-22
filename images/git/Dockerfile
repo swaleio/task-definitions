@@ -11,3 +11,15 @@ RUN chmod +x /opt/git/entrypoint.sh
 USER swale
 WORKDIR /mnt/workspace
 ENTRYPOINT ["/opt/git/entrypoint.sh"]
+
+# Per-image OCI metadata, and the single source of truth for it. The publish
+# workflow reads the title and description out of this file and feeds them to
+# docker/metadata-action, because a build --label always overrides a Dockerfile
+# LABEL - without that the generated repository-wide description would win.
+# The description also becomes the Docker Hub short description, which the
+# registry does not read from labels at all.
+LABEL org.opencontainers.image.title="Git"
+LABEL org.opencontainers.image.description="Git with LFS and non-interactive token auth for Swale workflows. Backs the git-clone task."
+LABEL org.opencontainers.image.source="https://github.com/swaleio/task-definitions"
+LABEL org.opencontainers.image.documentation="https://github.com/swaleio/task-definitions/blob/main/images/git/README.md"
+LABEL org.opencontainers.image.licenses="MIT"

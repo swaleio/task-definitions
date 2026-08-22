@@ -1,1 +1,0 @@
-The Swale client CLI for workflow tasks. Backs the swale-pull and swale-push tasks.

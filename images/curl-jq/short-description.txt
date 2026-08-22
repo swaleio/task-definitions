@@ -1,1 +1,0 @@
-curl and jq for HTTP requests in Swale workflows. Backs the http-request task.

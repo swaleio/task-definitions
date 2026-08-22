@@ -1,1 +1,0 @@
-Ollama server that pulls a model then serves it, for Swale runner tasks. Backs ollama-serve.

@@ -1,1 +1,0 @@
-Git with LFS and non-interactive token auth for Swale workflows. Backs the git-clone task.

@@ -1,1 +1,0 @@
-PyTorch CUDA with the Hugging Face training stack for Swale GPU tasks.

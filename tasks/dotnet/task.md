@@ -1,6 +1,6 @@
 ---
 name: Dotnet
-description: Runs an arbitrary shell script with the .NET SDK available. The escape hatch for build, test, and publish flows on dotnet.
+description: Runs an arbitrary shell script with the .NET SDK available, for build, test, and publish flows.
 inputs:
   script:
     description: The shell script to run. The dotnet CLI is on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.

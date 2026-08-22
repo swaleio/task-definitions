@@ -18,6 +18,7 @@ IDENT_RE = re.compile(r"^[a-z0-9_]+$")  # snake_case identifiers
 DIGEST_RE = re.compile(r"@sha256:[0-9a-f]{64}$")
 ENV_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 ENV_RESERVED_PREFIXES = ("WORKFLOW_", "INPUT_")
+DESCRIPTION_MAX_LENGTH = 100
 
 TOP_KEYS = {"name", "description", "inputs", "outputs", "exec"}
 EXEC_KEYS = {"image", "args", "env"}
@@ -74,6 +75,15 @@ def lint_file(path: str) -> list[str]:
     unknown = set(data) - TOP_KEYS
     if unknown:
         errors.append(f"{rel}: unknown top-level keys: {sorted(unknown)}")
+
+    description = data.get("description")
+    if not isinstance(description, str) or not description.strip():
+        errors.append(f"{rel}: description is required and must be a non-empty string")
+    elif len(description) > DESCRIPTION_MAX_LENGTH:
+        errors.append(
+            f"{rel}: description must be at most {DESCRIPTION_MAX_LENGTH} characters "
+            f"(is {len(description)}) — the platform rejects longer descriptions on import"
+        )
 
     exec_block = data.get("exec")
     if not isinstance(exec_block, dict):

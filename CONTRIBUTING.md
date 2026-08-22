@@ -23,6 +23,22 @@ A task definition is a Markdown file with a YAML frontmatter block:
   should never be moved). Compare two versions with
   `git diff git-clone/1-0-0..git-clone/1-1-0 -- tasks/git-clone/task.md`.
 
+### Name and description
+
+Both are top-level frontmatter fields, and **`description` is required**:
+
+```yaml
+name: Git clone
+description: Clones a Git repository into the workspace over HTTPS, with token auth and LFS.
+```
+
+- `description` must be non-empty and **at most 100 characters** — the platform
+  rejects longer descriptions at import, and it is the one-line summary shown
+  next to the task wherever the catalog is listed. Write it as a single sentence
+  describing what the task does; the body is where detail belongs.
+- The linter enforces both rules, so an over-long description fails CI rather
+  than the import.
+
 ### YAML is snake_case
 
 Field names and identifiers are snake_case: `compute_type`, `entry_point`,

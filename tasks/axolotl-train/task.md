@@ -1,6 +1,6 @@
 ---
 name: Axolotl train
-description: Fine-tunes a model with Axolotl — full fine-tune, LoRA, or QLoRA — driven entirely by a caller-supplied Axolotl config YAML.
+description: Fine-tunes a model with Axolotl (full, LoRA, or QLoRA) from a caller-supplied config YAML.
 inputs:
   config:
     description: Absolute path inside the container to the Axolotl config YAML. Point it at the mounted workspace (e.g. /mnt/workspace/axolotl.yaml) so an earlier task can write it there, or any other container-local path.

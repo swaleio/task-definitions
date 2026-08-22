@@ -1,6 +1,6 @@
 ---
 name: Axolotl merge LoRA
-description: Merges a trained LoRA/QLoRA adapter into its base model with Axolotl, producing standalone merged weights ready to serve, quantize, or upload.
+description: Merges a trained LoRA/QLoRA adapter into its base model with Axolotl, producing standalone weights.
 inputs:
   config:
     description: Absolute path inside the container to the Axolotl config YAML the adapter was trained with. Point it at the mounted workspace (e.g. /mnt/workspace/axolotl.yaml) to reuse the file the training task read, or any other container-local path.

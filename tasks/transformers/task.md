@@ -1,6 +1,6 @@
 ---
 name: Transformers
-description: Runs an arbitrary Python script on a CUDA GPU with torch, transformers, accelerate, datasets, trl, and peft preinstalled. The escape hatch for GPU Python without a dedicated task.
+description: Runs an arbitrary Python script on a CUDA GPU with torch, transformers, trl, and peft ready.
 inputs:
   script:
     description: The Python program to run. Parameterize it by interpolating a trusted workflow expression into the program text, or by reading a run-level environment variable via os.environ inside it.

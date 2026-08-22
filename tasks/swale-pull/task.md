@@ -1,6 +1,6 @@
 ---
 name: Swale pull
-description: Pulls a Swale project's content into the workspace using the Swale client CLI, at an optional ref and subpath.
+description: Pulls a Swale project's content into the workspace, at an optional ref and subpath.
 inputs:
   project:
     description: The Swale project (repository) to pull content from.

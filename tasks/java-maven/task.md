@@ -1,6 +1,6 @@
 ---
 name: Java Maven
-description: Runs an arbitrary shell script with a JDK and Maven (mvn) available, for building and testing Java projects. Use mvn -B for non-interactive batch output.
+description: Runs an arbitrary shell script with a JDK and Maven available, for building and testing Java.
 inputs:
   script:
     description: The shell script to run. A JDK and Maven are on PATH; invoke Maven as `mvn -B`. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.

@@ -1,6 +1,6 @@
 ---
 name: TRL SFT
-description: Fine-tunes a causal language model with TRL's supervised fine-tuning trainer (trl sft), driven entirely by a caller-supplied YAML config.
+description: Fine-tunes a causal language model with TRL supervised fine-tuning from a config file.
 inputs:
   config:
     description: Absolute path inside the container to the TRL SFT YAML config. Point it at the mounted workspace (e.g. /mnt/workspace/sft.yaml) so an earlier task can write it there, or any other container-local path.

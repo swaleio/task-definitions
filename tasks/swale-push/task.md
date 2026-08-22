@@ -1,6 +1,6 @@
 ---
 name: Swale push
-description: Pushes run artifacts from the workspace back to a Swale repository, authenticating with a project token.
+description: Pushes run artifacts from the workspace back to a Swale repository.
 inputs:
   project:
     description: Target Swale repository (project) to push the artifacts to.

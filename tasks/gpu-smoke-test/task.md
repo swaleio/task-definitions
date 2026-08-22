@@ -1,6 +1,6 @@
 ---
 name: GPU smoke test
-description: Verifies a GPU compute type end to end (nvidia-smi plus a CUDA matmul in torch) and emits the GPU name, VRAM size, and CUDA version. The mandatory first-run canary for GPU compute types.
+description: Verifies a GPU compute type end to end and emits the GPU name, VRAM size, and CUDA version.
 outputs:
   gpu_name:
     description: The CUDA device name reported by torch (e.g. NVIDIA A100-SXM4-80GB).

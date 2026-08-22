@@ -1,6 +1,6 @@
 ---
 name: vLLM serve
-description: Serves a model through vLLM's OpenAI-compatible API server as a long-lived runner task, from a Hugging Face repo id or a local model directory.
+description: Serves a model through vLLM's OpenAI-compatible API server as a long-lived runner task.
 inputs:
   model:
     description: Model to serve — a Hugging Face Hub repo id (e.g. meta-llama/Llama-3.1-8B-Instruct) or a full local directory path inside the container (e.g. a directory produced by swaleio/hf-download). A repo id is downloaded from the Hub at startup; a local path skips the download.

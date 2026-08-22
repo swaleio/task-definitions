@@ -3,10 +3,10 @@ name: llama.cpp quantize
 description: Quantizes a GGUF model file to a smaller preset (e.g. Q4_K_M) with llama.cpp's llama-quantize.
 inputs:
   input_gguf:
-    description: Absolute path inside the container of the source .gguf file, typically the outfile of a llamacpp-convert task. Point it at the mounted workspace (e.g. /mnt/workspace/model-f16.gguf), or any other container-local path.
+    description: Absolute path inside the container of the source .gguf file, typically the outfile of a llamacpp-convert task. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/model-f16.gguf), or any other container-local path.
     required: true
   output_gguf:
-    description: Absolute path inside the container for the quantized .gguf file. Point it at the mounted workspace (e.g. /mnt/workspace/model-q4_k_m.gguf) to share it with later tasks, or any other container-local path.
+    description: Absolute path inside the container for the quantized .gguf file. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/model-q4_k_m.gguf) to share it with later tasks, or any other container-local path.
     required: true
   preset:
     description: Quantization preset understood by llama-quantize, e.g. Q4_K_M, Q5_K_M, Q8_0.
@@ -41,8 +41,8 @@ Pass the same path to the next task.
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `input_gguf` | yes | — | Absolute path of the source `.gguf` file — typically the `outfile` of a `llamacpp-convert` task (e.g. `/mnt/workspace/model-f16.gguf`). |
-| `output_gguf` | yes | — | Absolute path for the quantized `.gguf` file. Point it at the mounted workspace (e.g. `/mnt/workspace/model-q4_k_m.gguf`) to share it with later tasks, or any other container-local path. |
+| `input_gguf` | yes | — | Absolute path of the source `.gguf` file — typically the `outfile` of a `llamacpp-convert` task (e.g. `${{env.WORKFLOW_STORAGE}}/model-f16.gguf`). |
+| `output_gguf` | yes | — | Absolute path for the quantized `.gguf` file. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/model-q4_k_m.gguf`) to share it with later tasks, or any other container-local path. |
 | `preset` | yes | — | Quantization preset, e.g. `Q4_K_M`, `Q5_K_M`, `Q8_0`. |
 
 All three inputs are required. `input_gguf` and `output_gguf` are the paths you
@@ -68,34 +68,40 @@ predecessor in `start_on` so the steps run in order, and the files are
 exchanged through the shared workspace paths the consumer chose.
 
 ```yaml
-tasks:
-  weights:
-    name: Fetch weights
-    uses: swaleio/hf-download@1-0-0
-    args:
-      repo: Qwen/Qwen2.5-1.5B-Instruct
-      include: "*.safetensors,*.json,tokenizer.*"
-      dest: /mnt/workspace/qwen-hf
-  convert:
-    name: Convert to GGUF
-    uses: swaleio/llamacpp-convert@1-0-0
-    start_on:
-      - weights
-    args:
-      model_dir: /mnt/workspace/qwen-hf
-      outfile: /mnt/workspace/qwen-16bit.gguf
-  quantize:
-    name: Quantize
-    uses: swaleio/llamacpp-quantize@1-0-0
-    start_on:
-      - convert
-    args:
-      input_gguf: /mnt/workspace/qwen-16bit.gguf
-      output_gguf: /mnt/workspace/qwen-q4_k_m.gguf
-      preset: Q4_K_M
+name: llama.cpp quantize example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      weights:
+        name: Fetch weights
+        uses: swaleio/hf-download@1-0-0
+        args:
+          repo: Qwen/Qwen2.5-1.5B-Instruct
+          include: "*.safetensors,*.json,tokenizer.*"
+          dest: ${{env.WORKFLOW_STORAGE}}/qwen-hf
+      convert:
+        name: Convert to GGUF
+        uses: swaleio/llamacpp-convert@1-0-0
+        start_on:
+          - weights
+        args:
+          model_dir: ${{env.WORKFLOW_STORAGE}}/qwen-hf
+          outfile: ${{env.WORKFLOW_STORAGE}}/qwen-16bit.gguf
+      quantize:
+        name: Quantize
+        uses: swaleio/llamacpp-quantize@1-0-0
+        start_on:
+          - convert
+        args:
+          input_gguf: ${{env.WORKFLOW_STORAGE}}/qwen-16bit.gguf
+          output_gguf: ${{env.WORKFLOW_STORAGE}}/qwen-q4_k_m.gguf
+          preset: Q4_K_M
 ```
 
-Downstream tasks read the quantized model at `/mnt/workspace/qwen-q4_k_m.gguf`
+Downstream tasks read the quantized model at `${{env.WORKFLOW_STORAGE}}/qwen-q4_k_m.gguf`
 — the path the workflow supplied, so no output lookup is needed.
 
 ---

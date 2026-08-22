@@ -15,6 +15,10 @@ built from this repo and published to Docker Hub under
 Reference a task by `account/name@version`:
 
 ```yaml
+name: Checkout example
+compute_type: cpu
+entry_point: main
+
 blocks:
   main:
     tasks:
@@ -23,8 +27,13 @@ blocks:
         uses: swaleio/git-clone@1-0-0
         args:
           repository_url: https://github.com/acme/app.git
-          dest: app
+          dest: ${{env.WORKFLOW_STORAGE}}/repo
 ```
+
+`name`, `compute_type`, `entry_point` and `blocks` are all required; tasks live
+inside a block, and `entry_point` names the block execution starts from. Compute
+type names come from what your project has available — `cpu` and `gpu` are the
+documented defaults.
 
 ## Repository layout
 

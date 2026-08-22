@@ -57,16 +57,22 @@ script is self-contained — it scaffolds and builds under a relative `out/`
 directory rather than assuming any particular mount.
 
 ```yaml
-tasks:
-  test:
-    name: Build and test
-    uses: swaleio/dotnet@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
-        dotnet new console -o out/app
-        dotnet build out/app --configuration Release
+name: Dotnet example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      test:
+        name: Build and test
+        uses: swaleio/dotnet@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
+            dotnet new console -o out/app
+            dotnet build out/app --configuration Release
 ```
 
 ## Emitting outputs
@@ -74,8 +80,9 @@ tasks:
 Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
 this generic `dotnet` task declares none). Share build artifacts by writing them
-somewhere a later task reads — the working directory for this task alone, or a
-shared mount such as `/mnt/workspace` when another task must pick them up.
+somewhere a later task reads — the working directory for this task alone, or the
+shared workspace (`$WORKFLOW_STORAGE` in the container) when another task must
+pick them up.
 
 ---
 

@@ -3,10 +3,10 @@ name: vLLM batch inference
 description: Runs offline batch inference with vLLM over an OpenAI-batch-format JSONL request file.
 inputs:
   input_file:
-    description: Absolute path inside the container of the OpenAI-batch-format JSONL request file. Point it at the mounted workspace (e.g. /mnt/workspace/batch/requests.jsonl) where an earlier task wrote it, or any other container-local path.
+    description: Absolute path inside the container of the OpenAI-batch-format JSONL request file. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/batch/requests.jsonl) where an earlier task wrote it, or any other container-local path.
     required: true
   output_file:
-    description: Absolute path inside the container. Point it at the mounted workspace (e.g. /mnt/workspace/batch/results.jsonl) to share the results with later tasks, or any other container-local path.
+    description: Absolute path inside the container. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/batch/results.jsonl) to share the results with later tasks, or any other container-local path.
     required: true
   model:
     description: The model to load — a Hugging Face repo id (e.g. Qwen/Qwen2.5-7B-Instruct) or the full path of a local model directory such as one fetched by hf-download.
@@ -37,7 +37,7 @@ server. `input_file` is a JSONL file in the OpenAI batch format — one request
 per line:
 
 ```json
-{"custom_id": "req-1", "method": "POST", "url": "/v1/chat/completions", "body": {"model": "/mnt/workspace/qwen", "messages": [{"role": "user", "content": "Hello!"}]}}
+{"custom_id": "req-1", "method": "POST", "url": "/v1/chat/completions", "body": {"model": "${{env.WORKFLOW_STORAGE}}/qwen", "messages": [{"role": "user", "content": "Hello!"}]}}
 ```
 
 Each request's `body.model` must match the `model` value the engine was started
@@ -48,8 +48,8 @@ tagged with the same `custom_id` (output order is not guaranteed).
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `input_file` | yes | — | Absolute path of the OpenAI-batch-format JSONL request file — typically a workspace path (e.g. `/mnt/workspace/batch/requests.jsonl`) an earlier task wrote. |
-| `output_file` | yes | — | Absolute path the results JSONL is written to. Point it at the mounted workspace (e.g. `/mnt/workspace/batch/results.jsonl`) to share it with later tasks. |
+| `input_file` | yes | — | Absolute path of the OpenAI-batch-format JSONL request file — typically a workspace path (e.g. `${{env.WORKFLOW_STORAGE}}/batch/requests.jsonl`) an earlier task wrote. |
+| `output_file` | yes | — | Absolute path the results JSONL is written to. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/batch/results.jsonl`) to share it with later tasks. |
 | `model` | yes | — | Hugging Face repo id, or the full path of a local model directory. |
 | `token` | no | — | HF access token for gated/private models (pass a secret). |
 
@@ -85,41 +85,47 @@ the Hugging Face stack treats as no token).
 ## Example
 
 ```yaml
-tasks:
-  weights:
-    name: Fetch weights
-    uses: swaleio/hf-download@1-0-0
-    args:
-      repo: Qwen/Qwen2.5-7B-Instruct
-      include: "*.safetensors,*.json,tokenizer.*"
-      dest: /mnt/workspace/qwen
-  requests:
-    name: Write batch requests
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        mkdir -p /mnt/workspace/batch
-        cat > /mnt/workspace/batch/requests.jsonl <<'EOF'
-        {"custom_id":"req-1","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/qwen","messages":[{"role":"user","content":"Summarize what vLLM does in one sentence."}]}}
-        {"custom_id":"req-2","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/qwen","messages":[{"role":"user","content":"Name three uses of batch inference."}]}}
-        EOF
-  batch:
-    name: Batch inference
-    uses: swaleio/vllm-batch@1-0-0
-    start_on:
-      - weights
-      - requests
-    compute_type: a100-80gb   # any GPU compute type whose VRAM fits the model
-    args:
-      model: ${{tasks.weights.outputs.path}}
-      input_file: /mnt/workspace/batch/requests.jsonl
-      output_file: /mnt/workspace/batch/results.jsonl
+name: vLLM batch inference example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      weights:
+        name: Fetch weights
+        uses: swaleio/hf-download@1-0-0
+        args:
+          repo: Qwen/Qwen2.5-7B-Instruct
+          include: "*.safetensors,*.json,tokenizer.*"
+          dest: ${{env.WORKFLOW_STORAGE}}/qwen
+      requests:
+        name: Write batch requests
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            mkdir -p ${{env.WORKFLOW_STORAGE}}/batch
+            cat > ${{env.WORKFLOW_STORAGE}}/batch/requests.jsonl <<'EOF'
+            {"custom_id":"req-1","method":"POST","url":"/v1/chat/completions","body":{"model":"${{env.WORKFLOW_STORAGE}}/qwen","messages":[{"role":"user","content":"Summarize what vLLM does in one sentence."}]}}
+            {"custom_id":"req-2","method":"POST","url":"/v1/chat/completions","body":{"model":"${{env.WORKFLOW_STORAGE}}/qwen","messages":[{"role":"user","content":"Name three uses of batch inference."}]}}
+            EOF
+      batch:
+        name: Batch inference
+        uses: swaleio/vllm-batch@1-0-0
+        start_on:
+          - weights
+          - requests
+        compute_type: gpu   # any GPU compute type whose VRAM fits the model
+        args:
+          model: ${{tasks.weights.outputs.path}}
+          input_file: ${{env.WORKFLOW_STORAGE}}/batch/requests.jsonl
+          output_file: ${{env.WORKFLOW_STORAGE}}/batch/results.jsonl
 ```
 
 Each request's `body.model` matches the engine's `model` value — here the local
 directory the `weights` task downloaded to, so nothing is re-fetched from the
-Hub. Later tasks read the results at `/mnt/workspace/batch/results.jsonl`.
+Hub. Later tasks read the results at `${{env.WORKFLOW_STORAGE}}/batch/results.jsonl`.
 
 ---
 

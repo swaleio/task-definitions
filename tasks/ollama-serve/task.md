@@ -35,7 +35,7 @@ writing the same store path must not overlap.
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `model` | yes | — | The model to pull before the server is considered ready, e.g. `llama3.2:3b`. |
-| `models_path` | no | per-task home | Where the Ollama model store lives. Point it at a workspace path (e.g. `/mnt/workspace/ollama`) to reuse a store an earlier task populated instead of re-pulling. |
+| `models_path` | no | per-task home | Where the Ollama model store lives. Point it at a workspace path (e.g. `${{env.WORKFLOW_STORAGE}}/ollama`) to reuse a store an earlier task populated instead of re-pulling. |
 
 This task declares **no outputs**: runner tasks are long-lived pods without an
 output-tracking sidecar, so results flow over HTTP rather than through
@@ -88,46 +88,52 @@ redownloading).
 ## Example
 
 ```yaml
-tasks:
-  llm:
-    name: Ollama server
-    uses: swaleio/ollama-serve@1-0-0
-    # Pick a GPU compute type available to your project.
-    compute_type: gpu-a100
-    terminate_on:
-      - generate
-    args:
-      model: llama3.2:3b
+name: Ollama serve example
+compute_type: cpu
+entry_point: main
 
-  ready:
-    name: Wait for Ollama
-    uses: swaleio/http-request@1-0-0
-    start_on:
-      - llm
-    args:
-      url: http://${{tasks.llm.ip-address}}:11434/api/tags
-      expected_status: "200"
-      retry: "30"
-      response_path: /mnt/workspace/ollama-tags.json
+blocks:
+  main:
+    tasks:
+      llm:
+        name: Ollama server
+        uses: swaleio/ollama-serve@1-0-0
+        # Pick a GPU compute type available to your project.
+        compute_type: gpu
+        terminate_on:
+          - generate
+        args:
+          model: llama3.2:3b
 
-  generate:
-    name: Generate
-    uses: swaleio/http-request@1-0-0
-    start_on:
-      - llm
-      - ready
-    args:
-      url: http://${{tasks.llm.ip-address}}:11434/api/generate
-      method: POST
-      headers: |
-        Content-Type: application/json
-      body: '{"model":"llama3.2:3b","prompt":"Why is the sky blue? Answer in one sentence.","stream":false}'
-      expected_status: "200"
-      response_path: /mnt/workspace/ollama-answer.json
+      ready:
+        name: Wait for Ollama
+        uses: swaleio/http-request@1-0-0
+        start_on:
+          - llm
+        args:
+          url: http://${{tasks.llm.ip-address}}:11434/api/tags
+          expected_status: "200"
+          retry: "30"
+          response_path: ${{env.WORKFLOW_STORAGE}}/ollama-tags.json
+
+      generate:
+        name: Generate
+        uses: swaleio/http-request@1-0-0
+        start_on:
+          - llm
+          - ready
+        args:
+          url: http://${{tasks.llm.ip-address}}:11434/api/generate
+          method: POST
+          headers: |
+            Content-Type: application/json
+          body: '{"model":"llama3.2:3b","prompt":"Why is the sky blue? Answer in one sentence.","stream":false}'
+          expected_status: "200"
+          response_path: ${{env.WORKFLOW_STORAGE}}/ollama-answer.json
 ```
 
 The runner is terminated once `generate` completes. The generated answer is
-available to later tasks at `/mnt/workspace/ollama-answer.json` (also exposed
+available to later tasks at `${{env.WORKFLOW_STORAGE}}/ollama-answer.json` (also exposed
 as `${{tasks.generate.outputs.body_file}}`).
 
 ---

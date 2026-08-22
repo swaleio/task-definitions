@@ -27,7 +27,7 @@ inputs:
     description: If set, the task fails unless the final response status code equals this value. Empty means accept any status.
     default: ""
   response_path:
-    description: Path where the response body is written. A bare relative path lands in the container's working directory; pass an absolute workspace path (e.g. /mnt/workspace/response.json) to share the body with downstream tasks. Use a distinct path per task since the workspace is shared.
+    description: Path where the response body is written. A bare relative path lands in the container's working directory; pass an absolute workspace path (e.g. ${{env.WORKFLOW_STORAGE}}/response.json) to share the body with downstream tasks. Use a distinct path per task since the workspace is shared.
     default: response.json
 outputs:
   status:
@@ -79,23 +79,29 @@ workspace, and to poll a not-yet-ready runner until it starts answering.
 ## Example
 
 ```yaml
-tasks:
-  submit:
-    name: Submit job
-    uses: swaleio/http-request@1-0-0
-    args:
-      url: https://api.example.com/v1/jobs
-      method: POST
-      headers: |
-        Authorization: Bearer ${{secrets.api_token}}
-        Content-Type: application/json
-      body: '{"name":"nightly","priority":"high"}'
-      expected_status: "201"
-      response_path: /mnt/workspace/job.json
+name: HTTP request example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      submit:
+        name: Submit job
+        uses: swaleio/http-request@1-0-0
+        args:
+          url: https://api.example.com/v1/jobs
+          method: POST
+          headers: |
+            Authorization: Bearer ${{secrets.api_token}}
+            Content-Type: application/json
+          body: '{"name":"nightly","priority":"high"}'
+          expected_status: "201"
+          response_path: ${{env.WORKFLOW_STORAGE}}/job.json
 ```
 
 The response body is available to later tasks at
-`${{tasks.submit.outputs.body_file}}` (here `/mnt/workspace/job.json`), and the
+`${{tasks.submit.outputs.body_file}}` (here `${{env.WORKFLOW_STORAGE}}/job.json`), and the
 status code as `${{tasks.submit.outputs.status}}`.
 
 ## Polling a runner

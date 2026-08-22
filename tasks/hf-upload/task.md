@@ -9,7 +9,7 @@ inputs:
     description: Repository kind on the Hub — one of "model", "dataset", or "space".
     default: model
   source:
-    description: Absolute path inside the container to the directory to upload. Point it at the mounted workspace (e.g. /mnt/workspace/model) to pick up a directory an earlier task produced, or any other container-local path.
+    description: Absolute path inside the container to the directory to upload. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/model) to pick up a directory an earlier task produced, or any other container-local path.
     required: true
   path_in_repo:
     description: Destination path inside the repository. Defaults to the repository root.
@@ -43,7 +43,7 @@ destination folder within the repository (root by default).
 |-------|----------|---------|-------------|
 | `repo` | yes | — | Target repository id, `namespace/name`. |
 | `repo_type` | no | `model` | Repository kind: `model`, `dataset`, or `space`. |
-| `source` | yes | — | Absolute path to the directory to upload inside the container (e.g. `/mnt/workspace/model`). |
+| `source` | yes | — | Absolute path to the directory to upload inside the container (e.g. `${{env.WORKFLOW_STORAGE}}/model`). |
 | `path_in_repo` | no | repo root | Destination path inside the repository. |
 | `token` | yes | — | Hugging Face write token (pass a project/account secret). |
 
@@ -54,18 +54,24 @@ destination folder within the repository (root by default).
 ## Example
 
 ```yaml
-tasks:
-  publish:
-    name: Publish model
-    uses: swaleio/hf-upload@1-0-0
-    args:
-      repo: acme/text-classifier
-      repo_type: model
-      source: /mnt/workspace/artifacts/model
-      token: ${{secrets.hf_token}}
+name: HF upload example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      publish:
+        name: Publish model
+        uses: swaleio/hf-upload@1-0-0
+        args:
+          repo: acme/text-classifier
+          repo_type: model
+          source: ${{env.WORKFLOW_STORAGE}}/artifacts/model
+          token: ${{secrets.hf_token}}
 ```
 
-Uploads everything under `/mnt/workspace/artifacts/model` to the `acme/text-classifier`
+Uploads everything under `${{env.WORKFLOW_STORAGE}}/artifacts/model` to the `acme/text-classifier`
 model repository on the Hub.
 
 ---

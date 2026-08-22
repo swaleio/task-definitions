@@ -3,7 +3,7 @@ name: Axolotl train
 description: Fine-tunes a model with Axolotl (full, LoRA, or QLoRA) from a caller-supplied config YAML.
 inputs:
   config:
-    description: Absolute path inside the container to the Axolotl config YAML. Point it at the mounted workspace (e.g. /mnt/workspace/axolotl.yaml) so an earlier task can write it there, or any other container-local path.
+    description: Absolute path inside the container to the Axolotl config YAML. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/axolotl.yaml) so an earlier task can write it there, or any other container-local path.
     required: true
   token:
     description: Hugging Face access token for gated or private base models (pass a secret). Omit for public base models or local model directories.
@@ -31,7 +31,7 @@ single required input.
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `config` | yes | — | Absolute path to the Axolotl config YAML inside the container. Point it at the mounted workspace (e.g. `/mnt/workspace/axolotl.yaml`) so an earlier task can write it there, or any other container-local path. |
+| `config` | yes | — | Absolute path to the Axolotl config YAML inside the container. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/axolotl.yaml`) so an earlier task can write it there, or any other container-local path. |
 | `token` | no | — | HF access token for gated/private base models (pass a secret); delivered to the container as `HF_TOKEN` via the definition's `exec.env`. Unneeded for public base models or local model directories. |
 
 ## Training artifacts
@@ -40,7 +40,7 @@ This task declares no outputs — the vendor image has no wrapper to emit them.
 Everything the run produces (adapter weights or full checkpoints, tokenizer
 files, training logs) is written to the config's `output_dir`. Point
 `output_dir` at a path a later task can consume — e.g.
-`/mnt/workspace/lora-out` on the shared workspace — so downstream tasks such
+`${{env.WORKFLOW_STORAGE}}/lora-out` on the shared workspace — so downstream tasks such
 as `swaleio/axolotl-merge-lora` or a publish task — `swaleio/swale-push`
 (the platform's own store) or `swaleio/hf-upload` — can pick the artifacts up
 from there.
@@ -75,45 +75,51 @@ A self-contained QLoRA run: a `bash` task writes a minimal config to the
 shared workspace, then this task trains from it.
 
 ```yaml
-tasks:
-  write_config:
-    name: Write training config
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        cat > /mnt/workspace/axolotl.yaml <<'EOF'
-        base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
-        load_in_4bit: true
-        adapter: qlora
-        lora_r: 32
-        lora_alpha: 16
-        lora_dropout: 0.05
-        lora_target_linear: true
-        datasets:
-          - path: mhenrichsen/alpaca_2k_test
-            type: alpaca
-        output_dir: /mnt/workspace/lora-out
-        sequence_len: 2048
-        micro_batch_size: 2
-        gradient_accumulation_steps: 4
-        num_epochs: 1
-        optimizer: adamw_bnb_8bit
-        learning_rate: 0.0002
-        bf16: auto
-        gradient_checkpointing: true
-        EOF
-  train:
-    name: QLoRA fine-tune
-    uses: swaleio/axolotl-train@1-0-0
-    start_on:
-      - write_config
-    compute_type: gpu_a100   # any GPU compute type — see Compute above
-    args:
-      config: /mnt/workspace/axolotl.yaml
+name: Axolotl train example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      write_config:
+        name: Write training config
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            cat > ${{env.WORKFLOW_STORAGE}}/axolotl.yaml <<'EOF'
+            base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+            load_in_4bit: true
+            adapter: qlora
+            lora_r: 32
+            lora_alpha: 16
+            lora_dropout: 0.05
+            lora_target_linear: true
+            datasets:
+              - path: mhenrichsen/alpaca_2k_test
+                type: alpaca
+            output_dir: ${{env.WORKFLOW_STORAGE}}/lora-out
+            sequence_len: 2048
+            micro_batch_size: 2
+            gradient_accumulation_steps: 4
+            num_epochs: 1
+            optimizer: adamw_bnb_8bit
+            learning_rate: 0.0002
+            bf16: auto
+            gradient_checkpointing: true
+            EOF
+      train:
+        name: QLoRA fine-tune
+        uses: swaleio/axolotl-train@1-0-0
+        start_on:
+          - write_config
+        compute_type: gpu   # any GPU compute type — see Compute above
+        args:
+          config: ${{env.WORKFLOW_STORAGE}}/axolotl.yaml
 ```
 
-The trained adapter lands at `/mnt/workspace/lora-out` (the config's
+The trained adapter lands at `${{env.WORKFLOW_STORAGE}}/lora-out` (the config's
 `output_dir`), ready for `swaleio/axolotl-merge-lora`, `swaleio/swale-push`,
 or `swaleio/hf-upload`.
 

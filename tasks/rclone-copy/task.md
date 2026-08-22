@@ -3,10 +3,10 @@ name: Rclone copy
 description: Copies files between cloud/remote storage and the workspace with rclone, via credential inputs.
 inputs:
   source:
-    description: Source to copy from. Use `remote:bucket/path` for the configured remote, or a workspace path like `/mnt/workspace/data`.
+    description: Source to copy from. Use `remote:bucket/path` for the configured remote, or a workspace path like `${{env.WORKFLOW_STORAGE}}/data`.
     required: true
   dest:
-    description: Destination to copy to. Use `remote:bucket/path` for the configured remote, or a workspace path like `/mnt/workspace/out`.
+    description: Destination to copy to. Use `remote:bucket/path` for the configured remote, or a workspace path like `${{env.WORKFLOW_STORAGE}}/out`.
     required: true
   remote_type:
     description: The rclone backend for the `remote:` remote. One of s3, azureblob, gcs, dropbox, sftp, http.
@@ -40,7 +40,7 @@ exec:
 Copies files between a remote storage backend and the run's workspace using
 [`rclone`](https://rclone.org). It handles S3, Azure Blob, Google Cloud Storage,
 Dropbox, SFTP, and HTTP. Point `source` and `dest` at either the configured
-remote (`remote:…`) or a workspace path (`/mnt/workspace/…`), in either
+remote (`remote:…`) or a workspace path (`${{env.WORKFLOW_STORAGE}}/…`), in either
 direction: `remote:` → workspace downloads, workspace → `remote:` uploads.
 
 ## Connection model
@@ -88,7 +88,7 @@ concurrency — also goes through `flags`.
 ## Outputs
 
 None. The task writes the copied files to the destination (typically a
-`/mnt/workspace/…` subpath) for downstream tasks to read; it emits no output
+`${{env.WORKFLOW_STORAGE}}/…` subpath) for downstream tasks to read; it emits no output
 keys.
 
 ## Compute
@@ -100,20 +100,26 @@ keys.
 Download an S3 prefix into the workspace so later tasks can process it:
 
 ```yaml
-tasks:
-  fetch_dataset:
-    name: Fetch dataset
-    uses: swaleio/rclone-copy@1-0-0
-    args:
-      remote_type: s3
-      source: remote:my-bucket/datasets/train
-      dest: /mnt/workspace/data
-      access_key_id: ${{secrets.aws_access_key_id}}
-      secret_access_key: ${{secrets.aws_secret_access_key}}
-      flags: "--s3-region eu-west-1 --transfers 8"
+name: Rclone copy example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      fetch_dataset:
+        name: Fetch dataset
+        uses: swaleio/rclone-copy@1-0-0
+        args:
+          remote_type: s3
+          source: remote:my-bucket/datasets/train
+          dest: ${{env.WORKFLOW_STORAGE}}/data
+          access_key_id: ${{secrets.aws_access_key_id}}
+          secret_access_key: ${{secrets.aws_secret_access_key}}
+          flags: "--s3-region eu-west-1 --transfers 8"
 ```
 
-To upload instead, swap `source` and `dest` — e.g. `source: /mnt/workspace/out`
+To upload instead, swap `source` and `dest` — e.g. `source: ${{env.WORKFLOW_STORAGE}}/out`
 and `dest: remote:my-bucket/results`.
 
 ---

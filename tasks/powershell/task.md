@@ -65,17 +65,23 @@ script is self-contained — it writes to a relative `out/` directory under the
 working directory rather than assuming any particular mount.
 
 ```yaml
-tasks:
-  report:
-    name: Report
-    uses: swaleio/powershell@1-0-0
-    args:
-      script: |
-        $ErrorActionPreference = 'Stop'
-        New-Item -ItemType Directory -Force -Path out | Out-Null
-        $count = (Get-ChildItem -Recurse -File | Measure-Object).Count
-        "file count: $count" | Set-Content out/report.txt
-        Get-Content out/report.txt
+name: PowerShell example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      report:
+        name: Report
+        uses: swaleio/powershell@1-0-0
+        args:
+          script: |
+            $ErrorActionPreference = 'Stop'
+            New-Item -ItemType Directory -Force -Path out | Out-Null
+            $count = (Get-ChildItem -Recurse -File | Measure-Object).Count
+            "file count: $count" | Set-Content out/report.txt
+            Get-Content out/report.txt
 ```
 
 ## Emitting outputs

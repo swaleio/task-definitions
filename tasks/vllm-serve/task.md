@@ -41,7 +41,7 @@ starts this task without wiring `terminate_on` never finishes.
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `model` | yes | — | Hub repo id (e.g. `meta-llama/Llama-3.1-8B-Instruct`) or a full local model directory path (e.g. `/mnt/workspace/llama` from `swaleio/hf-download`). A local path skips the Hub download. |
+| `model` | yes | — | Hub repo id (e.g. `meta-llama/Llama-3.1-8B-Instruct`) or a full local model directory path (e.g. `${{env.WORKFLOW_STORAGE}}/llama` from `swaleio/hf-download`). A local path skips the Hub download. |
 | `port` | no | `8000` | Port the server listens on. Consumers combine it with the runner's ip-address, so every consumer URL must use the same port. |
 | `token` | no | — | HF access token for gated/private Hub models (pass a secret); delivered to the server as `HF_TOKEN` via the definition's `exec.env`. Unneeded for public models or local directories. |
 
@@ -94,51 +94,57 @@ directory, the served model name defaults to that path — the consumer's reques
 body uses it as the `model` field.
 
 ```yaml
-tasks:
-  weights:
-    name: Fetch weights
-    uses: swaleio/hf-download@1-0-0
-    args:
-      repo: meta-llama/Llama-3.1-8B-Instruct
-      include: "*.safetensors,*.json,tokenizer.*"
-      dest: /mnt/workspace/llama
-      token: ${{secrets.hf_token}}
+name: vLLM serve example
+compute_type: cpu
+entry_point: main
 
-  serve:
-    name: Serve model
-    uses: swaleio/vllm-serve@1-0-0
-    compute_type: gpu-a100   # illustrative — pick a GPU compute type available to your project
-    start_on: [weights]
-    terminate_on: [generate]   # the runner is terminated when its consumers complete
-    args:
-      model: ${{tasks.weights.outputs.path}}
+blocks:
+  main:
+    tasks:
+      weights:
+        name: Fetch weights
+        uses: swaleio/hf-download@1-0-0
+        args:
+          repo: meta-llama/Llama-3.1-8B-Instruct
+          include: "*.safetensors,*.json,tokenizer.*"
+          dest: ${{env.WORKFLOW_STORAGE}}/llama
+          token: ${{secrets.hf_token}}
 
-  wait_ready:
-    name: Wait for server
-    uses: swaleio/http-request@1-0-0
-    start_on: [serve]
-    args:
-      url: http://${{tasks.serve.ip-address}}:8000/health
-      expected_status: "200"
+      serve:
+        name: Serve model
+        uses: swaleio/vllm-serve@1-0-0
+        compute_type: gpu   # illustrative — pick a GPU compute type available to your project
+        start_on: [weights]
+        terminate_on: [generate]   # the runner is terminated when its consumers complete
+        args:
+          model: ${{tasks.weights.outputs.path}}
 
-  generate:
-    name: Chat completion
-    uses: swaleio/http-request@1-0-0
-    start_on: [wait_ready]
-    args:
-      url: http://${{tasks.serve.ip-address}}:8000/v1/chat/completions
-      method: POST
-      headers: |
-        Content-Type: application/json
-      body: '{"model":"/mnt/workspace/llama","messages":[{"role":"user","content":"Say hello."}]}'
-      expected_status: "200"
-      response_path: /mnt/workspace/completion.json
+      wait_ready:
+        name: Wait for server
+        uses: swaleio/http-request@1-0-0
+        start_on: [serve]
+        args:
+          url: http://${{tasks.serve.ip-address}}:8000/health
+          expected_status: "200"
+
+      generate:
+        name: Chat completion
+        uses: swaleio/http-request@1-0-0
+        start_on: [wait_ready]
+        args:
+          url: http://${{tasks.serve.ip-address}}:8000/v1/chat/completions
+          method: POST
+          headers: |
+            Content-Type: application/json
+          body: '{"model":"${{env.WORKFLOW_STORAGE}}/llama","messages":[{"role":"user","content":"Say hello."}]}'
+          expected_status: "200"
+          response_path: ${{env.WORKFLOW_STORAGE}}/completion.json
 ```
 
 The `serve` runner's `terminate_on: [generate]` ends the server — and with it
 the workflow — once `generate` completes.
 
-Later tasks read the completion at `/mnt/workspace/completion.json` (or via
+Later tasks read the completion at `${{env.WORKFLOW_STORAGE}}/completion.json` (or via
 `${{tasks.generate.outputs.body_file}}`).
 
 ---

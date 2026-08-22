@@ -59,10 +59,16 @@ here in seconds instead of deep inside a training job.
 The task declares no inputs, so it takes no args:
 
 ```yaml
-tasks:
-  gpu_check:
-    name: GPU check
-    uses: swaleio/gpu-smoke-test@1-0-0
+name: GPU smoke test example
+compute_type: gpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      gpu_check:
+        name: GPU check
+        uses: swaleio/gpu-smoke-test@1-0-0
 ```
 
 Downstream tasks read the probed hardware via

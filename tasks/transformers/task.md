@@ -44,24 +44,30 @@ program is self-contained — it pulls a small public model from the Hub and run
 it on the GPU.
 
 ```yaml
-tasks:
-  classify:
-    name: Classify
-    uses: swaleio/transformers@1-0-0
-    args:
-      script: |
-        import torch
-        from transformers import pipeline
+name: Transformers example
+compute_type: gpu
+entry_point: main
 
-        assert torch.cuda.is_available(), "schedule this task on a GPU compute type"
+blocks:
+  main:
+    tasks:
+      classify:
+        name: Classify
+        uses: swaleio/transformers@1-0-0
+        args:
+          script: |
+            import torch
+            from transformers import pipeline
 
-        clf = pipeline(
-            "text-classification",
-            model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
-            device=0,
-        )
-        for result in clf(["Swale makes this easy.", "This queue is painfully slow."]):
-            print(result)
+            assert torch.cuda.is_available(), "schedule this task on a GPU compute type"
+
+            clf = pipeline(
+                "text-classification",
+                model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+                device=0,
+            )
+            for result in clf(["Swale makes this easy.", "This queue is painfully slow."]):
+                print(result)
 ```
 
 ## Parameterizing
@@ -88,22 +94,29 @@ run-level env vars into every later container, and the Hugging Face libraries
 pick `HF_TOKEN` up automatically:
 
 ```yaml
-tasks:
-  publish_token:
-    name: Publish HF token
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        printf 'HF_TOKEN=%s\n' '${{secrets.hf_token}}' >> "$WORKFLOW_ENV"
-  generate:
-    name: Generate
-    uses: swaleio/transformers@1-0-0
-    start_on:
-      - publish_token
-    args:
-      script: |
-        # HF_TOKEN is now in the environment; load a gated model as usual.
-        ...
+name: Transformers - Gated models and tokens
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      publish_token:
+        name: Publish HF token
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            printf 'HF_TOKEN=%s\n' '${{secrets.hf_token}}' >> "$WORKFLOW_ENV"
+      generate:
+        name: Generate
+        uses: swaleio/transformers@1-0-0
+        compute_type: gpu   # any GPU compute type available to your project
+        start_on:
+          - publish_token
+        args:
+          script: |
+            # HF_TOKEN is now in the environment; load a gated model as usual.
+            ...
 ```
 
 ## Emitting outputs
@@ -112,7 +125,7 @@ Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
 this generic `transformers` task declares none, so emitting a key here would
 fail the task). Exchange large results through files instead: write to the
-working directory, or to a shared mount such as `/mnt/workspace` when a later
+working directory, or to the shared workspace (`$WORKFLOW_STORAGE` in the container) when a later
 task must read them.
 
 ---

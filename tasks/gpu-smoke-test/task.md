@@ -10,7 +10,7 @@ outputs:
     description: The CUDA version the torch build targets (e.g. 13.0).
 exec:
   # docker.io/swaleio/transformers-gpu:1-0-0
-  image: docker.io/swaleio/transformers-gpu@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/transformers-gpu@sha256:cd90129e2b50edd8c9f5bbe2cf5e717e173df50822143208d69d5a80b02136a5
   args:
     - bash
     - -lc

@@ -19,7 +19,7 @@ inputs:
     required: true
 exec:
   # docker.io/swaleio/swale-cli:1-0-0
-  image: docker.io/swaleio/swale-cli@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/swale-cli@sha256:c3717a48cd51c2c2b2f2890e52e21818d06a6e0dba7ee2abe713238c596d773c
   # Flag names (--project, --message) are provisional — verify against the swale CLI.
   # `account` and `token` are intentionally NOT args: the image reads them from
   # INPUT_ACCOUNT / INPUT_TOKEN so the secret never lands in the container argv

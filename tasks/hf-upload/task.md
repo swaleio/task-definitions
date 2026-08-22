@@ -19,7 +19,7 @@ inputs:
     required: true
 exec:
   # docker.io/swaleio/hf-cli:1-0-0
-  image: docker.io/swaleio/hf-cli@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/hf-cli@sha256:c4433260a36c46289265b5ccd3a06847986879cefd2c1052cbe8e43ccbe7b116
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

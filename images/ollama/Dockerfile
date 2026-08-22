@@ -24,3 +24,15 @@ EXPOSE 11434
 # wrapper so the server starts in the background, the requested model is
 # pulled, and the container stays in the foreground as a runner.
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Per-image OCI metadata, and the single source of truth for it. The publish
+# workflow reads the title and description out of this file and feeds them to
+# docker/metadata-action, because a build --label always overrides a Dockerfile
+# LABEL - without that the generated repository-wide description would win.
+# The description also becomes the Docker Hub short description, which the
+# registry does not read from labels at all.
+LABEL org.opencontainers.image.title="Ollama"
+LABEL org.opencontainers.image.description="Ollama server that pulls a model then serves it, for Swale runner tasks. Backs ollama-serve."
+LABEL org.opencontainers.image.source="https://github.com/swaleio/task-definitions"
+LABEL org.opencontainers.image.documentation="https://github.com/swaleio/task-definitions/blob/main/images/ollama/README.md"
+LABEL org.opencontainers.image.licenses="MIT"

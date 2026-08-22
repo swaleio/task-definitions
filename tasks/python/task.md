@@ -81,3 +81,7 @@ tasks:
 
         print(f"wrote {len(rows)} rows")
 ```
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

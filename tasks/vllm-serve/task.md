@@ -140,3 +140,7 @@ the workflow — once `generate` completes.
 
 Later tasks read the completion at `/mnt/workspace/completion.json` (or via
 `${{tasks.generate.outputs.body_file}}`).
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

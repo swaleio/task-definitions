@@ -83,3 +83,7 @@ tasks:
 Append `key=value` lines to the file at `$env:WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
 this generic `powershell` task declares none).
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

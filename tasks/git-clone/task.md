@@ -66,3 +66,7 @@ tasks:
 
 Downstream tasks read the cloned files at `/mnt/workspace/repo` and the commit
 via `${{tasks.checkout.outputs.commit_sha}}`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

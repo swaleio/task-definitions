@@ -67,3 +67,7 @@ tasks:
 
 Uploads everything under `/mnt/workspace/artifacts/model` to the `acme/text-classifier`
 model repository on the Hub.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

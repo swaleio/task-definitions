@@ -84,3 +84,7 @@ tasks:
 
 Downstream tasks read the files at `/mnt/workspace/llama`, or reference the
 resolved location via `${{tasks.weights.outputs.path}}`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

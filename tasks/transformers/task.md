@@ -114,3 +114,7 @@ this generic `transformers` task declares none, so emitting a key here would
 fail the task). Exchange large results through files instead: write to the
 working directory, or to a shared mount such as `/mnt/workspace` when a later
 task must read them.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

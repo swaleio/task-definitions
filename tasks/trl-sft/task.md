@@ -89,3 +89,7 @@ tasks:
 
 Downstream tasks read the fine-tuned adapter/model at `/mnt/workspace/sft-out`
 — the `output_dir` the config chose.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

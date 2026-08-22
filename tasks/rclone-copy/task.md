@@ -115,3 +115,7 @@ tasks:
 
 To upload instead, swap `source` and `dest` — e.g. `source: /mnt/workspace/out`
 and `dest: remote:my-bucket/results`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

@@ -76,3 +76,7 @@ outputs for downstream tasks (declare them in a task that needs typed outputs;
 this generic `dotnet` task declares none). Share build artifacts by writing them
 somewhere a later task reads — the working directory for this task alone, or a
 shared mount such as `/mnt/workspace` when another task must pick them up.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

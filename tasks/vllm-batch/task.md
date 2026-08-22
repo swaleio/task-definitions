@@ -120,3 +120,7 @@ tasks:
 Each request's `body.model` matches the engine's `model` value — here the local
 directory the `weights` task downloaded to, so nothing is re-fetched from the
 Hub. Later tasks read the results at `/mnt/workspace/batch/results.jsonl`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

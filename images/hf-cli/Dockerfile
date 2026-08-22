@@ -14,3 +14,15 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 USER swale
 WORKDIR /mnt/workspace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Per-image OCI metadata, and the single source of truth for it. The publish
+# workflow reads the title and description out of this file and feeds them to
+# docker/metadata-action, because a build --label always overrides a Dockerfile
+# LABEL - without that the generated repository-wide description would win.
+# The description also becomes the Docker Hub short description, which the
+# registry does not read from labels at all.
+LABEL org.opencontainers.image.title="Hugging Face CLI"
+LABEL org.opencontainers.image.description="Hugging Face Hub CLI for Swale workflows. Backs the hf-download and hf-upload tasks."
+LABEL org.opencontainers.image.source="https://github.com/swaleio/task-definitions"
+LABEL org.opencontainers.image.documentation="https://github.com/swaleio/task-definitions/blob/main/images/hf-cli/README.md"
+LABEL org.opencontainers.image.licenses="MIT"

@@ -105,3 +105,7 @@ health endpoint and keep `retry` and `retry_on_connrefused` at their defaults â€
 curl retries connection-refused until the server accepts connections, so the
 task succeeds once the runner is up. List the runner in the polling task's
 `start_on`, and read the runner address as `${{tasks.<runner-id>.ip-address}}`.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

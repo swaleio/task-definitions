@@ -115,3 +115,7 @@ tasks:
 After the run, the merged model is at `/mnt/workspace/lora-out/merged`, ready
 for `swaleio/swale-push` (the platform's own store), `swaleio/hf-upload`,
 or a serving task.
+
+---
+
+Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

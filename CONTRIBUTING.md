@@ -169,6 +169,24 @@ images/<name>/README.md      # synced to the Docker Hub page by CI
 Publish CI builds changed images, pushes `docker.io/swaleio/<name>`, attests
 build provenance, and syncs the image README to Docker Hub.
 
+### How publish CI authenticates
+
+Two different credentials, because Docker Hub splits them across two systems:
+
+- **Pushing images is keyless.** The `swaleio` organization has an OIDC
+  connection whose ruleset trusts only workflows running on `main` of this
+  repository and grants image push. `docker/login-action` exchanges the
+  workflow's OIDC token for a short-lived registry token, so no push credential
+  is stored in this repository. Configured through the repository *variables*
+  `DOCKERHUB_OIDC_CONNECTIONID` and `DOCKERHUB_ORGANIZATION`.
+- **Syncing the image README needs a PAT** (`DOCKERHUB_USERNAME` /
+  `DOCKERHUB_TOKEN` secrets, `read/write/delete` scope). A repository
+  description lives on Docker Hub's *management* API, which authenticates a
+  **user** login — an organization token cannot reach it at all (it is rejected
+  with `Cannot log into an organization account`), and the registry token OIDC
+  issues is for a different system entirely. So the description step is the one
+  place a long-lived credential is still required.
+
 ## CI checks
 
 On every PR (`lint.yml`):

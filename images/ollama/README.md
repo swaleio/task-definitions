@@ -43,10 +43,10 @@ writes to `$WORKFLOW_TASK_OUTPUT` — results flow over HTTP.
 
 ## Model storage
 
-Pulled models land on container-local disk under the user's home
-(`~/.ollama/models`): fine for the runner's lifetime, gone with the pod.
-`OLLAMA_MODELS` could be pointed at another path (e.g. a mounted volume) in a
-later image revision if models ever need to be shared or persisted.
+Pulled models land under the home directory (`~/.ollama/models`), which the
+platform mounts writable and per-task. They live exactly as long as the runner
+pod, which is what this image needs: the model serves requests for the pod's
+lifetime and nothing outside it reads the files.
 
 ## Building
 

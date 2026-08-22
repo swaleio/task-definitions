@@ -29,6 +29,24 @@ equally to vendor images (which must already satisfy it) and swale-built images
   value into the script text. (For fixed tasks, each declared input arrives as
   `$INPUT_*`, safe to read as data.)
 
+## Writable paths
+
+A task container's filesystem is read-only except for these, and it runs as a
+fixed non-root user:
+
+| Path | Scope | Use it for |
+|------|-------|-----------|
+| `/mnt/workspace` | Shared by every task in the run | Anything a later task reads |
+| `/mnt/scratch` | This task only, discarded after | Large intermediates |
+| `/tmp` | This task only, discarded after | Temporary files |
+| `$HOME` (`/home/task`) | This task only, discarded after | Tool caches and config |
+
+`$HOME` being writable is why tools work unmodified: `~/.cache/huggingface`,
+`~/.ollama`, `git config --global`, and package-manager caches all land there
+without configuration. Because it is per-task, those caches repopulate on every
+task and count against the compute type's scratch capacity — so a model or
+artifact another task needs belongs on `/mnt/workspace`, never in a cache.
+
 ## Workspace
 
 - A single per-run volume is mounted at **`/mnt/workspace`**, shared by every
@@ -63,13 +81,14 @@ equally to vendor images (which must already satisfy it) and swale-built images
   variables to later tasks.
 - `WORKFLOW_STORAGE` — the workspace path (`/mnt/workspace`).
 - `WORKFLOW_TASK_ID` — this task's run id.
+- `HOME` — the writable home directory (`/home/task`).
 
 A definition may also declare its own environment variables under `exec.env` —
 a map of UPPER_SNAKE names to values that may embed `${{inputs.*}}`
 expressions, resolved before injection. These are injected at the **lowest**
 precedence (`exec.env` < `INPUT_*` < run-level environment < the reserved
-`WORKFLOW_*` variables above), and the reserved `WORKFLOW_`/`INPUT_` name
-prefixes are protected. This is how catalog tasks deliver well-known variables
+variables above, `WORKFLOW_*` and `HOME`, which a definition cannot override),
+and the reserved `WORKFLOW_`/`INPUT_` name prefixes are protected. This is how catalog tasks deliver well-known variables
 such as `HF_TOKEN` to the tools they wrap.
 
 ## Networking

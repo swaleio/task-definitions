@@ -33,9 +33,8 @@ fi
 
 # Pull the requested model (INPUT_MODEL carries the required `model` input).
 # Multi-gigabyte pulls take minutes; consumers poll readiness against the API
-# (see the ollama-serve task docs for the pull-time caveat). Pulled layers
-# land on container-local disk under this user's home and live exactly as
-# long as the runner pod (OLLAMA_MODELS could relocate them later).
+# (see the ollama-serve task docs for the pull-time caveat). Pulled layers land
+# under the home directory and live exactly as long as the runner pod.
 if [ -n "$INPUT_MODEL" ]; then
   ollama pull "$INPUT_MODEL"
 fi

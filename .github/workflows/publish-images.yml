@@ -22,8 +22,7 @@ on:
 
 permissions:
   contents: read
-  # id-token is still required by attest-build-provenance, even though the
-  # registry login no longer uses OIDC.
+  # Required by attest-build-provenance.
   id-token: write
   attestations: write
 

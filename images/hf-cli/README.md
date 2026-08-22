@@ -9,9 +9,9 @@ artifacts back to the Hub.
 - **Installed:** `huggingface_hub[cli,hf_xet]` (the `hf` CLI plus the Xet
   accelerated transfer backend)
 - **User:** non-root `swale` (uid 1000)
-- **Hub cache** — stays at the CLI default under the user's home; the image does
-  not force a location. A caller can relocate it (e.g. onto the mounted
-  workspace so blobs persist across tasks in a run) by setting `INPUT_HF_HOME`.
+- **Hub cache** — stays at the CLI default under the home directory, which the
+  platform mounts writable and per-task. It is scratch: downloaded models go to
+  the caller's `dest`, so nothing another task depends on lives in the cache.
 - **`WORKDIR /mnt/workspace`**, **`ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]`**
 
 ## Invocation
@@ -23,8 +23,6 @@ inputs before running `hf "$@"`:
 
 | Input env | Applies to | Effect |
 |-----------|------------|--------|
-| `INPUT_TOKEN` | — | No longer read by the entrypoint — the task definitions deliver `HF_TOKEN` via `exec.env`. |
-| `INPUT_HF_HOME` | all | Exported as `HF_HOME` to relocate the Hub cache (e.g. onto the mounted workspace). Optional; the default under the user's home is used when unset. |
 | `INPUT_INCLUDE` | `download` | Comma-separated glob patterns; each becomes a repeated `--include <glob>`. Patterns are passed literally (no shell globbing). |
 | `INPUT_REVISION` | all | Appended as `--revision <ref>` to pin a branch, tag, or commit. |
 | `INPUT_DEST` | `download` | The full local path the caller chose for the download; emitted verbatim as the `path` output. |

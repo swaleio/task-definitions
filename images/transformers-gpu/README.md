@@ -11,8 +11,9 @@ fine-tuning, or arbitrary GPU Python without a build step.
   `datasets==4.4.1`, `trl==0.24.0`, `peft==0.18.0`, `sentencepiece==0.2.1`,
   `huggingface_hub[hf_xet]==0.36.0`
 - **User:** non-root `swale` (uid 1000)
-- **Hub cache** — stays at the Hugging Face default under the user's home; the
-  image does not force a location.
+- **Hub cache** — stays at the Hugging Face default under the home directory,
+  which the platform mounts writable and per-task. It is scratch, so a model a
+  later task needs belongs on the shared workspace instead.
 - **`WORKDIR /mnt/workspace`**, **no `ENTRYPOINT`**
 
 ## Invocation

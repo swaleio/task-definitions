@@ -11,10 +11,9 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # (${{tasks.<id>.ip-address}}:11434). The entrypoint honors this value.
 ENV OLLAMA_HOST=0.0.0.0:11434
 
-# Pulled models land under the user's home on container-local disk, which is
-# fine for the runner's lifetime — nothing needs to outlive the pod.
-# OLLAMA_MODELS could be pointed elsewhere (e.g. a mounted path) in a later
-# image revision if models ever need to be shared or persisted.
+# Pulled models land under the home directory, which the platform mounts
+# writable and per-task. That suits a runner exactly: the models are needed for
+# the pod's lifetime and nothing outside it reads them.
 
 USER swale
 WORKDIR /mnt/workspace

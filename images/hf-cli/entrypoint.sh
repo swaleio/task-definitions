@@ -6,13 +6,6 @@ set -e
 # inputs (INPUT_* env vars injected by the platform).
 cmd="$1"
 
-# The Hub cache stays at the image default (under the user's home) unless the
-# caller relocates it. Set INPUT_HF_HOME to, for example, a path on the mounted
-# workspace to persist downloaded blobs across tasks in a run.
-if [ -n "$INPUT_HF_HOME" ]; then
-  export HF_HOME="$INPUT_HF_HOME"
-fi
-
 # For downloads, restrict to matching files. INPUT_INCLUDE is a comma-separated
 # list of glob patterns, each appended as its own --include flag. Disable
 # pathname expansion (set -f) so a pattern like *.safetensors is passed through

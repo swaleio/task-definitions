@@ -43,9 +43,16 @@ fixed non-root user:
 
 `$HOME` being writable is why tools work unmodified: `~/.cache/huggingface`,
 `~/.ollama`, `git config --global`, and package-manager caches all land there
-without configuration. Because it is per-task, those caches repopulate on every
-task and count against the compute type's scratch capacity — so a model or
-artifact another task needs belongs on `/mnt/workspace`, never in a cache.
+without configuration.
+
+That default is right only while the cache is private to one task. Because home
+is per-task, its contents repopulate on every task and count against the compute
+type's scratch capacity — so a store that another task in the run fills or reads
+(a model cache, a downloaded checkpoint, a package mirror) has to go on
+`/mnt/workspace` instead. A task that keeps such a store must therefore expose the
+location as an **optional input** defaulting to the tool's own home-directory path,
+so the caller decides whether it is task-private scratch or shared run state. A
+hardcoded `$HOME` path forecloses that choice.
 
 ## Workspace
 

@@ -22,6 +22,7 @@ The `ollama-serve` task passes **no `args`** — the wrapper is driven entirely 
 | Input env | Required | Purpose |
 |-----------|----------|---------|
 | `INPUT_MODEL` | yes (required task input) | Model to `ollama pull` once the server answers, e.g. `llama3.2:3b`. |
+| `INPUT_MODELS_PATH` | no | Exported as `OLLAMA_MODELS` when non-empty, moving the model store off the per-task home directory. |
 
 ## Lifecycle
 
@@ -44,9 +45,14 @@ writes to `$WORKFLOW_TASK_OUTPUT` — results flow over HTTP.
 ## Model storage
 
 Pulled models land under the home directory (`~/.ollama/models`), which the
-platform mounts writable and per-task. They live exactly as long as the runner
-pod, which is what this image needs: the model serves requests for the pod's
-lifetime and nothing outside it reads the files.
+platform mounts writable and per-task, so the store is discarded when the runner
+pod ends and each run pulls the model again.
+
+`INPUT_MODELS_PATH` moves the store elsewhere. Pointed at the shared workspace it
+outlives the pod, so a store populated by an earlier task is already there when
+the server starts — `ollama pull` finds the model present and returns without
+transferring anything. Because the workspace is shared by every task in the run,
+two tasks writing the same store path must not overlap.
 
 ## Building
 

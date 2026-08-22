@@ -54,14 +54,20 @@ the resolved `commit_sha` for downstream tasks.
 ## Example
 
 ```yaml
-tasks:
-  checkout:
-    name: Checkout
-    uses: swaleio/git-clone@1-0-0
-    args:
-      repository_url: https://github.com/acme/app.git
-      dest: /mnt/workspace/repo
-      git_token: ${{secrets.github_token}}
+name: Git clone example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      checkout:
+        name: Checkout
+        uses: swaleio/git-clone@1-0-0
+        args:
+          repository_url: https://github.com/acme/app.git
+          dest: /mnt/workspace/repo
+          git_token: ${{secrets.github_token}}
 ```
 
 Downstream tasks read the cloned files at `/mnt/workspace/repo` and the commit

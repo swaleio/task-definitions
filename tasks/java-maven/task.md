@@ -53,19 +53,25 @@ script is self-contained — it scaffolds and packages a project under a relativ
 `out/` directory rather than assuming any particular mount.
 
 ```yaml
-tasks:
-  build:
-    name: Build
-    uses: swaleio/java-maven@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        mvn -B archetype:generate \
-          -DgroupId=com.example -DartifactId=app \
-          -DarchetypeArtifactId=maven-archetype-quickstart \
-          -DarchetypeVersion=1.4 -DinteractiveMode=false \
-          -DoutputDirectory=out
-        mvn -B -f out/app/pom.xml package
+name: Java Maven example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      build:
+        name: Build
+        uses: swaleio/java-maven@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            mvn -B archetype:generate \
+              -DgroupId=com.example -DartifactId=app \
+              -DarchetypeArtifactId=maven-archetype-quickstart \
+              -DarchetypeVersion=1.4 -DinteractiveMode=false \
+              -DoutputDirectory=out
+            mvn -B -f out/app/pom.xml package
 ```
 
 The example scaffolds and packages into a relative `out/` directory; point Maven

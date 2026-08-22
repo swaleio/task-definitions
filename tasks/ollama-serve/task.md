@@ -88,42 +88,48 @@ redownloading).
 ## Example
 
 ```yaml
-tasks:
-  llm:
-    name: Ollama server
-    uses: swaleio/ollama-serve@1-0-0
-    # Pick a GPU compute type available to your project.
-    compute_type: gpu-a100
-    terminate_on:
-      - generate
-    args:
-      model: llama3.2:3b
+name: Ollama serve example
+compute_type: cpu
+entry_point: main
 
-  ready:
-    name: Wait for Ollama
-    uses: swaleio/http-request@1-0-0
-    start_on:
-      - llm
-    args:
-      url: http://${{tasks.llm.ip-address}}:11434/api/tags
-      expected_status: "200"
-      retry: "30"
-      response_path: /mnt/workspace/ollama-tags.json
+blocks:
+  main:
+    tasks:
+      llm:
+        name: Ollama server
+        uses: swaleio/ollama-serve@1-0-0
+        # Pick a GPU compute type available to your project.
+        compute_type: gpu
+        terminate_on:
+          - generate
+        args:
+          model: llama3.2:3b
 
-  generate:
-    name: Generate
-    uses: swaleio/http-request@1-0-0
-    start_on:
-      - llm
-      - ready
-    args:
-      url: http://${{tasks.llm.ip-address}}:11434/api/generate
-      method: POST
-      headers: |
-        Content-Type: application/json
-      body: '{"model":"llama3.2:3b","prompt":"Why is the sky blue? Answer in one sentence.","stream":false}'
-      expected_status: "200"
-      response_path: /mnt/workspace/ollama-answer.json
+      ready:
+        name: Wait for Ollama
+        uses: swaleio/http-request@1-0-0
+        start_on:
+          - llm
+        args:
+          url: http://${{tasks.llm.ip-address}}:11434/api/tags
+          expected_status: "200"
+          retry: "30"
+          response_path: /mnt/workspace/ollama-tags.json
+
+      generate:
+        name: Generate
+        uses: swaleio/http-request@1-0-0
+        start_on:
+          - llm
+          - ready
+        args:
+          url: http://${{tasks.llm.ip-address}}:11434/api/generate
+          method: POST
+          headers: |
+            Content-Type: application/json
+          body: '{"model":"llama3.2:3b","prompt":"Why is the sky blue? Answer in one sentence.","stream":false}'
+          expected_status: "200"
+          response_path: /mnt/workspace/ollama-answer.json
 ```
 
 The runner is terminated once `generate` completes. The generated answer is

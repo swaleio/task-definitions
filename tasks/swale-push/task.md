@@ -64,16 +64,22 @@ secret so it never appears in the task's argv, pod spec, or run logs.
 ## Example
 
 ```yaml
-tasks:
-  publish:
-    name: Publish artifacts
-    uses: swaleio/swale-push@1-0-0
-    args:
-      project: acme/model-artifacts
-      account: acme
-      source: /mnt/workspace/outputs
-      message: Nightly build artifacts
-      token: ${{secrets.swale_token}}
+name: Swale push example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      publish:
+        name: Publish artifacts
+        uses: swaleio/swale-push@1-0-0
+        args:
+          project: acme/model-artifacts
+          account: acme
+          source: /mnt/workspace/outputs
+          message: Nightly build artifacts
+          token: ${{secrets.swale_token}}
 ```
 
 This pushes `/mnt/workspace/outputs` to the `acme/model-artifacts` repository,

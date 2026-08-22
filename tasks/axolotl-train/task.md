@@ -75,42 +75,48 @@ A self-contained QLoRA run: a `bash` task writes a minimal config to the
 shared workspace, then this task trains from it.
 
 ```yaml
-tasks:
-  write_config:
-    name: Write training config
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        cat > /mnt/workspace/axolotl.yaml <<'EOF'
-        base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
-        load_in_4bit: true
-        adapter: qlora
-        lora_r: 32
-        lora_alpha: 16
-        lora_dropout: 0.05
-        lora_target_linear: true
-        datasets:
-          - path: mhenrichsen/alpaca_2k_test
-            type: alpaca
-        output_dir: /mnt/workspace/lora-out
-        sequence_len: 2048
-        micro_batch_size: 2
-        gradient_accumulation_steps: 4
-        num_epochs: 1
-        optimizer: adamw_bnb_8bit
-        learning_rate: 0.0002
-        bf16: auto
-        gradient_checkpointing: true
-        EOF
-  train:
-    name: QLoRA fine-tune
-    uses: swaleio/axolotl-train@1-0-0
-    start_on:
-      - write_config
-    compute_type: gpu_a100   # any GPU compute type — see Compute above
-    args:
-      config: /mnt/workspace/axolotl.yaml
+name: Axolotl train example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      write_config:
+        name: Write training config
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            cat > /mnt/workspace/axolotl.yaml <<'EOF'
+            base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+            load_in_4bit: true
+            adapter: qlora
+            lora_r: 32
+            lora_alpha: 16
+            lora_dropout: 0.05
+            lora_target_linear: true
+            datasets:
+              - path: mhenrichsen/alpaca_2k_test
+                type: alpaca
+            output_dir: /mnt/workspace/lora-out
+            sequence_len: 2048
+            micro_batch_size: 2
+            gradient_accumulation_steps: 4
+            num_epochs: 1
+            optimizer: adamw_bnb_8bit
+            learning_rate: 0.0002
+            bf16: auto
+            gradient_checkpointing: true
+            EOF
+      train:
+        name: QLoRA fine-tune
+        uses: swaleio/axolotl-train@1-0-0
+        start_on:
+          - write_config
+        compute_type: gpu   # any GPU compute type — see Compute above
+        args:
+          config: /mnt/workspace/axolotl.yaml
 ```
 
 The trained adapter lands at `/mnt/workspace/lora-out` (the config's

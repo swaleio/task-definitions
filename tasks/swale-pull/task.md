@@ -74,17 +74,23 @@ distinct `dest` paths so they don't overwrite each other.
 ## Example
 
 ```yaml
-tasks:
-  fetch_data:
-    name: Fetch data
-    uses: swaleio/swale-pull@1-0-0
-    args:
-      project: acme/datasets
-      account: acme
-      ref: main
-      path: images/train
-      dest: /mnt/workspace/data
-      token: ${{secrets.swale_token}}
+name: Swale pull example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      fetch_data:
+        name: Fetch data
+        uses: swaleio/swale-pull@1-0-0
+        args:
+          project: acme/datasets
+          account: acme
+          ref: main
+          path: images/train
+          dest: /mnt/workspace/data
+          token: ${{secrets.swale_token}}
 ```
 
 Downstream tasks read the pulled files from `/mnt/workspace/data`.

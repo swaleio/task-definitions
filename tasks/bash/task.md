@@ -31,16 +31,22 @@ script is self-contained — it writes to a relative `out/` directory under the
 working directory rather than assuming any particular mount.
 
 ```yaml
-tasks:
-  build:
-    name: Build
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        mkdir -p out
-        echo "$(date -u) build ok" > out/build.log
-        cat out/build.log
+name: Bash example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      build:
+        name: Build
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            mkdir -p out
+            echo "$(date -u) build ok" > out/build.log
+            cat out/build.log
 ```
 
 ## Parameterizing

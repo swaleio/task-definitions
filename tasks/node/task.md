@@ -64,19 +64,25 @@ script is self-contained — it works in a relative `out/` directory under the
 working directory rather than assuming any particular mount.
 
 ```yaml
-tasks:
-  build:
-    name: Build web app
-    uses: swaleio/node@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        corepack enable
-        mkdir -p out
-        cd out
-        npm init -y
-        node -e "require('fs').writeFileSync('hello.txt', 'built with node ' + process.version)"
-        cat hello.txt
+name: Node example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      build:
+        name: Build web app
+        uses: swaleio/node@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            corepack enable
+            mkdir -p out
+            cd out
+            npm init -y
+            node -e "require('fs').writeFileSync('hello.txt', 'built with node ' + process.version)"
+            cat hello.txt
 ```
 
 ---

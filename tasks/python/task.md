@@ -66,20 +66,26 @@ program is self-contained — it writes to a relative `out/` directory under the
 working directory rather than assuming any particular mount.
 
 ```yaml
-tasks:
-  summarize:
-    name: Summarize
-    uses: swaleio/python@1-0-0
-    args:
-      script: |
-        from pathlib import Path
+name: Python example
+compute_type: cpu
+entry_point: main
 
-        out = Path("out")
-        out.mkdir(exist_ok=True)
-        rows = [f"row {i}" for i in range(100)]
-        (out / "data.txt").write_text("\n".join(rows))
+blocks:
+  main:
+    tasks:
+      summarize:
+        name: Summarize
+        uses: swaleio/python@1-0-0
+        args:
+          script: |
+            from pathlib import Path
 
-        print(f"wrote {len(rows)} rows")
+            out = Path("out")
+            out.mkdir(exist_ok=True)
+            rows = [f"row {i}" for i in range(100)]
+            (out / "data.txt").write_text("\n".join(rows))
+
+            print(f"wrote {len(rows)} rows")
 ```
 
 ---

@@ -66,50 +66,57 @@ Chains training and merging: the config written in the first task is the same
 one the merge reads, and `adapter_dir` is the config's `output_dir`.
 
 ```yaml
-tasks:
-  write_config:
-    name: Write training config
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        cat > /mnt/workspace/axolotl.yaml <<'EOF'
-        base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
-        load_in_4bit: true
-        adapter: qlora
-        lora_r: 32
-        lora_alpha: 16
-        lora_dropout: 0.05
-        lora_target_linear: true
-        datasets:
-          - path: mhenrichsen/alpaca_2k_test
-            type: alpaca
-        output_dir: /mnt/workspace/lora-out
-        sequence_len: 2048
-        micro_batch_size: 2
-        gradient_accumulation_steps: 4
-        num_epochs: 1
-        optimizer: adamw_bnb_8bit
-        learning_rate: 0.0002
-        bf16: auto
-        gradient_checkpointing: true
-        EOF
-  train:
-    name: QLoRA fine-tune
-    uses: swaleio/axolotl-train@1-0-0
-    start_on:
-      - write_config
-    compute_type: gpu_a100   # training needs a GPU compute type — see swaleio/axolotl-train
-    args:
-      config: /mnt/workspace/axolotl.yaml
-  merge:
-    name: Merge adapter
-    uses: swaleio/axolotl-merge-lora@1-0-0
-    start_on:
-      - train
-    args:
-      config: /mnt/workspace/axolotl.yaml
-      adapter_dir: /mnt/workspace/lora-out
+name: Axolotl merge LoRA example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      write_config:
+        name: Write training config
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            cat > /mnt/workspace/axolotl.yaml <<'EOF'
+            base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+            load_in_4bit: true
+            adapter: qlora
+            lora_r: 32
+            lora_alpha: 16
+            lora_dropout: 0.05
+            lora_target_linear: true
+            datasets:
+              - path: mhenrichsen/alpaca_2k_test
+                type: alpaca
+            output_dir: /mnt/workspace/lora-out
+            sequence_len: 2048
+            micro_batch_size: 2
+            gradient_accumulation_steps: 4
+            num_epochs: 1
+            optimizer: adamw_bnb_8bit
+            learning_rate: 0.0002
+            bf16: auto
+            gradient_checkpointing: true
+            EOF
+      train:
+        name: QLoRA fine-tune
+        uses: swaleio/axolotl-train@1-0-0
+        start_on:
+          - write_config
+        compute_type: gpu   # training needs a GPU compute type — see swaleio/axolotl-train
+        args:
+          config: /mnt/workspace/axolotl.yaml
+      merge:
+        name: Merge adapter
+        uses: swaleio/axolotl-merge-lora@1-0-0
+        compute_type: gpu   # any GPU compute type available to your project
+        start_on:
+          - train
+        args:
+          config: /mnt/workspace/axolotl.yaml
+          adapter_dir: /mnt/workspace/lora-out
 ```
 
 After the run, the merged model is at `/mnt/workspace/lora-out/merged`, ready

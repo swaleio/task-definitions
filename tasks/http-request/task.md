@@ -79,19 +79,25 @@ workspace, and to poll a not-yet-ready runner until it starts answering.
 ## Example
 
 ```yaml
-tasks:
-  submit:
-    name: Submit job
-    uses: swaleio/http-request@1-0-0
-    args:
-      url: https://api.example.com/v1/jobs
-      method: POST
-      headers: |
-        Authorization: Bearer ${{secrets.api_token}}
-        Content-Type: application/json
-      body: '{"name":"nightly","priority":"high"}'
-      expected_status: "201"
-      response_path: /mnt/workspace/job.json
+name: HTTP request example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      submit:
+        name: Submit job
+        uses: swaleio/http-request@1-0-0
+        args:
+          url: https://api.example.com/v1/jobs
+          method: POST
+          headers: |
+            Authorization: Bearer ${{secrets.api_token}}
+            Content-Type: application/json
+          body: '{"name":"nightly","priority":"high"}'
+          expected_status: "201"
+          response_path: /mnt/workspace/job.json
 ```
 
 The response body is available to later tasks at

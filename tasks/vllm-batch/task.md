@@ -85,36 +85,42 @@ the Hugging Face stack treats as no token).
 ## Example
 
 ```yaml
-tasks:
-  weights:
-    name: Fetch weights
-    uses: swaleio/hf-download@1-0-0
-    args:
-      repo: Qwen/Qwen2.5-7B-Instruct
-      include: "*.safetensors,*.json,tokenizer.*"
-      dest: /mnt/workspace/qwen
-  requests:
-    name: Write batch requests
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        set -euo pipefail
-        mkdir -p /mnt/workspace/batch
-        cat > /mnt/workspace/batch/requests.jsonl <<'EOF'
-        {"custom_id":"req-1","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/qwen","messages":[{"role":"user","content":"Summarize what vLLM does in one sentence."}]}}
-        {"custom_id":"req-2","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/qwen","messages":[{"role":"user","content":"Name three uses of batch inference."}]}}
-        EOF
-  batch:
-    name: Batch inference
-    uses: swaleio/vllm-batch@1-0-0
-    start_on:
-      - weights
-      - requests
-    compute_type: a100-80gb   # any GPU compute type whose VRAM fits the model
-    args:
-      model: ${{tasks.weights.outputs.path}}
-      input_file: /mnt/workspace/batch/requests.jsonl
-      output_file: /mnt/workspace/batch/results.jsonl
+name: vLLM batch inference example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      weights:
+        name: Fetch weights
+        uses: swaleio/hf-download@1-0-0
+        args:
+          repo: Qwen/Qwen2.5-7B-Instruct
+          include: "*.safetensors,*.json,tokenizer.*"
+          dest: /mnt/workspace/qwen
+      requests:
+        name: Write batch requests
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            set -euo pipefail
+            mkdir -p /mnt/workspace/batch
+            cat > /mnt/workspace/batch/requests.jsonl <<'EOF'
+            {"custom_id":"req-1","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/qwen","messages":[{"role":"user","content":"Summarize what vLLM does in one sentence."}]}}
+            {"custom_id":"req-2","method":"POST","url":"/v1/chat/completions","body":{"model":"/mnt/workspace/qwen","messages":[{"role":"user","content":"Name three uses of batch inference."}]}}
+            EOF
+      batch:
+        name: Batch inference
+        uses: swaleio/vllm-batch@1-0-0
+        start_on:
+          - weights
+          - requests
+        compute_type: gpu   # any GPU compute type whose VRAM fits the model
+        args:
+          model: ${{tasks.weights.outputs.path}}
+          input_file: /mnt/workspace/batch/requests.jsonl
+          output_file: /mnt/workspace/batch/results.jsonl
 ```
 
 Each request's `body.model` matches the engine's `model` value — here the local

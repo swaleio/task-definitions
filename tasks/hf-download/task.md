@@ -82,15 +82,21 @@ with the task's own scratch capacity.
 ## Example
 
 ```yaml
-tasks:
-  weights:
-    name: Fetch weights
-    uses: swaleio/hf-download@1-0-0
-    args:
-      repo: meta-llama/Llama-3.1-8B-Instruct
-      include: "*.safetensors,*.json,tokenizer.*"
-      dest: /mnt/workspace/llama
-      token: ${{secrets.hf_token}}
+name: Hugging Face download example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      weights:
+        name: Fetch weights
+        uses: swaleio/hf-download@1-0-0
+        args:
+          repo: meta-llama/Llama-3.1-8B-Instruct
+          include: "*.safetensors,*.json,tokenizer.*"
+          dest: /mnt/workspace/llama
+          token: ${{secrets.hf_token}}
 ```
 
 Downstream tasks read the files at `/mnt/workspace/llama`, or reference the

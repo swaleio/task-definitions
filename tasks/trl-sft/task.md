@@ -57,34 +57,41 @@ A `bash` task writes the config onto the shared workspace, then `trl-sft`
 consumes it. A tiny model and public dataset keep the run small:
 
 ```yaml
-tasks:
-  write_config:
-    name: Write config
-    uses: swaleio/bash@1-0-0
-    args:
-      script: |
-        cat > /mnt/workspace/sft.yaml <<'EOF'
-        model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
-        dataset_name: trl-lib/Capybara
-        learning_rate: 2.0e-5
-        num_train_epochs: 1
-        per_device_train_batch_size: 2
-        gradient_accumulation_steps: 8
-        bf16: true
-        use_peft: true
-        lora_r: 16
-        lora_alpha: 32
-        report_to: none
-        output_dir: /mnt/workspace/sft-out
-        EOF
-  train:
-    name: Train
-    uses: swaleio/trl-sft@1-0-0
-    start_on:
-      - write_config
-    args:
-      config: /mnt/workspace/sft.yaml
-      token: ${{secrets.hf_token}}
+name: TRL SFT example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      write_config:
+        name: Write config
+        uses: swaleio/bash@1-0-0
+        args:
+          script: |
+            cat > /mnt/workspace/sft.yaml <<'EOF'
+            model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+            dataset_name: trl-lib/Capybara
+            learning_rate: 2.0e-5
+            num_train_epochs: 1
+            per_device_train_batch_size: 2
+            gradient_accumulation_steps: 8
+            bf16: true
+            use_peft: true
+            lora_r: 16
+            lora_alpha: 32
+            report_to: none
+            output_dir: /mnt/workspace/sft-out
+            EOF
+      train:
+        name: Train
+        uses: swaleio/trl-sft@1-0-0
+        compute_type: gpu   # any GPU compute type available to your project
+        start_on:
+          - write_config
+        args:
+          config: /mnt/workspace/sft.yaml
+          token: ${{secrets.hf_token}}
 ```
 
 Downstream tasks read the fine-tuned adapter/model at `/mnt/workspace/sft-out`

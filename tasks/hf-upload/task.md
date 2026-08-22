@@ -54,15 +54,21 @@ destination folder within the repository (root by default).
 ## Example
 
 ```yaml
-tasks:
-  publish:
-    name: Publish model
-    uses: swaleio/hf-upload@1-0-0
-    args:
-      repo: acme/text-classifier
-      repo_type: model
-      source: /mnt/workspace/artifacts/model
-      token: ${{secrets.hf_token}}
+name: HF upload example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      publish:
+        name: Publish model
+        uses: swaleio/hf-upload@1-0-0
+        args:
+          repo: acme/text-classifier
+          repo_type: model
+          source: /mnt/workspace/artifacts/model
+          token: ${{secrets.hf_token}}
 ```
 
 Uploads everything under `/mnt/workspace/artifacts/model` to the `acme/text-classifier`

@@ -100,17 +100,23 @@ keys.
 Download an S3 prefix into the workspace so later tasks can process it:
 
 ```yaml
-tasks:
-  fetch_dataset:
-    name: Fetch dataset
-    uses: swaleio/rclone-copy@1-0-0
-    args:
-      remote_type: s3
-      source: remote:my-bucket/datasets/train
-      dest: /mnt/workspace/data
-      access_key_id: ${{secrets.aws_access_key_id}}
-      secret_access_key: ${{secrets.aws_secret_access_key}}
-      flags: "--s3-region eu-west-1 --transfers 8"
+name: Rclone copy example
+compute_type: cpu
+entry_point: main
+
+blocks:
+  main:
+    tasks:
+      fetch_dataset:
+        name: Fetch dataset
+        uses: swaleio/rclone-copy@1-0-0
+        args:
+          remote_type: s3
+          source: remote:my-bucket/datasets/train
+          dest: /mnt/workspace/data
+          access_key_id: ${{secrets.aws_access_key_id}}
+          secret_access_key: ${{secrets.aws_secret_access_key}}
+          flags: "--s3-region eu-west-1 --transfers 8"
 ```
 
 To upload instead, swap `source` and `dest` — e.g. `source: /mnt/workspace/out`

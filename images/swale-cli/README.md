@@ -38,3 +38,9 @@ Runs under the standard container contract: non-root, no command/working-dir/env
 override from the definition, shared `/mnt/workspace` (`$WORKFLOW_STORAGE`), and
 outputs emitted by appending `key=value` to `$WORKFLOW_TASK_OUTPUT`. Every task
 input arrives as an `INPUT_<NAME>` environment variable.
+
+---
+
+Built from [`images/swale-cli`](https://github.com/swaleio/task-definitions/tree/main/images/swale-cli) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository, and licensed under the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

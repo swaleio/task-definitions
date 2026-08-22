@@ -48,3 +48,9 @@ Appended to `$WORKFLOW_TASK_OUTPUT` as `key=value` lines:
   into a task failure.
 - Runs as a non-root user (uid 1000) with `WORKDIR /mnt/workspace`, per the Swale
   container contract.
+
+---
+
+Built from [`images/curl-jq`](https://github.com/swaleio/task-definitions/tree/main/images/curl-jq) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository, and licensed under the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

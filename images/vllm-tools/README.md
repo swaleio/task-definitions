@@ -40,9 +40,17 @@ provides a default shm size; single-GPU workloads run fine with it.
 
 ## Building
 
+From the repository root:
+
 ```sh
 docker build -t docker.io/swaleio/vllm-tools:1-0-0 images/vllm-tools
 ```
 
 CI pins the real base digest and publishes the image; task definitions
 reference it as `docker.io/swaleio/vllm-tools@sha256:<digest>`.
+
+---
+
+Built from [`images/vllm-tools`](https://github.com/swaleio/task-definitions/tree/main/images/vllm-tools) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository, and licensed under the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

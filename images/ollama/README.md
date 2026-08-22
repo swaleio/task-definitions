@@ -56,9 +56,17 @@ two tasks writing the same store path must not overlap.
 
 ## Building
 
+From the repository root:
+
 ```sh
 docker build -t docker.io/swaleio/ollama:1-0-0 images/ollama
 ```
 
 CI pins the base digest, publishes the image, and task definitions reference it
 as `docker.io/swaleio/ollama@sha256:<digest>`.
+
+---
+
+Built from [`images/ollama`](https://github.com/swaleio/task-definitions/tree/main/images/ollama) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository, and licensed under the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

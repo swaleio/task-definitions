@@ -53,7 +53,7 @@ Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
 this generic `python` task declares none, so emitting a key here would fail the
 task — exchange results through files instead: write to the working directory,
-or to a shared mount such as `/mnt/workspace` when a later task must read them).
+or to the shared workspace (`$WORKFLOW_STORAGE` in the container) when a later task must read them).
 
 ## Compute
 

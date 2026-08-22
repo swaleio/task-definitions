@@ -75,7 +75,7 @@ blocks:
 ```
 
 The example scaffolds and packages into a relative `out/` directory; point Maven
-at a shared mount such as `/mnt/workspace` instead when a downstream task must
+at the shared workspace (`$WORKFLOW_STORAGE` in the container) instead when a downstream task must
 consume the produced artifacts.
 
 ## Emitting outputs

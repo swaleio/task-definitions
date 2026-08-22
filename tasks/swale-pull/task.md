@@ -15,7 +15,7 @@ inputs:
     description: Restrict the pull to this subpath within the project. Empty pulls the whole project.
     default: ""
   dest:
-    description: Absolute path inside the container. Point it at the mounted workspace (e.g. /mnt/workspace/repo) to share the result with later tasks, or any other container-local path.
+    description: Absolute path inside the container. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/repo) to share the result with later tasks, or any other container-local path.
     required: true
   token:
     description: Swale access token for authentication (pass a secret). Read from the INPUT_TOKEN environment variable and exported to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
@@ -39,7 +39,7 @@ exec:
 
 Pulls the content of a Swale `project` into the `dest` path you supply, using the
 Swale client CLI (`swale-cli`). Point `dest` at the mounted workspace (e.g.
-`/mnt/workspace/repo`) so later tasks in the run can read it from the shared
+`${{env.WORKFLOW_STORAGE}}/repo`) so later tasks in the run can read it from the shared
 workspace, or at any other container-local path. Restrict the pull to a single
 `ref` and/or `path` when you only need part of a project.
 
@@ -61,7 +61,7 @@ never appears in the container's argv or run logs.
 | `account` | yes | — | Swale account name; injected as `INPUT_ACCOUNT` → `SWALE_ACCOUNT_NAME`. |
 | `ref` | no | default ref | Branch, tag, or commit to pull. |
 | `path` | no | whole project | Subpath within the project to pull. |
-| `dest` | yes | — | Absolute container path to write into (e.g. `/mnt/workspace/repo`). |
+| `dest` | yes | — | Absolute container path to write into (e.g. `${{env.WORKFLOW_STORAGE}}/repo`). |
 | `token` | yes | — | Swale access token (pass a secret); injected as `INPUT_TOKEN` → `SWALE_ACCOUNT_TOKEN`. |
 
 Because the workspace is shared across concurrent tasks, give parallel pulls
@@ -89,11 +89,11 @@ blocks:
           account: acme
           ref: main
           path: images/train
-          dest: /mnt/workspace/data
+          dest: ${{env.WORKFLOW_STORAGE}}/data
           token: ${{secrets.swale_token}}
 ```
 
-Downstream tasks read the pulled files from `/mnt/workspace/data`.
+Downstream tasks read the pulled files from `${{env.WORKFLOW_STORAGE}}/data`.
 
 ---
 

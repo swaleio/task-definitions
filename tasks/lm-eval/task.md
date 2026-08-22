@@ -9,7 +9,7 @@ inputs:
     description: Comma-separated lm-eval task names to run, e.g. "mmlu,gsm8k". The list is passed as a single value, so commas are safe.
     required: true
   output_path:
-    description: Absolute path inside the container under which lm-eval writes its results JSON. Point it at the mounted workspace (e.g. /mnt/workspace/eval) to share the results with later tasks, or any other container-local path.
+    description: Absolute path inside the container under which lm-eval writes its results JSON. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/eval) to share the results with later tasks, or any other container-local path.
     required: true
   token:
     description: Hugging Face access token for gated or private models (pass a secret). Omit for public models and local model directories.
@@ -49,7 +49,7 @@ datasets are downloaded from the Hub at run time.
 |-------|----------|---------|-------------|
 | `model_dir` | yes | — | Full path of a local model directory (e.g. from `hf-download`), or a Hugging Face repo id. |
 | `tasks` | yes | — | Comma-separated lm-eval task names, e.g. `mmlu,gsm8k` — passed as one value, no word-splitting. |
-| `output_path` | yes | — | Absolute path the results are written under. Point it at the mounted workspace (e.g. `/mnt/workspace/eval`) to share them with later tasks. |
+| `output_path` | yes | — | Absolute path the results are written under. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/eval`) to share them with later tasks. |
 | `token` | no | — | HF access token for gated/private models (pass a secret). |
 
 ## Outputs
@@ -98,7 +98,7 @@ blocks:
         args:
           repo: Qwen/Qwen2.5-7B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
-          dest: /mnt/workspace/qwen
+          dest: ${{env.WORKFLOW_STORAGE}}/qwen
       eval:
         name: Evaluate
         uses: swaleio/lm-eval@1-0-0
@@ -108,11 +108,11 @@ blocks:
         args:
           model_dir: ${{tasks.weights.outputs.path}}
           tasks: "mmlu,gsm8k"
-          output_path: /mnt/workspace/eval
+          output_path: ${{env.WORKFLOW_STORAGE}}/eval
 ```
 
 The harness evaluates the downloaded checkpoint without re-fetching it and
-writes the results JSON under `/mnt/workspace/eval`, where a later task can
+writes the results JSON under `${{env.WORKFLOW_STORAGE}}/eval`, where a later task can
 read it — for example to gate a deployment on a minimum benchmark score.
 
 ---

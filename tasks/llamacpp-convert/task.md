@@ -3,10 +3,10 @@ name: llama.cpp convert
 description: Converts a Hugging Face model directory into a single GGUF file with llama.cpp.
 inputs:
   model_dir:
-    description: Absolute path inside the container of the Hugging Face format model directory to convert. Point it at the mounted workspace (e.g. /mnt/workspace/model-hf) where an earlier task placed the model, or any other container-local path.
+    description: Absolute path inside the container of the Hugging Face format model directory to convert. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/model-hf) where an earlier task placed the model, or any other container-local path.
     required: true
   outfile:
-    description: Absolute path inside the container for the converted .gguf file. Point it at the mounted workspace (e.g. /mnt/workspace/model-f16.gguf) to share it with later tasks, or any other container-local path.
+    description: Absolute path inside the container for the converted .gguf file. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/model-f16.gguf) to share it with later tasks, or any other container-local path.
     required: true
   outtype:
     description: "GGUF tensor type to write: f16, bf16, or q8_0. Defaults to auto, which writes the checkpoint's own 16-bit float type — bf16 for a bf16 model, f16 otherwise."
@@ -43,8 +43,8 @@ the same path to the next task.
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `model_dir` | yes | — | Absolute path of the Hugging Face format model directory to convert. Point it at the mounted workspace (e.g. `/mnt/workspace/model-hf`) where an earlier task placed the model, or any other container-local path. |
-| `outfile` | yes | — | Absolute path for the converted `.gguf` file. Point it at the mounted workspace (e.g. `/mnt/workspace/model-f16.gguf`) to share it with later tasks, or any other container-local path. |
+| `model_dir` | yes | — | Absolute path of the Hugging Face format model directory to convert. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/model-hf`) where an earlier task placed the model, or any other container-local path. |
+| `outfile` | yes | — | Absolute path for the converted `.gguf` file. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/model-f16.gguf`) to share it with later tasks, or any other container-local path. |
 | `outtype` | no | `auto` | GGUF tensor type: `f16`, `bf16`, or `q8_0`. The default `auto` matches the checkpoint — `bf16` for a bf16 model, `f16` otherwise. |
 
 `model_dir` and `outfile` are required — they are the paths you choose and the
@@ -84,27 +84,27 @@ blocks:
         args:
           repo: Qwen/Qwen2.5-1.5B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
-          dest: /mnt/workspace/qwen-hf
+          dest: ${{env.WORKFLOW_STORAGE}}/qwen-hf
       convert:
         name: Convert to GGUF
         uses: swaleio/llamacpp-convert@1-0-0
         start_on:
           - weights
         args:
-          model_dir: /mnt/workspace/qwen-hf
-          outfile: /mnt/workspace/qwen-16bit.gguf
+          model_dir: ${{env.WORKFLOW_STORAGE}}/qwen-hf
+          outfile: ${{env.WORKFLOW_STORAGE}}/qwen-16bit.gguf
       quantize:
         name: Quantize
         uses: swaleio/llamacpp-quantize@1-0-0
         start_on:
           - convert
         args:
-          input_gguf: /mnt/workspace/qwen-16bit.gguf
-          output_gguf: /mnt/workspace/qwen-q4_k_m.gguf
+          input_gguf: ${{env.WORKFLOW_STORAGE}}/qwen-16bit.gguf
+          output_gguf: ${{env.WORKFLOW_STORAGE}}/qwen-q4_k_m.gguf
           preset: Q4_K_M
 ```
 
-Downstream tasks read the quantized model at `/mnt/workspace/qwen-q4_k_m.gguf`
+Downstream tasks read the quantized model at `${{env.WORKFLOW_STORAGE}}/qwen-q4_k_m.gguf`
 — the path the workflow supplied, so no output lookup is needed.
 
 ---

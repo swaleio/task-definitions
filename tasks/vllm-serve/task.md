@@ -41,7 +41,7 @@ starts this task without wiring `terminate_on` never finishes.
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `model` | yes | — | Hub repo id (e.g. `meta-llama/Llama-3.1-8B-Instruct`) or a full local model directory path (e.g. `/mnt/workspace/llama` from `swaleio/hf-download`). A local path skips the Hub download. |
+| `model` | yes | — | Hub repo id (e.g. `meta-llama/Llama-3.1-8B-Instruct`) or a full local model directory path (e.g. `${{env.WORKFLOW_STORAGE}}/llama` from `swaleio/hf-download`). A local path skips the Hub download. |
 | `port` | no | `8000` | Port the server listens on. Consumers combine it with the runner's ip-address, so every consumer URL must use the same port. |
 | `token` | no | — | HF access token for gated/private Hub models (pass a secret); delivered to the server as `HF_TOKEN` via the definition's `exec.env`. Unneeded for public models or local directories. |
 
@@ -107,7 +107,7 @@ blocks:
         args:
           repo: meta-llama/Llama-3.1-8B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
-          dest: /mnt/workspace/llama
+          dest: ${{env.WORKFLOW_STORAGE}}/llama
           token: ${{secrets.hf_token}}
 
       serve:
@@ -136,15 +136,15 @@ blocks:
           method: POST
           headers: |
             Content-Type: application/json
-          body: '{"model":"/mnt/workspace/llama","messages":[{"role":"user","content":"Say hello."}]}'
+          body: '{"model":"${{env.WORKFLOW_STORAGE}}/llama","messages":[{"role":"user","content":"Say hello."}]}'
           expected_status: "200"
-          response_path: /mnt/workspace/completion.json
+          response_path: ${{env.WORKFLOW_STORAGE}}/completion.json
 ```
 
 The `serve` runner's `terminate_on: [generate]` ends the server — and with it
 the workflow — once `generate` completes.
 
-Later tasks read the completion at `/mnt/workspace/completion.json` (or via
+Later tasks read the completion at `${{env.WORKFLOW_STORAGE}}/completion.json` (or via
 `${{tasks.generate.outputs.body_file}}`).
 
 ---

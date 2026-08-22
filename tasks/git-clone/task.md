@@ -9,7 +9,7 @@ inputs:
     description: Branch, tag, or commit to check out. Defaults to the repository's default branch.
     default: ""
   dest:
-    description: Absolute path inside the container. Point it at the mounted workspace (e.g. /mnt/workspace/repo) to share the result with later tasks, or any other container-local path.
+    description: Absolute path inside the container. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/repo) to share the result with later tasks, or any other container-local path.
     required: true
   git_token:
     description: Token for private-repository HTTPS auth (pass a secret). Omit for public repos.
@@ -38,7 +38,7 @@ the resolved `commit_sha` for downstream tasks.
 |-------|----------|---------|-------------|
 | `repository_url` | yes | — | HTTPS URL of the repository. |
 | `revision` | no | default branch | Branch, tag, or commit to check out. |
-| `dest` | yes | — | Absolute clone path inside the container. Point it at the mounted workspace (e.g. `/mnt/workspace/repo`) to share the clone with later tasks, or any other container-local path. |
+| `dest` | yes | — | Absolute clone path inside the container. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/repo`) to share the clone with later tasks, or any other container-local path. |
 | `git_token` | no | — | Token for private repos (pass a project/account secret). |
 
 ## Outputs
@@ -66,11 +66,11 @@ blocks:
         uses: swaleio/git-clone@1-0-0
         args:
           repository_url: https://github.com/acme/app.git
-          dest: /mnt/workspace/repo
+          dest: ${{env.WORKFLOW_STORAGE}}/repo
           git_token: ${{secrets.github_token}}
 ```
 
-Downstream tasks read the cloned files at `/mnt/workspace/repo` and the commit
+Downstream tasks read the cloned files at `${{env.WORKFLOW_STORAGE}}/repo` and the commit
 via `${{tasks.checkout.outputs.commit_sha}}`.
 
 ---

@@ -9,7 +9,7 @@ inputs:
     description: Swale account name for authentication. Read from the INPUT_ACCOUNT environment variable and exported to the CLI as SWALE_ACCOUNT_NAME.
     required: true
   source:
-    description: Absolute path inside the container. Point it at the mounted workspace (e.g. /mnt/workspace/outputs) to publish a result an earlier task wrote there, or any other container-local path.
+    description: Absolute path inside the container. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/outputs) to publish a result an earlier task wrote there, or any other container-local path.
     required: true
   message:
     description: Message recorded with the push.
@@ -35,7 +35,7 @@ exec:
 
 Pushes the contents of the `source` path you supply to the Swale repository named
 by `project`, recording an optional `message`. Point `source` at the mounted
-workspace (e.g. `/mnt/workspace/outputs`) to publish artifacts an earlier task
+workspace (e.g. `${{env.WORKFLOW_STORAGE}}/outputs`) to publish artifacts an earlier task
 wrote there, or at any other container-local path. This is how a run publishes
 its artifacts back to Swale once the work is done.
 
@@ -50,7 +50,7 @@ secret so it never appears in the task's argv, pod spec, or run logs.
 |-------|----------|---------|-------------|
 | `project` | yes | — | Target Swale repository (project) to push to. |
 | `account` | yes | — | Swale account name; injected as `INPUT_ACCOUNT` → `SWALE_ACCOUNT_NAME`. |
-| `source` | yes | — | Absolute container path to push (e.g. `/mnt/workspace/outputs`). |
+| `source` | yes | — | Absolute container path to push (e.g. `${{env.WORKFLOW_STORAGE}}/outputs`). |
 | `message` | no | `""` | Message recorded with the push. |
 | `token` | yes | — | Swale access token (pass a secret); injected as `INPUT_TOKEN` → `SWALE_ACCOUNT_TOKEN`. |
 
@@ -77,12 +77,12 @@ blocks:
         args:
           project: acme/model-artifacts
           account: acme
-          source: /mnt/workspace/outputs
+          source: ${{env.WORKFLOW_STORAGE}}/outputs
           message: Nightly build artifacts
           token: ${{secrets.swale_token}}
 ```
 
-This pushes `/mnt/workspace/outputs` to the `acme/model-artifacts` repository,
+This pushes `${{env.WORKFLOW_STORAGE}}/outputs` to the `acme/model-artifacts` repository,
 authenticating with the `acme` account and the `swale_token` secret.
 
 ---

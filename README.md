@@ -27,7 +27,7 @@ blocks:
         uses: swaleio/git-clone@1-0-0
         args:
           repository_url: https://github.com/acme/app.git
-          dest: /mnt/workspace/repo
+          dest: ${{env.WORKFLOW_STORAGE}}/repo
 ```
 
 `name`, `compute_type`, `entry_point` and `blocks` are all required; tasks live

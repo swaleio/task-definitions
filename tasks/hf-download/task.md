@@ -18,7 +18,7 @@ inputs:
     description: Directory for the Hub download cache. Point it at the workspace to reuse blobs across tasks in the run; defaults to the per-task home directory, which is discarded with the task.
     default: ""
   dest:
-    description: Absolute path inside the container. Point it at the mounted workspace (e.g. /mnt/workspace/llama) to share the result with later tasks, or any other container-local path.
+    description: Absolute path inside the container. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/llama) to share the result with later tasks, or any other container-local path.
     required: true
   token:
     description: Hugging Face access token for gated or private repos (pass a secret). Omit for public repos.
@@ -65,15 +65,15 @@ with the task's own scratch capacity.
 | `repo_type` | no | `model` | Repository type: `model`, `dataset`, or `space`. |
 | `revision` | no | main revision | Branch, tag, or commit to download. |
 | `include` | no | everything | Comma-separated glob patterns (e.g. `*.safetensors,*.json`). |
-| `cache_dir` | no | per-task home | Where the Hub cache lives. A workspace path (e.g. `/mnt/workspace/hf-cache`) survives the task and is reused by later downloads. |
-| `dest` | yes | — | Absolute path to the download directory inside the container (e.g. `/mnt/workspace/llama` to share it with later tasks). |
+| `cache_dir` | no | per-task home | Where the Hub cache lives. A workspace path (e.g. `${{env.WORKFLOW_STORAGE}}/hf-cache`) survives the task and is reused by later downloads. |
+| `dest` | yes | — | Absolute path to the download directory inside the container (e.g. `${{env.WORKFLOW_STORAGE}}/llama` to share it with later tasks). |
 | `token` | no | — | HF access token for gated/private repos (pass a secret). |
 
 ## Outputs
 
 | Output | Description |
 |--------|-------------|
-| `path` | The local directory the content was downloaded to — the `dest` you passed (e.g. `/mnt/workspace/llama`). |
+| `path` | The local directory the content was downloaded to — the `dest` you passed (e.g. `${{env.WORKFLOW_STORAGE}}/llama`). |
 
 ## Compute
 
@@ -95,11 +95,11 @@ blocks:
         args:
           repo: meta-llama/Llama-3.1-8B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
-          dest: /mnt/workspace/llama
+          dest: ${{env.WORKFLOW_STORAGE}}/llama
           token: ${{secrets.hf_token}}
 ```
 
-Downstream tasks read the files at `/mnt/workspace/llama`, or reference the
+Downstream tasks read the files at `${{env.WORKFLOW_STORAGE}}/llama`, or reference the
 resolved location via `${{tasks.weights.outputs.path}}`.
 
 ---

@@ -3,7 +3,7 @@ name: TRL SFT
 description: Fine-tunes a causal language model with TRL supervised fine-tuning from a config file.
 inputs:
   config:
-    description: Absolute path inside the container to the TRL SFT YAML config. Point it at the mounted workspace (e.g. /mnt/workspace/sft.yaml) so an earlier task can write it there, or any other container-local path.
+    description: Absolute path inside the container to the TRL SFT YAML config. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/sft.yaml) so an earlier task can write it there, or any other container-local path.
     required: true
   token:
     description: Hugging Face access token for gated or private models and datasets (pass a secret). Delivered as HF_TOKEN via the definition's exec.env; omit for public repos.
@@ -31,14 +31,14 @@ settings, precision, batch sizes, and where the result lands.
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `config` | yes | — | Absolute path to the TRL SFT YAML config inside the container. Point it at the mounted workspace (e.g. `/mnt/workspace/sft.yaml`) so an earlier task can write it there. |
+| `config` | yes | — | Absolute path to the TRL SFT YAML config inside the container. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/sft.yaml`) so an earlier task can write it there. |
 | `token` | no | — | HF access token for gated/private models and datasets (pass a secret). Delivered to the trainer as `HF_TOKEN` via the definition's `exec.env` (an omitted token resolves to an empty value, which the Hugging Face stack treats as no token); it is never placed on the command line. |
 
 ## Where the model lands
 
 This task declares **no outputs** — the fine-tuned model is written to the
 config's `output_dir`, wherever that points. Set `output_dir` to a path on the
-mounted workspace that you choose (e.g. `/mnt/workspace/sft-out`) so later
+mounted workspace that you choose (e.g. `${{env.WORKFLOW_STORAGE}}/sft-out`) so later
 tasks — evaluation, publishing, serving — can read the checkpoint directly from
 that path. To publish the checkpoint, use `swaleio/swale-push` (the
 platform's own store) or `swaleio/hf-upload` for the Hugging Face Hub.
@@ -69,7 +69,7 @@ blocks:
         uses: swaleio/bash@1-0-0
         args:
           script: |
-            cat > /mnt/workspace/sft.yaml <<'EOF'
+            cat > ${{env.WORKFLOW_STORAGE}}/sft.yaml <<'EOF'
             model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
             dataset_name: trl-lib/Capybara
             learning_rate: 2.0e-5
@@ -81,7 +81,7 @@ blocks:
             lora_r: 16
             lora_alpha: 32
             report_to: none
-            output_dir: /mnt/workspace/sft-out
+            output_dir: ${{env.WORKFLOW_STORAGE}}/sft-out
             EOF
       train:
         name: Train
@@ -90,11 +90,11 @@ blocks:
         start_on:
           - write_config
         args:
-          config: /mnt/workspace/sft.yaml
+          config: ${{env.WORKFLOW_STORAGE}}/sft.yaml
           token: ${{secrets.hf_token}}
 ```
 
-Downstream tasks read the fine-tuned adapter/model at `/mnt/workspace/sft-out`
+Downstream tasks read the fine-tuned adapter/model at `${{env.WORKFLOW_STORAGE}}/sft-out`
 — the `output_dir` the config chose.
 
 ---

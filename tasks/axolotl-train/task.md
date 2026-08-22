@@ -3,7 +3,7 @@ name: Axolotl train
 description: Fine-tunes a model with Axolotl (full, LoRA, or QLoRA) from a caller-supplied config YAML.
 inputs:
   config:
-    description: Absolute path inside the container to the Axolotl config YAML. Point it at the mounted workspace (e.g. /mnt/workspace/axolotl.yaml) so an earlier task can write it there, or any other container-local path.
+    description: Absolute path inside the container to the Axolotl config YAML. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/axolotl.yaml) so an earlier task can write it there, or any other container-local path.
     required: true
   token:
     description: Hugging Face access token for gated or private base models (pass a secret). Omit for public base models or local model directories.
@@ -31,7 +31,7 @@ single required input.
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `config` | yes | — | Absolute path to the Axolotl config YAML inside the container. Point it at the mounted workspace (e.g. `/mnt/workspace/axolotl.yaml`) so an earlier task can write it there, or any other container-local path. |
+| `config` | yes | — | Absolute path to the Axolotl config YAML inside the container. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/axolotl.yaml`) so an earlier task can write it there, or any other container-local path. |
 | `token` | no | — | HF access token for gated/private base models (pass a secret); delivered to the container as `HF_TOKEN` via the definition's `exec.env`. Unneeded for public base models or local model directories. |
 
 ## Training artifacts
@@ -40,7 +40,7 @@ This task declares no outputs — the vendor image has no wrapper to emit them.
 Everything the run produces (adapter weights or full checkpoints, tokenizer
 files, training logs) is written to the config's `output_dir`. Point
 `output_dir` at a path a later task can consume — e.g.
-`/mnt/workspace/lora-out` on the shared workspace — so downstream tasks such
+`${{env.WORKFLOW_STORAGE}}/lora-out` on the shared workspace — so downstream tasks such
 as `swaleio/axolotl-merge-lora` or a publish task — `swaleio/swale-push`
 (the platform's own store) or `swaleio/hf-upload` — can pick the artifacts up
 from there.
@@ -88,7 +88,7 @@ blocks:
         args:
           script: |
             set -euo pipefail
-            cat > /mnt/workspace/axolotl.yaml <<'EOF'
+            cat > ${{env.WORKFLOW_STORAGE}}/axolotl.yaml <<'EOF'
             base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
             load_in_4bit: true
             adapter: qlora
@@ -99,7 +99,7 @@ blocks:
             datasets:
               - path: mhenrichsen/alpaca_2k_test
                 type: alpaca
-            output_dir: /mnt/workspace/lora-out
+            output_dir: ${{env.WORKFLOW_STORAGE}}/lora-out
             sequence_len: 2048
             micro_batch_size: 2
             gradient_accumulation_steps: 4
@@ -116,10 +116,10 @@ blocks:
           - write_config
         compute_type: gpu   # any GPU compute type — see Compute above
         args:
-          config: /mnt/workspace/axolotl.yaml
+          config: ${{env.WORKFLOW_STORAGE}}/axolotl.yaml
 ```
 
-The trained adapter lands at `/mnt/workspace/lora-out` (the config's
+The trained adapter lands at `${{env.WORKFLOW_STORAGE}}/lora-out` (the config's
 `output_dir`), ready for `swaleio/axolotl-merge-lora`, `swaleio/swale-push`,
 or `swaleio/hf-upload`.
 

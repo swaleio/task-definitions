@@ -75,7 +75,7 @@ blocks:
     tasks:
       summarize:
         name: Summarize
-        uses: swaleio/python@1-0-0
+        uses: swaleio/python@1.0.0
         args:
           script: |
             from pathlib import Path

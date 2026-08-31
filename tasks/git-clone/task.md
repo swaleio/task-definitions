@@ -63,7 +63,7 @@ blocks:
     tasks:
       checkout:
         name: Checkout
-        uses: swaleio/git-clone@1-0-0
+        uses: swaleio/git-clone@1.0.0
         args:
           repository_url: https://github.com/acme/app.git
           dest: ${{env.WORKFLOW_STORAGE}}/repo

@@ -63,7 +63,7 @@ blocks:
     tasks:
       publish:
         name: Publish model
-        uses: swaleio/hf-upload@1-0-0
+        uses: swaleio/hf-upload@1.0.0
         args:
           repo: acme/text-classifier
           repo_type: model

@@ -68,7 +68,7 @@ blocks:
     tasks:
       gpu_check:
         name: GPU check
-        uses: swaleio/gpu-smoke-test@1-0-0
+        uses: swaleio/gpu-smoke-test@1.0.0
 ```
 
 Downstream tasks read the probed hardware via

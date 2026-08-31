@@ -53,7 +53,7 @@ blocks:
     tasks:
       classify:
         name: Classify
-        uses: swaleio/transformers@1-0-0
+        uses: swaleio/transformers@1.0.0
         args:
           script: |
             import torch
@@ -103,13 +103,13 @@ blocks:
     tasks:
       publish_token:
         name: Publish HF token
-        uses: swaleio/bash@1-0-0
+        uses: swaleio/bash@1.0.0
         args:
           script: |
             printf 'HF_TOKEN=%s\n' '${{secrets.hf_token}}' >> "$WORKFLOW_ENV"
       generate:
         name: Generate
-        uses: swaleio/transformers@1-0-0
+        uses: swaleio/transformers@1.0.0
         compute_type: gpu   # any GPU compute type available to your project
         start_on:
           - publish_token

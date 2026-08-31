@@ -66,7 +66,7 @@ blocks:
     tasks:
       test:
         name: Build and test
-        uses: swaleio/dotnet@1-0-0
+        uses: swaleio/dotnet@1.0.0
         args:
           script: |
             set -euo pipefail

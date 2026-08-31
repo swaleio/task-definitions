@@ -1,7 +1,7 @@
 name: Release task version
 
 # A task version is released by pushing a tag named `<task-name>/<version>`
-# (e.g. `git-clone/1-0-0`). The tag freezes tasks/<task-name>/task.md as that
+# (e.g. `git-clone/1.0.0`). The tag freezes tasks/<task-name>/task.md as that
 # immutable version — the same file on main keeps evolving toward the next one.
 # This workflow validates the tag and imports the frozen file into the Swale
 # platform under the version from the tag name.
@@ -23,23 +23,7 @@ jobs:
       - name: Parse and validate tag
         id: tag
         shell: bash
-        run: |
-          tag="${GITHUB_REF_NAME}"
-          name="${tag%%/*}"
-          version="${tag#*/}"
-          if [ -z "$name" ] || [ -z "$version" ] || [ "$name/$version" != "$tag" ]; then
-            echo "::error::Tag '$tag' must be '<task-name>/<version>'"; exit 1
-          fi
-          for field in "$name" "$version"; do
-            if ! printf '%s' "$field" | grep -Eq '^[A-Za-z0-9_-]{1,100}$'; then
-              echo "::error::'$field' must match ^[A-Za-z0-9_-]{1,100}$ (no dots)"; exit 1
-            fi
-          done
-          if [ ! -f "tasks/$name/task.md" ]; then
-            echo "::error::tasks/$name/task.md does not exist at tag '$tag'"; exit 1
-          fi
-          echo "name=$name" >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+        run: eng/scripts/validate-release-tag.sh "$GITHUB_REF_NAME"
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:

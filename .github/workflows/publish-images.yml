@@ -33,34 +33,28 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.list.outputs.images }}
+      build: ${{ steps.list.outputs.build }}
+      sync: ${{ steps.list.outputs.sync }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 2
       - id: list
         shell: bash
+        env:
+          IMAGE: ${{ github.event.inputs.image }}
+          BEFORE: ${{ github.event.before }}
         run: |
-          image="${{ github.event.inputs.image }}"
-          if [ "$image" = "all" ]; then
-            names=$(find images -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
-          elif [ -n "$image" ]; then
-            names="$image"
-          else
-            names=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- images/ \
-              | awk -F/ '{print $2}' | sort -u)
-          fi
-          json=$(printf '%s\n' "$names" | grep -v '^$' | jq -R . | jq -cs .)
-          echo "images=${json:-[]}" >> "$GITHUB_OUTPUT"
+          eng/scripts/discover-images.sh "$IMAGE" "$BEFORE" "$GITHUB_SHA"
 
   publish:
     needs: discover
-    if: needs.discover.outputs.images != '[]'
+    if: needs.discover.outputs.build != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.discover.outputs.images) }}
+        image: ${{ fromJson(needs.discover.outputs.build) }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
@@ -139,3 +133,32 @@ jobs:
           echo "Published docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}"
           echo "Pin this digest in the referencing task definition's exec.image." >> "$GITHUB_STEP_SUMMARY"
           echo "\`docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  sync-readme:
+    needs: discover
+    if: needs.discover.outputs.sync != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.sync) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - id: imagemeta
+        shell: bash
+        run: |
+          file="images/${{ matrix.image }}/Dockerfile"
+          description=$(grep -m1 '^LABEL org.opencontainers.image.description=' "$file" | cut -d'"' -f2)
+          echo "description=$description" >> "$GITHUB_OUTPUT"
+
+      # Docker Hub's management API rejects organization tokens, so this needs a
+      # user credential rather than the one the images are pushed with.
+      - name: Sync README to Docker Hub
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
+          readme-filepath: images/${{ matrix.image }}/README.md
+          short-description: ${{ steps.imagemeta.outputs.description }}

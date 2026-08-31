@@ -44,9 +44,23 @@ to `$WORKFLOW_TASK_OUTPUT`, where `<dest>` is the full path from `INPUT_DEST`
 
 ## Building
 
+From the repository root:
+
 ```sh
 docker build -t docker.io/swaleio/hf-cli:1-0-0 images/hf-cli
 ```
 
 CI pins the real base digest and publishes the image; task definitions reference
 it as `docker.io/swaleio/hf-cli@sha256:<digest>`.
+
+---
+
+Built from [`images/hf-cli`](https://github.com/swaleio/task-definitions/tree/main/images/hf-cli) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository. For how a task definition
+references an image, see the
+[task definition reference](https://docs.swale.io/reference/task-definition-syntax)
+in the [Swale documentation](https://docs.swale.io).
+
+The Dockerfile and entrypoint are covered by the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE). The software this image packages keeps
+its own licenses, which ship inside the image.

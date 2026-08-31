@@ -41,9 +41,23 @@ fast).
 
 ## Building
 
+From the repository root:
+
 ```sh
 docker build -t docker.io/swaleio/transformers-gpu:1-0-0 images/transformers-gpu
 ```
 
 CI pins the real base digest and publishes the image; task definitions
 reference it as `docker.io/swaleio/transformers-gpu@sha256:<digest>`.
+
+---
+
+Built from [`images/transformers-gpu`](https://github.com/swaleio/task-definitions/tree/main/images/transformers-gpu) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository. For how a task definition
+references an image, see the
+[task definition reference](https://docs.swale.io/reference/task-definition-syntax)
+in the [Swale documentation](https://docs.swale.io).
+
+The Dockerfile and entrypoint are covered by the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE). The software this image packages keeps
+its own licenses, which ship inside the image.

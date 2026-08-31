@@ -33,9 +33,23 @@ to `$WORKFLOW_TASK_OUTPUT`.
 
 ## Building
 
+From the repository root:
+
 ```sh
 docker build -t docker.io/swaleio/git:1-0-0 images/git
 ```
 
 CI publishes the image; task definitions reference it as
 `docker.io/swaleio/git@sha256:<digest>`.
+
+---
+
+Built from [`images/git`](https://github.com/swaleio/task-definitions/tree/main/images/git) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository. For how a task definition
+references an image, see the
+[task definition reference](https://docs.swale.io/reference/task-definition-syntax)
+in the [Swale documentation](https://docs.swale.io).
+
+The Dockerfile and entrypoint are covered by the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE). The software this image packages keeps
+its own licenses, which ship inside the image.

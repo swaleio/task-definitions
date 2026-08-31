@@ -70,3 +70,15 @@ rclone copy "$INPUT_SOURCE" "$INPUT_DEST" $INPUT_FLAGS
 
 The image is Alpine-based and runs as the base image's non-root `rclone` user
 (UID 1009) with `ca-certificates` already installed.
+
+---
+
+Built from [`images/rclone`](https://github.com/swaleio/task-definitions/tree/main/images/rclone) in the
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository. For how a task definition
+references an image, see the
+[task definition reference](https://docs.swale.io/reference/task-definition-syntax)
+in the [Swale documentation](https://docs.swale.io).
+
+The Dockerfile and entrypoint are covered by the
+[MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE). The software this image packages keeps
+its own licenses, which ship inside the image.

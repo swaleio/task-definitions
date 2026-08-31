@@ -23,31 +23,7 @@ jobs:
       - name: Parse and validate tag
         id: tag
         shell: bash
-        run: |
-          tag="${GITHUB_REF_NAME}"
-          name="${tag%%/*}"
-          version="${tag#*/}"
-          if [ -z "$name" ] || [ -z "$version" ] || [ "$name/$version" != "$tag" ]; then
-            echo "::error::Tag '$tag' must be '<task-name>/<version>'"; exit 1
-          fi
-          if ! printf '%s' "$name" | grep -Eq '^[A-Za-z0-9_-]{1,100}$'; then
-            echo "::error::Task name '$name' must match ^[A-Za-z0-9_-]{1,100}$"; exit 1
-          fi
-          # Versions accept dots, but must begin and end alphanumeric.
-          if ! printf '%s' "$version" | grep -Eq '^[A-Za-z0-9]([A-Za-z0-9._-]{0,98}[A-Za-z0-9])?$'; then
-            echo "::error::Version '$version' must match ^[A-Za-z0-9]([A-Za-z0-9._-]{0,98}[A-Za-z0-9])?$"; exit 1
-          fi
-          case "$version" in
-            *..*) echo "::error::Version '$version' cannot contain '..'"; exit 1 ;;
-          esac
-          if [ "$(printf '%s' "$version" | tr '[:upper:]' '[:lower:]')" = "latest" ]; then
-            echo "::error::Version '$version' is reserved by the platform"; exit 1
-          fi
-          if [ ! -f "tasks/$name/task.md" ]; then
-            echo "::error::tasks/$name/task.md does not exist at tag '$tag'"; exit 1
-          fi
-          echo "name=$name" >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+        run: eng/scripts/validate-release-tag.sh "$GITHUB_REF_NAME"
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:

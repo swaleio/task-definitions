@@ -74,7 +74,10 @@ The image is Alpine-based and runs as the base image's non-root `rclone` user
 ---
 
 Built from [`images/rclone`](https://github.com/swaleio/task-definitions/tree/main/images/rclone) in the
-[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository.
+[swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository. For how a task definition
+references an image, see the
+[task definition reference](https://docs.swale.io/reference/task-definition-syntax)
+in the [Swale documentation](https://docs.swale.io).
 
 The Dockerfile and entrypoint are covered by the
 [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE). The software this image packages keeps

@@ -62,7 +62,7 @@ blocks:
     tasks:
       build:
         name: Build
-        uses: swaleio/java-maven@1-0-0
+        uses: swaleio/java-maven@1.0.0
         args:
           script: |
             set -euo pipefail

@@ -103,7 +103,7 @@ blocks:
     tasks:
       weights:
         name: Fetch weights
-        uses: swaleio/hf-download@1-0-0
+        uses: swaleio/hf-download@1.0.0
         args:
           repo: meta-llama/Llama-3.1-8B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
@@ -112,7 +112,7 @@ blocks:
 
       serve:
         name: Serve model
-        uses: swaleio/vllm-serve@1-0-0
+        uses: swaleio/vllm-serve@1.0.0
         compute_type: gpu   # illustrative — pick a GPU compute type available to your project
         start_on: [weights]
         terminate_on: [generate]   # the runner is terminated when its consumers complete
@@ -121,7 +121,7 @@ blocks:
 
       wait_ready:
         name: Wait for server
-        uses: swaleio/http-request@1-0-0
+        uses: swaleio/http-request@1.0.0
         start_on: [serve]
         args:
           url: http://${{tasks.serve.ip-address}}:8000/health
@@ -129,7 +129,7 @@ blocks:
 
       generate:
         name: Chat completion
-        uses: swaleio/http-request@1-0-0
+        uses: swaleio/http-request@1.0.0
         start_on: [wait_ready]
         args:
           url: http://${{tasks.serve.ip-address}}:8000/v1/chat/completions

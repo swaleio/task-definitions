@@ -11,17 +11,19 @@ A task definition is a Markdown file with a YAML frontmatter block:
 
 ### Names and versions
 
-- Names and versions match `^[A-Za-z0-9_-]{1,100}$`. **No dots** — use `1-0-0`,
-  not `1.0.0`.
+- **Names** match `^[A-Za-z0-9_-]{1,100}$` — no dots.
+- **Versions** match `^[A-Za-z0-9]([A-Za-z0-9._-]{0,98}[A-Za-z0-9])?$`, so `1.0.0`
+  works. A version must begin and end with a letter or digit, must not contain
+  `..`, and cannot be `latest` — the platform reserves it.
 - **Versions are git tags**, GitHub-Actions-style: releasing a version means
-  pushing a tag named `<name>/<version>` (e.g. `git-clone/1-0-0`). The tag
+  pushing a tag named `<name>/<version>` (e.g. `git-clone/1.0.0`). The tag
   freezes `tasks/<name>/task.md` as that immutable version and triggers the
   release workflow, which imports the frozen file into the platform under the
   version from the tag name. The file on `main` keeps evolving toward the next
   release — doc typo fixes don't mint versions.
 - A published version is **immutable** on the platform (and the release tag
   should never be moved). Compare two versions with
-  `git diff git-clone/1-0-0..git-clone/1-1-0 -- tasks/git-clone/task.md`.
+  `git diff git-clone/1.0.0..git-clone/1.1.0 -- tasks/git-clone/task.md`.
 
 ### Name and description
 

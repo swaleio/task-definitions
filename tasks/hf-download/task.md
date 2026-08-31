@@ -91,7 +91,7 @@ blocks:
     tasks:
       weights:
         name: Fetch weights
-        uses: swaleio/hf-download@1-0-0
+        uses: swaleio/hf-download@1.0.0
         args:
           repo: meta-llama/Llama-3.1-8B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"

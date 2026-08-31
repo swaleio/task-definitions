@@ -97,7 +97,7 @@ blocks:
     tasks:
       llm:
         name: Ollama server
-        uses: swaleio/ollama-serve@1-0-0
+        uses: swaleio/ollama-serve@1.0.0
         # Pick a GPU compute type available to your project.
         compute_type: gpu
         terminate_on:
@@ -107,7 +107,7 @@ blocks:
 
       ready:
         name: Wait for Ollama
-        uses: swaleio/http-request@1-0-0
+        uses: swaleio/http-request@1.0.0
         start_on:
           - llm
         args:
@@ -118,7 +118,7 @@ blocks:
 
       generate:
         name: Generate
-        uses: swaleio/http-request@1-0-0
+        uses: swaleio/http-request@1.0.0
         start_on:
           - llm
           - ready

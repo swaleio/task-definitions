@@ -88,7 +88,7 @@ blocks:
     tasks:
       submit:
         name: Submit job
-        uses: swaleio/http-request@1-0-0
+        uses: swaleio/http-request@1.0.0
         args:
           url: https://api.example.com/v1/jobs
           method: POST

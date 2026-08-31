@@ -66,7 +66,7 @@ blocks:
     tasks:
       write_config:
         name: Write config
-        uses: swaleio/bash@1-0-0
+        uses: swaleio/bash@1.0.0
         args:
           script: |
             cat > ${{env.WORKFLOW_STORAGE}}/sft.yaml <<'EOF'
@@ -85,7 +85,7 @@ blocks:
             EOF
       train:
         name: Train
-        uses: swaleio/trl-sft@1-0-0
+        uses: swaleio/trl-sft@1.0.0
         compute_type: gpu   # any GPU compute type available to your project
         start_on:
           - write_config

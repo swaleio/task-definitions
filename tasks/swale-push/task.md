@@ -73,7 +73,7 @@ blocks:
     tasks:
       publish:
         name: Publish artifacts
-        uses: swaleio/swale-push@1-0-0
+        uses: swaleio/swale-push@1.0.0
         args:
           project: acme/model-artifacts
           account: acme

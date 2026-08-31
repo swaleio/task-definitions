@@ -74,7 +74,7 @@ blocks:
     tasks:
       report:
         name: Report
-        uses: swaleio/powershell@1-0-0
+        uses: swaleio/powershell@1.0.0
         args:
           script: |
             $ErrorActionPreference = 'Stop'

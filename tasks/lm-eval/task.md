@@ -94,14 +94,14 @@ blocks:
     tasks:
       weights:
         name: Fetch weights
-        uses: swaleio/hf-download@1-0-0
+        uses: swaleio/hf-download@1.0.0
         args:
           repo: Qwen/Qwen2.5-7B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
           dest: ${{env.WORKFLOW_STORAGE}}/qwen
       eval:
         name: Evaluate
-        uses: swaleio/lm-eval@1-0-0
+        uses: swaleio/lm-eval@1.0.0
         start_on:
           - weights
         compute_type: gpu   # any GPU compute type whose VRAM fits the model

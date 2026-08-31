@@ -73,7 +73,7 @@ blocks:
     tasks:
       build:
         name: Build web app
-        uses: swaleio/node@1-0-0
+        uses: swaleio/node@1.0.0
         args:
           script: |
             set -euo pipefail

@@ -109,7 +109,7 @@ blocks:
     tasks:
       fetch_dataset:
         name: Fetch dataset
-        uses: swaleio/rclone-copy@1-0-0
+        uses: swaleio/rclone-copy@1.0.0
         args:
           remote_type: s3
           source: remote:my-bucket/datasets/train

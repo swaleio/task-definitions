@@ -84,7 +84,7 @@ blocks:
     tasks:
       write_config:
         name: Write training config
-        uses: swaleio/bash@1-0-0
+        uses: swaleio/bash@1.0.0
         args:
           script: |
             set -euo pipefail
@@ -111,7 +111,7 @@ blocks:
             EOF
       train:
         name: QLoRA fine-tune
-        uses: swaleio/axolotl-train@1-0-0
+        uses: swaleio/axolotl-train@1.0.0
         start_on:
           - write_config
         compute_type: gpu   # any GPU compute type — see Compute above

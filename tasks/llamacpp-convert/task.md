@@ -80,14 +80,14 @@ blocks:
     tasks:
       weights:
         name: Fetch weights
-        uses: swaleio/hf-download@1-0-0
+        uses: swaleio/hf-download@1.0.0
         args:
           repo: Qwen/Qwen2.5-1.5B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
           dest: ${{env.WORKFLOW_STORAGE}}/qwen-hf
       convert:
         name: Convert to GGUF
-        uses: swaleio/llamacpp-convert@1-0-0
+        uses: swaleio/llamacpp-convert@1.0.0
         start_on:
           - weights
         args:
@@ -95,7 +95,7 @@ blocks:
           outfile: ${{env.WORKFLOW_STORAGE}}/qwen-16bit.gguf
       quantize:
         name: Quantize
-        uses: swaleio/llamacpp-quantize@1-0-0
+        uses: swaleio/llamacpp-quantize@1.0.0
         start_on:
           - convert
         args:

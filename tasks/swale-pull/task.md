@@ -83,7 +83,7 @@ blocks:
     tasks:
       fetch_data:
         name: Fetch data
-        uses: swaleio/swale-pull@1-0-0
+        uses: swaleio/swale-pull@1.0.0
         args:
           project: acme/datasets
           account: acme

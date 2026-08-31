@@ -40,7 +40,7 @@ blocks:
     tasks:
       build:
         name: Build
-        uses: swaleio/bash@1-0-0
+        uses: swaleio/bash@1.0.0
         args:
           script: |
             set -euo pipefail

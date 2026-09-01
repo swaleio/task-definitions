@@ -1,68 +1,59 @@
 ---
 name: Swale pull
-description: Pulls a Swale project's content into the workspace, at an optional ref and subpath.
+description: Pulls the content of a Swale repository into a path you choose.
 inputs:
-  project:
-    description: The Swale project (repository) to pull content from.
+  target:
+    description: "Repository to pull from, as <project>/<repository>[:<tag>]. Without a tag, the latest is pulled."
+    required: true
+  dest:
+    description: Absolute path inside the container to write the pulled files to. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/data) to share the result with later tasks, or at any other container-local path.
     required: true
   account:
-    description: Swale account name for authentication. Read from the INPUT_ACCOUNT environment variable and exported to the CLI as SWALE_ACCOUNT_NAME.
-    required: true
-  ref:
-    description: Branch, tag, or commit to pull. Empty pulls the project's default ref.
-    default: ""
-  path:
-    description: Restrict the pull to this subpath within the project. Empty pulls the whole project.
-    default: ""
-  dest:
-    description: Absolute path inside the container. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/repo) to share the result with later tasks, or any other container-local path.
+    description: Swale account name for authentication. Delivered to the CLI as SWALE_ACCOUNT_NAME.
     required: true
   token:
-    description: Swale access token for authentication (pass a secret). Read from the INPUT_TOKEN environment variable and exported to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
+    description: Swale access token for authentication (pass a secret). Delivered to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
     required: true
 exec:
-  # docker.io/swaleio/swale-cli:1.0.0
-  image: docker.io/swaleio/swale-cli@sha256:c3717a48cd51c2c2b2f2890e52e21818d06a6e0dba7ee2abe713238c596d773c
+  # docker.io/swaleio/swale-cli:0.1.0
+  image: docker.io/swaleio/swale-cli@sha256:9a5ccf315a27f27740dc1683d3a5720793e9215c3eae57b83f0fb3a5b8eb173f
+  # The CLI reads its credentials from the environment. exec.env is how they get
+  # there without appearing in the container's argv, and so its pod spec.
+  env:
+    SWALE_ACCOUNT_NAME: ${{inputs.account}}
+    SWALE_ACCOUNT_TOKEN: ${{inputs.token}}
   args:
     - pull
-    - "--project"
-    - ${{inputs.project}}
-    - "--ref"
-    - ${{inputs.ref}}
+    - ${{inputs.target}}
     - "--path"
-    - ${{inputs.path}}
-    - "--dest"
     - ${{inputs.dest}}
 ---
 
 # Swale pull
 
-Pulls the content of a Swale `project` into the `dest` path you supply, using the
-Swale client CLI (`swale-cli`). Point `dest` at the mounted workspace (e.g.
-`${{env.WORKFLOW_STORAGE}}/repo`) so later tasks in the run can read it from the shared
-workspace, or at any other container-local path. Restrict the pull to a single
-`ref` and/or `path` when you only need part of a project.
+Pulls the content of a Swale repository into the `dest` path you supply. Point
+`dest` at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/data`) so later
+tasks in the run can read it, or at any other container-local path.
 
-Authentication uses `account` and `token`. The platform injects them as
-`INPUT_ACCOUNT` and `INPUT_TOKEN`; the image exports them to the CLI as
+`target` names what to pull, in the CLI's own form —
+`<project>/<repository>[:<tag>]`. The tag selects the version and is part of the
+target rather than a separate input; omit it and the latest is pulled.
+
+Authentication uses `account` and `token`, delivered to the CLI as
 `SWALE_ACCOUNT_NAME` and `SWALE_ACCOUNT_TOKEN`. Pass `token` as a secret so it
-never appears in the container's argv or run logs.
-
-> **CLI flags are provisional.** The exact `swale-cli pull` flag names
-> (`--project`, `--ref`, `--path`, `--dest`) should be verified against the
-> installed Swale CLI and adjusted if they differ. An empty `--ref`/`--path`
-> value is expected to fall back to the project default / whole project.
+never appears in the container's argv, pod spec, or run logs.
 
 ## Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `project` | yes | — | The Swale project to pull from. |
-| `account` | yes | — | Swale account name; injected as `INPUT_ACCOUNT` → `SWALE_ACCOUNT_NAME`. |
-| `ref` | no | default ref | Branch, tag, or commit to pull. |
-| `path` | no | whole project | Subpath within the project to pull. |
-| `dest` | yes | — | Absolute container path to write into (e.g. `${{env.WORKFLOW_STORAGE}}/repo`). |
-| `token` | yes | — | Swale access token (pass a secret); injected as `INPUT_TOKEN` → `SWALE_ACCOUNT_TOKEN`. |
+| `target` | yes | — | Repository to pull, as `<project>/<repository>[:<tag>]`. |
+| `dest` | yes | — | Absolute container path to write into (e.g. `${{env.WORKFLOW_STORAGE}}/data`). |
+| `account` | yes | — | Swale account name; delivered as `SWALE_ACCOUNT_NAME`. |
+| `token` | yes | — | Swale access token (pass a secret); delivered as `SWALE_ACCOUNT_TOKEN`. |
+
+A pull fetches the whole repository at the given tag; there is no way to
+restrict it to a subpath.
 
 Because the workspace is shared across concurrent tasks, give parallel pulls
 distinct `dest` paths so they don't overwrite each other.
@@ -85,11 +76,9 @@ blocks:
         name: Fetch data
         uses: swaleio/swale-pull@1.0.0
         args:
-          project: acme/datasets
-          account: acme
-          ref: main
-          path: images/train
+          target: acme/datasets:v3
           dest: ${{env.WORKFLOW_STORAGE}}/data
+          account: acme
           token: ${{secrets.swale_token}}
 ```
 

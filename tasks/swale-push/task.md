@@ -1,61 +1,61 @@
 ---
 name: Swale push
-description: Pushes run artifacts from the workspace back to a Swale repository.
+description: Pushes files from the workspace to a Swale repository.
 inputs:
-  project:
-    description: Target Swale repository (project) to push the artifacts to.
-    required: true
-  account:
-    description: Swale account name for authentication. Read from the INPUT_ACCOUNT environment variable and exported to the CLI as SWALE_ACCOUNT_NAME.
+  target:
+    description: "Repository to push to, as <project>/<repository>[:<tag>]. Without a tag, the push is tagged latest."
     required: true
   source:
-    description: Absolute path inside the container. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/outputs) to publish a result an earlier task wrote there, or any other container-local path.
+    description: Absolute path inside the container to push. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/outputs) to publish a result an earlier task wrote there, or at any other container-local path.
     required: true
-  message:
-    description: Message recorded with the push.
-    default: ""
+  account:
+    description: Swale account name for authentication. Delivered to the CLI as SWALE_ACCOUNT_NAME.
+    required: true
   token:
-    description: Swale access token for authentication (pass a secret). Read from the INPUT_TOKEN environment variable and exported to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
+    description: Swale access token for authentication (pass a secret). Delivered to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
     required: true
 exec:
-  # docker.io/swaleio/swale-cli:1.0.0
-  image: docker.io/swaleio/swale-cli@sha256:c3717a48cd51c2c2b2f2890e52e21818d06a6e0dba7ee2abe713238c596d773c
-  # Flag names (--project, --message) are provisional — verify against the swale CLI.
-  # `account` and `token` are intentionally NOT args: the image reads them from
-  # INPUT_ACCOUNT / INPUT_TOKEN so the secret never lands in the container argv
-  # (pod spec / run logs).
+  # docker.io/swaleio/swale-cli:0.1.0
+  image: docker.io/swaleio/swale-cli@sha256:9a5ccf315a27f27740dc1683d3a5720793e9215c3eae57b83f0fb3a5b8eb173f
+  # The CLI reads its credentials from the environment. exec.env is how they get
+  # there without appearing in the container's argv, and so its pod spec.
+  env:
+    SWALE_ACCOUNT_NAME: ${{inputs.account}}
+    SWALE_ACCOUNT_TOKEN: ${{inputs.token}}
   args:
     - push
-    - "--project=${{inputs.project}}"
-    - "--message=${{inputs.message}}"
+    - ${{inputs.target}}
+    - "--path"
     - ${{inputs.source}}
 ---
 
 # Swale push
 
-Pushes the contents of the `source` path you supply to the Swale repository named
-by `project`, recording an optional `message`. Point `source` at the mounted
-workspace (e.g. `${{env.WORKFLOW_STORAGE}}/outputs`) to publish artifacts an earlier task
-wrote there, or at any other container-local path. This is how a run publishes
-its artifacts back to Swale once the work is done.
+Pushes the file or directory at `source` to a Swale repository. Point `source`
+at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/outputs`) to publish
+artifacts an earlier task wrote there, or at any other container-local path.
+This is how a run publishes its results back to Swale once the work is done.
 
-Authentication uses `account` and `token`, which the platform injects as the
-`INPUT_ACCOUNT` and `INPUT_TOKEN` environment variables and the image exports to
-the CLI as `SWALE_ACCOUNT_NAME` and `SWALE_ACCOUNT_TOKEN`. Pass `token` as a
-secret so it never appears in the task's argv, pod spec, or run logs.
+`target` names where to push, in the CLI's own form —
+`<project>/<repository>[:<tag>]`. The tag labels the version this push creates
+and is part of the target rather than a separate input; omit it and the push is
+tagged latest.
+
+Authentication uses `account` and `token`, delivered to the CLI as
+`SWALE_ACCOUNT_NAME` and `SWALE_ACCOUNT_TOKEN`. Pass `token` as a secret so it
+never appears in the container's argv, pod spec, or run logs.
 
 ## Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `project` | yes | — | Target Swale repository (project) to push to. |
-| `account` | yes | — | Swale account name; injected as `INPUT_ACCOUNT` → `SWALE_ACCOUNT_NAME`. |
+| `target` | yes | — | Repository to push to, as `<project>/<repository>[:<tag>]`. |
 | `source` | yes | — | Absolute container path to push (e.g. `${{env.WORKFLOW_STORAGE}}/outputs`). |
-| `message` | no | `""` | Message recorded with the push. |
-| `token` | yes | — | Swale access token (pass a secret); injected as `INPUT_TOKEN` → `SWALE_ACCOUNT_TOKEN`. |
+| `account` | yes | — | Swale account name; delivered as `SWALE_ACCOUNT_NAME`. |
+| `token` | yes | — | Swale access token (pass a secret); delivered as `SWALE_ACCOUNT_TOKEN`. |
 
-> The `swale push` flag names above (`--project`, `--message`) are provisional
-> and should be verified against the swale CLI before this version is published.
+A push records no message; the tag in `target` is what identifies the version it
+creates.
 
 ## Compute
 
@@ -75,15 +75,15 @@ blocks:
         name: Publish artifacts
         uses: swaleio/swale-push@1.0.0
         args:
-          project: acme/model-artifacts
-          account: acme
+          target: acme/model-artifacts:nightly
           source: ${{env.WORKFLOW_STORAGE}}/outputs
-          message: Nightly build artifacts
+          account: acme
           token: ${{secrets.swale_token}}
 ```
 
-This pushes `${{env.WORKFLOW_STORAGE}}/outputs` to the `acme/model-artifacts` repository,
-authenticating with the `acme` account and the `swale_token` secret.
+This pushes `${{env.WORKFLOW_STORAGE}}/outputs` to the `acme/model-artifacts`
+repository under the `nightly` tag, authenticating with the `acme` account and
+the `swale_token` secret.
 
 ---
 

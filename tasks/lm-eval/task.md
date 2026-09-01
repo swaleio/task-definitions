@@ -117,4 +117,8 @@ read it — for example to gate a deployment on a minimum benchmark score.
 
 ---
 
+For the workflow syntax these examples use, see the
+[workflow definition reference](https://docs.swale.io/reference/workflow-definition-syntax)
+in the [Swale documentation](https://docs.swale.io).
+
 Licensed under the [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE).

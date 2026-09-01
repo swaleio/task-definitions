@@ -86,6 +86,11 @@ exec:
   exactly as a GitHub Action's tag freezes the image reference inside it.
   Swale-built images live at `docker.io/swaleio/<name>`; vendor images keep their
   own registry and tag.
+- **The tag in that comment must exist on the registry, and must not be deleted
+  or moved while a definition pins its digest.** A digest stays pullable once
+  untagged, but it disappears from the registry's listing, so nobody can see what
+  the catalog runs. `latest` does not count: publishing moves it, so it stops
+  naming the pinned digest as soon as the next build lands.
 
 ### Inputs and outputs
 
@@ -116,12 +121,17 @@ the file at `$WORKFLOW_TASK_OUTPUT` (see the container contract). Emitting an
   is a consumer-supplied input holding the **full** path.
 - A path whose result a downstream task consumes (a clone destination, a download
   directory, an upload source) is a **required** input with no default — the
-  consumer supplies it. The platform mounts the shared workspace at
-  `/mnt/workspace`, which the consumer MAY target (e.g. `/mnt/workspace/repo`) to
-  share the result with later tasks, but the task must not force that prefix.
+  consumer supplies it. A consumer reaches the shared workspace through
+  `${{env.WORKFLOW_STORAGE}}` (e.g. `${{env.WORKFLOW_STORAGE}}/repo`) rather than
+  the literal mount path, and MAY target it to share the result with later tasks
+  — but the task must not force that prefix.
+- `${{env.*}}` resolves in **workflow** arguments only. A definition's own
+  `exec.args`/`exec.env` resolve against a scope with an empty env, where
+  `${{env.WORKFLOW_STORAGE}}` silently becomes an empty string rather than
+  failing — so a path written that way inside a definition yields `/repo`.
 - An incidental output path the task just needs somewhere to put (e.g. a response
   file) may stay optional with a bare **relative** default (e.g. `response.json`)
-  — never a `/mnt/workspace`-prefixed default. Note that the consumer can pass an
+  — never a workspace-prefixed default. Note that the consumer can pass an
   absolute workspace path to share it downstream.
 
 ### Compute
@@ -168,7 +178,7 @@ after.
 
 ## The container contract
 
-Every image an image references must honor
+Every image a task definition references must honor
 [`docs/container-contract.md`](docs/container-contract.md): the `INPUT_*` env
 convention, the `/mnt/workspace` shared volume, the `$WORKFLOW_TASK_OUTPUT`
 key=value output file, and non-interactive (no-TTY) operation.

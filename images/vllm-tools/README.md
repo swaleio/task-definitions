@@ -43,7 +43,7 @@ provides a default shm size; single-GPU workloads run fine with it.
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/vllm-tools:1-0-0 images/vllm-tools
+docker build -t docker.io/swaleio/vllm-tools:1.0.0 images/vllm-tools
 ```
 
 CI pins the real base digest and publishes the image; task definitions

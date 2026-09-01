@@ -44,7 +44,7 @@ fast).
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/transformers-gpu:1-0-0 images/transformers-gpu
+docker build -t docker.io/swaleio/transformers-gpu:1.0.0 images/transformers-gpu
 ```
 
 CI pins the real base digest and publishes the image; task definitions

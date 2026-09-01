@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Decides which images a publish run must rebuild and which only need their
-# Docker Hub description refreshed. Run it directly to see what a push would do:
+# Decides which images a run must build and whose Docker Hub description it must
+# refresh. Run it directly to see what a push would do:
 #
 #   eng/scripts/discover-images.sh "" <before-sha> <head-sha>
 #
-# A README is not part of the build context that matters: changing one leaves
-# the published digest identical, so rebuilding gigabytes to refresh a
-# description is waste. Such images go to the sync list instead.
+# The two are independent concerns. A README is not part of the build, so
+# changing one must not rebuild gigabytes; a Dockerfile change does not touch
+# the description. A commit doing both gets both, in parallel.
 set -euo pipefail
 
 requested="${1:-}"
@@ -20,19 +20,20 @@ to_json='BEGIN { ORS = ""; print "[" }
          END { print "]" }'
 
 if [ "$requested" = "all" ]; then
+  # A release republishes every image and refreshes every description, which is
+  # also how a newly added image gets its page for the first time.
   build=$(find images -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
-  sync=""
+  sync="$build"
 elif [ -n "$requested" ]; then
   build="$requested"
-  sync=""
+  sync="$requested"
 else
   # workflow_dispatch carries no "before" commit, so fall back to the previous
   # commit for the documented changed-since-last-push behaviour.
   [ -n "$before" ] || before=$(git rev-parse HEAD^)
   changed=$(git diff --name-only "$before" "$head_sha" -- images/)
-  touched=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 { print $2 }' | sort -u)
   build=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u)
-  sync=$(comm -23 <(printf '%s\n' "$touched" | awk 'NF') <(printf '%s\n' "$build" | awk 'NF'))
+  sync=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF == "README.md" { print $2 }' | sort -u)
 fi
 
 build_json=$(printf '%s\n' "$build" | awk "$to_json")

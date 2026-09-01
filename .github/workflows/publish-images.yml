@@ -1,7 +1,9 @@
 name: Publish images
 
-# Builds each swale-built task image, pushes it to Docker Hub digest-pinned,
-# attests build provenance, and syncs the image README to the Docker Hub page.
+# Builds each swale-built task image and syncs its README to the Docker Hub
+# page. A push only proves the image still builds; publishing is deliberate,
+# via workflow_dispatch with the version to release, and moves `latest` with it
+# so `latest` always names a released version rather than an arbitrary build.
 # The published digest is what a task definition pins in exec.image.
 
 on:
@@ -16,9 +18,8 @@ on:
         required: false
         default: "all"
       tag:
-        description: "Explicit tag for the published image (e.g. 1-0-0). Empty = <run>-<sha>."
-        required: false
-        default: ""
+        description: "Version to publish, e.g. 1.0.0. Published alongside 'latest'."
+        required: true
 
 permissions:
   contents: read
@@ -96,8 +97,8 @@ jobs:
         with:
           images: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
           tags: |
-            type=raw,value=${{ github.event.inputs.tag || format('{0}-{1}', github.run_number, github.sha) }}
-            type=raw,value=latest
+            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=raw,value=latest,enable=${{ github.event_name == 'workflow_dispatch' }}
           labels: |
             org.opencontainers.image.title=${{ steps.imagemeta.outputs.title }}
             org.opencontainers.image.description=${{ steps.imagemeta.outputs.description }}
@@ -106,29 +107,22 @@ jobs:
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
         with:
           context: images/${{ matrix.image }}
-          push: true
+          push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          provenance: true
-          sbom: true
+          # Attestations need an image exporter, which only exists when pushing.
+          provenance: ${{ github.event_name == 'workflow_dispatch' }}
+          sbom: ${{ github.event_name == 'workflow_dispatch' }}
 
       - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        if: github.event_name == 'workflow_dispatch'
         with:
           subject-name: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
-      - name: Sync README to Docker Hub
-        if: hashFiles(format('images/{0}/README.md', matrix.image)) != ''
-        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
-          readme-filepath: images/${{ matrix.image }}/README.md
-          short-description: ${{ steps.imagemeta.outputs.description }}
-
       - name: Report published digest
+        if: github.event_name == 'workflow_dispatch'
         run: |
           echo "Published docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}"
           echo "Pin this digest in the referencing task definition's exec.image." >> "$GITHUB_STEP_SUMMARY"
@@ -154,7 +148,17 @@ jobs:
 
       # Docker Hub's management API rejects organization tokens, so this needs a
       # user credential rather than the one the images are pushed with.
+      - id: published
+        shell: bash
+        env:
+          REPOSITORY: ${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://hub.docker.com/v2/repositories/$REPOSITORY/")
+          echo "exists=$([ "$code" = "200" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          [ "$code" = "200" ] || echo "::notice::$REPOSITORY is not published yet; skipping its description"
+
       - name: Sync README to Docker Hub
+        if: steps.published.outputs.exists == 'true'
         uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}

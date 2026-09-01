@@ -4,7 +4,7 @@ Swale-built image that provides the Swale client CLI (`swale`), backing the
 `swale-pull` and `swale-push` task definitions.
 
 - **Base:** `docker.io/library/debian:13-slim` (digest-pinned in the Dockerfile).
-- **Built image ref:** `docker.io/swaleio/swale-cli:1-0-0`
+- **Built image ref:** `docker.io/swaleio/swale-cli:1.0.0`
   (`docker.io/swaleio/swale-cli@sha256:…`, real digest pinned by CI).
 - **User:** non-root `swale` (uid 1000).
 - **Workdir:** `/mnt/workspace` — the shared per-run workspace volume.

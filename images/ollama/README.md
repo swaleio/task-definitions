@@ -59,7 +59,7 @@ two tasks writing the same store path must not overlap.
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/ollama:1-0-0 images/ollama
+docker build -t docker.io/swaleio/ollama:1.0.0 images/ollama
 ```
 
 CI pins the base digest, publishes the image, and task definitions reference it

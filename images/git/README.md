@@ -36,7 +36,7 @@ to `$WORKFLOW_TASK_OUTPUT`.
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/git:1-0-0 images/git
+docker build -t docker.io/swaleio/git:1.0.0 images/git
 ```
 
 CI publishes the image; task definitions reference it as

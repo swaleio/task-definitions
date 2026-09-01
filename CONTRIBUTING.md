@@ -87,7 +87,9 @@ exec:
   Swale-built images live at `docker.io/swaleio/<name>`; vendor images keep their
   own registry and tag.
 - **The tag in that comment must exist on the registry, and must not be deleted
-  or moved while a definition pins its digest.** A digest stays pullable once
+  or moved while a definition pins its digest.** A build only carries a version
+  tag when one is asked for: publishing without a tag moves `latest` and mints
+  nothing else, so a version tag is a deliberate act. A digest stays pullable once
   untagged, but it disappears from the registry's listing, so nobody can see what
   the catalog runs. `latest` does not count: publishing moves it, so it stops
   naming the pinned digest as soon as the next build lands.

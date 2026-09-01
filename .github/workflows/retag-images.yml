@@ -1,0 +1,59 @@
+name: Retag images
+
+# Points an additional tag at images that are already published, without
+# rebuilding them. Used to give a build the release tag it ships under: the
+# digest does not move, so definitions already pinning it stay valid.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Existing tag to copy from (e.g. 1-0-0)."
+        required: true
+      target:
+        description: "Tag to point at the same digest (e.g. 1.0.0)."
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY_NAMESPACE: swaleio
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.list.outputs.build }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - id: list
+        shell: bash
+        run: eng/scripts/discover-images.sh all
+
+  retag:
+    needs: discover
+    if: needs.discover.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.images) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
+
+      - name: Log in to Docker Hub as the organization
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          username: ${{ vars.DOCKERHUB_ORGANIZATION }}
+          password: ${{ secrets.DOCKERHUB_ORGANIZATION_TOKEN }}
+
+      - name: Copy the tag
+        shell: bash
+        env:
+          REPOSITORY: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
+          SOURCE: ${{ github.event.inputs.source }}
+          TARGET: ${{ github.event.inputs.target }}
+        run: eng/scripts/retag-image.sh "$REPOSITORY" "$SOURCE" "$TARGET"

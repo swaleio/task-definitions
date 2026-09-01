@@ -53,7 +53,7 @@ override.
 
 ```yaml
 exec:
-  # docker.io/swaleio/git:1-0-0
+  # docker.io/swaleio/git:1.0.0
   image: docker.io/swaleio/git@sha256:<digest>   # digest-pinned
   env:
     GIT_TOKEN: ${{inputs.token}}

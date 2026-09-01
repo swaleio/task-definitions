@@ -47,7 +47,7 @@ to `$WORKFLOW_TASK_OUTPUT`, where `<dest>` is the full path from `INPUT_DEST`
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/hf-cli:1-0-0 images/hf-cli
+docker build -t docker.io/swaleio/hf-cli:1.0.0 images/hf-cli
 ```
 
 CI pins the real base digest and publishes the image; task definitions reference

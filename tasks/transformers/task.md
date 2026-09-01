@@ -6,7 +6,7 @@ inputs:
     description: The Python program to run. Parameterize it by interpolating a trusted workflow expression into the program text, or by reading a run-level environment variable via os.environ inside it.
     required: true
 exec:
-  # docker.io/swaleio/transformers-gpu:1-0-0
+  # docker.io/swaleio/transformers-gpu:1.0.0
   image: docker.io/swaleio/transformers-gpu@sha256:cd90129e2b50edd8c9f5bbe2cf5e717e173df50822143208d69d5a80b02136a5
   args:
     - bash

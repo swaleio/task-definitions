@@ -27,7 +27,7 @@ outputs:
   path:
     description: The local directory the content was downloaded to, i.e. the value of the dest input.
 exec:
-  # docker.io/swaleio/hf-cli:1-0-0
+  # docker.io/swaleio/hf-cli:1.0.0
   image: docker.io/swaleio/hf-cli@sha256:c4433260a36c46289265b5ccd3a06847986879cefd2c1052cbe8e43ccbe7b116
   env:
     HF_TOKEN: ${{inputs.token}}

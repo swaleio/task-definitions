@@ -16,7 +16,7 @@ on:
         required: false
         default: "all"
       tag:
-        description: "Explicit tag for the published image (e.g. 1-0-0). Empty = <run>-<sha>."
+        description: "Explicit tag for the published image (e.g. 1.0.0). Empty = <run>-<sha>."
         required: false
         default: ""
 

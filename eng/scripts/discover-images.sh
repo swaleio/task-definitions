@@ -13,6 +13,18 @@ requested="${1:-}"
 before="${2:-}"
 head_sha="${3:-}"
 
+# A deleted image still shows up in the diff, but has no directory left to
+# build from or describe. Without this it reaches the matrix and the build
+# fails on a context that is not there -- which is what removing an image
+# looks like, not a mistake worth failing a run over.
+existing() {
+  while read -r name; do
+    if [ -n "$name" ] && [ -d "images/$name" ]; then
+      printf '%s\n' "$name"
+    fi
+  done
+}
+
 # Emptiness is filtered inside awk rather than with grep, because grep exits 1
 # when it matches nothing and would take the whole script down under pipefail.
 to_json='BEGIN { ORS = ""; print "[" }
@@ -25,6 +37,12 @@ if [ "$requested" = "all" ]; then
   build=$(find images -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
   sync="$build"
 elif [ -n "$requested" ]; then
+  # Named explicitly, so say plainly that it is not there rather than
+  # handing docker a context that does not exist.
+  if [ ! -d "images/$requested" ]; then
+    echo "::error::No image directory images/$requested" >&2
+    exit 1
+  fi
   build="$requested"
   sync="$requested"
 else
@@ -32,8 +50,8 @@ else
   # commit for the documented changed-since-last-push behaviour.
   [ -n "$before" ] || before=$(git rev-parse HEAD^)
   changed=$(git diff --name-only "$before" "$head_sha" -- images/)
-  build=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u)
-  sync=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF == "README.md" { print $2 }' | sort -u)
+  build=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u | existing)
+  sync=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF == "README.md" { print $2 }' | sort -u | existing)
 fi
 
 build_json=$(printf '%s\n' "$build" | awk "$to_json")

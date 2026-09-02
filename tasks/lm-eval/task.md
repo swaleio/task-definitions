@@ -16,7 +16,7 @@ inputs:
     default: ""
 exec:
   # docker.io/swaleio/vllm-tools:1.0.0
-  image: docker.io/swaleio/vllm-tools@sha256:2dc0808f422bf107d13af4b0e4d03150e13e08f30762a19aeb919fa1ad687afc
+  image: docker.io/swaleio/vllm-tools@sha256:3f8ae9ff26ddb3ec1905475b35ceebf672a07e750c12a2cef5b6d1f98f9db3cc
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

@@ -31,7 +31,7 @@ inputs:
     default: ""
 exec:
   # docker.io/swaleio/rclone:1.0.0
-  image: docker.io/swaleio/rclone@sha256:ef8e4a277734e238ab6794f48c2775df93428671384988cef2eff81831e8add5
+  image: docker.io/swaleio/rclone@sha256:2cbece0f10abd3779942bb4b9a1ff7f2cde256aaab70e9ff8dd8e6740d30d389
   args: []
 ---
 

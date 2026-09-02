@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/swaleio/transformers-gpu:1.0.0
-  image: docker.io/swaleio/transformers-gpu@sha256:cd90129e2b50edd8c9f5bbe2cf5e717e173df50822143208d69d5a80b02136a5
+  image: docker.io/swaleio/transformers-gpu@sha256:9346b9a6a9da72735635d0227a2547873ee4015b09188434f2f768e425d2d9a9
   args:
     - bash
     - -lc

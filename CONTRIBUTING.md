@@ -201,10 +201,24 @@ Publish CI builds changed images, pushes `docker.io/swaleio/<name>`, attests
 build provenance, and syncs the image README to Docker Hub.
 
 
-Images are pushed with the organization's OIDC connection; the Docker Hub
-credentials in repository secrets are used only to sync image READMEs. See the
-comments in `.github/workflows/publish-images.yml` if you are changing that
-workflow.
+Images are pushed with a Docker Hub organization access token; a second, personal
+credential exists only to sync image READMEs, because Docker Hub's management
+API rejects organization tokens. See the comments in
+`.github/workflows/publish-images.yml` if you are changing that workflow.
+
+### Labels
+
+`title`, `description` and `licenses` are read back out of the Dockerfile by CI
+and handed to `metadata-action`, because a build `--label` overrides a
+Dockerfile `LABEL` and the repository's own values would otherwise win. A
+missing one fails the build.
+
+`licenses` names the license of **the software the image exists to provide**, as
+an SPDX expression — not this repository's license, and not an audit of every
+package in the base. This repository is MIT; the software in the images mostly
+is not. Two tools in one image is `A AND B` (`curl AND MIT`). Take it from
+upstream's own `COPYING`/`LICENSE` or, for a Python package, from PyPI — not
+from whichever image it was copied from.
 
 ## CI checks
 

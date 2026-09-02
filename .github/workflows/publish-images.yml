@@ -80,17 +80,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_ORGANIZATION }}
           password: ${{ secrets.DOCKERHUB_ORGANIZATION_TOKEN }}
 
-      # The Dockerfile owns the per-image title and description. They are fed to
-      # metadata-action below because a build --label overrides a Dockerfile LABEL,
-      # so without this the generated repository-wide description would win.
+      # The Dockerfile owns the labels that describe the software it packages.
+      # They are fed to metadata-action below because a build --label overrides a
+      # Dockerfile LABEL, so without this the repository's own values win -- and
+      # for licenses that is actively wrong: this repository is MIT, the software
+      # in the images is not, so every image would claim MIT.
       - id: imagemeta
         shell: bash
         run: |
           file="images/${{ matrix.image }}/Dockerfile"
-          title=$(grep -m1 '^LABEL org.opencontainers.image.title=' "$file" | cut -d'"' -f2)
-          description=$(grep -m1 '^LABEL org.opencontainers.image.description=' "$file" | cut -d'"' -f2)
-          echo "title=$title" >> "$GITHUB_OUTPUT"
-          echo "description=$description" >> "$GITHUB_OUTPUT"
+          for label in title description licenses; do
+            value=$(grep -m1 "^LABEL org.opencontainers.image.${label}=" "$file" | cut -d'"' -f2)
+            [[ -n "$value" ]] || { echo "::error::${file} has no org.opencontainers.image.${label} label"; exit 1; }
+            echo "${label}=${value}" >> "$GITHUB_OUTPUT"
+          done
 
       - id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
@@ -102,6 +105,7 @@ jobs:
           labels: |
             org.opencontainers.image.title=${{ steps.imagemeta.outputs.title }}
             org.opencontainers.image.description=${{ steps.imagemeta.outputs.description }}
+            org.opencontainers.image.licenses=${{ steps.imagemeta.outputs.licenses }}
 
       - id: build
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6

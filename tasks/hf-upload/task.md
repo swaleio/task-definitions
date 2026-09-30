@@ -55,7 +55,7 @@ destination folder within the repository (root by default).
 
 ```yaml
 name: HF upload example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:

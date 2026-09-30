@@ -86,7 +86,7 @@ the Hugging Face stack treats as no token).
 
 ```yaml
 name: LM evaluation harness example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -104,7 +104,7 @@ blocks:
         uses: swaleio/lm-eval@1.0.0
         start_on:
           - weights
-        compute_type: gpu   # any GPU compute type whose VRAM fits the model
+        compute_type: a100-1   # any GPU compute type whose VRAM fits the model
         args:
           model_dir: ${{tasks.weights.outputs.path}}
           tasks: "mmlu,gsm8k"

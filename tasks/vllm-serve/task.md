@@ -95,7 +95,7 @@ body uses it as the `model` field.
 
 ```yaml
 name: vLLM serve example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -113,7 +113,7 @@ blocks:
       serve:
         name: Serve model
         uses: swaleio/vllm-serve@1.0.0
-        compute_type: gpu   # illustrative — pick a GPU compute type available to your project
+        compute_type: a100-1   # any GPU compute type whose VRAM fits the model
         start_on: [weights]
         terminate_on: [generate]   # the runner is terminated when its consumers complete
         args:

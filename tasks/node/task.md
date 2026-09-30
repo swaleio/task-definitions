@@ -65,7 +65,7 @@ working directory rather than assuming any particular mount.
 
 ```yaml
 name: Node example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:

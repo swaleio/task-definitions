@@ -60,7 +60,7 @@ The task declares no inputs, so it takes no args:
 
 ```yaml
 name: GPU smoke test example
-compute_type: gpu
+compute_type: t4-1   # the GPU compute type to verify
 entry_point: main
 
 blocks:

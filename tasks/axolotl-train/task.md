@@ -51,8 +51,8 @@ from there.
 
 - **Full fine-tune** of a 7–8B model wants an A100/H100-class card (80 GB
   VRAM).
-- **QLoRA** of the same models fits in 24–48 GB; the example below runs
-  comfortably at the low end.
+- **QLoRA** of the same models fits in 24–48 GB; the example below fine-tunes
+  a 1.1B model, which fits a 16 GB card.
 
 The workflow selects the compute type via `compute_type`; the definition does
 not pin one. On a CPU compute type the task does not fail fast — the container
@@ -76,7 +76,7 @@ shared workspace, then this task trains from it.
 
 ```yaml
 name: Axolotl train example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -114,7 +114,7 @@ blocks:
         uses: swaleio/axolotl-train@1.0.0
         start_on:
           - write_config
-        compute_type: gpu   # any GPU compute type — see Compute above
+        compute_type: t4-1   # any GPU compute type — see Compute above
         args:
           config: ${{env.WORKFLOW_STORAGE}}/axolotl.yaml
 ```

@@ -83,7 +83,7 @@ with the task's own scratch capacity.
 
 ```yaml
 name: Hugging Face download example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:

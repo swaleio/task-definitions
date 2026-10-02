@@ -206,8 +206,9 @@ images/<name>/README.md      # synced to the Docker Hub page by CI
 ```
 
 Publish CI builds changed images, pushes `docker.io/swaleio/<name>`, attests
-build provenance, and syncs the image README to Docker Hub.
-
+build provenance, and syncs the image README to Docker Hub. To refresh a page
+without changing its README, dispatch "Publish images" without a version: it
+builds and pushes nothing and only syncs the selected images' READMEs.
 
 Images are pushed with a Docker Hub organization access token; a second, personal
 credential exists only to sync image READMEs, because Docker Hub's management

@@ -4,6 +4,7 @@ name: Publish images
 # page. A push only proves the image still builds; publishing is deliberate,
 # via workflow_dispatch with the version to release, and moves `latest` with it
 # so `latest` always names a released version rather than an arbitrary build.
+# A dispatch without a version builds nothing and only refreshes descriptions.
 # The published digest is what a task definition pins in exec.image.
 
 on:
@@ -14,12 +15,13 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: "Image to (re)publish: a single name (e.g. git), 'all' for every image under images/, or empty to fall back to changed-since-last-push."
+        description: "Image to (re)publish or describe: a single name (e.g. git), 'all' for every image under images/, or empty to fall back to changed-since-last-push."
         required: false
         default: "all"
       tag:
-        description: "Version to publish, e.g. 1.0.0. Published alongside 'latest'."
-        required: true
+        description: "Version to publish, e.g. 1.0.0. Published alongside 'latest'. Empty builds and pushes nothing and only refreshes the Docker Hub descriptions."
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -50,7 +52,8 @@ jobs:
 
   publish:
     needs: discover
-    if: needs.discover.outputs.build != '[]'
+    # A dispatch without a version is a description refresh, so nothing builds.
+    if: needs.discover.outputs.build != '[]' && (github.event_name == 'push' || github.event.inputs.tag != '')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

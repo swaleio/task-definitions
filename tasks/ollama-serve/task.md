@@ -89,7 +89,7 @@ redownloading).
 
 ```yaml
 name: Ollama serve example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -98,8 +98,8 @@ blocks:
       llm:
         name: Ollama server
         uses: swaleio/ollama-serve@1.0.0
-        # Pick a GPU compute type available to your project.
-        compute_type: gpu
+        # Any GPU compute type whose VRAM fits the model.
+        compute_type: t4-1
         terminate_on:
           - generate
         args:

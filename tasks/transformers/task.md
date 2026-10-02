@@ -45,7 +45,7 @@ it on the GPU.
 
 ```yaml
 name: Transformers example
-compute_type: gpu
+compute_type: t4-1
 entry_point: main
 
 blocks:
@@ -95,7 +95,7 @@ pick `HF_TOKEN` up automatically:
 
 ```yaml
 name: Transformers - Gated models and tokens
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -110,7 +110,7 @@ blocks:
       generate:
         name: Generate
         uses: swaleio/transformers@1.0.0
-        compute_type: gpu   # any GPU compute type available to your project
+        compute_type: t4-1   # any GPU compute type whose VRAM fits the model
         start_on:
           - publish_token
         args:

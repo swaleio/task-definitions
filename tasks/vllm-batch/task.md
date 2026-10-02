@@ -86,7 +86,7 @@ the Hugging Face stack treats as no token).
 
 ```yaml
 name: vLLM batch inference example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -116,7 +116,7 @@ blocks:
         start_on:
           - weights
           - requests
-        compute_type: gpu   # any GPU compute type whose VRAM fits the model
+        compute_type: a100-1   # any GPU compute type whose VRAM fits the model
         args:
           model: ${{tasks.weights.outputs.path}}
           input_file: ${{env.WORKFLOW_STORAGE}}/batch/requests.jsonl

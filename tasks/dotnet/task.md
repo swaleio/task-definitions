@@ -58,7 +58,7 @@ directory rather than assuming any particular mount.
 
 ```yaml
 name: Dotnet example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:

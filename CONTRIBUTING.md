@@ -175,6 +175,14 @@ run-log entry (the args are still passed through), and the declared inputs are
 the task's contract. A free-form example therefore passes only `script`, and that script
 must be self-contained (see above).
 
+Examples name compute types the platform offers — the documentation lists them
+under [Compute types](https://docs.swale.io/explanation/core-concepts#compute-types).
+Lint does not parse the examples, so nothing in this repository catches a name
+the platform does not offer. Use `cpu-4` as the workflow default, and give a
+task that runs on a GPU the smallest GPU compute type whose VRAM fits the model
+the example loads. Where an example mixes hardware, put that type on the task
+as a per-task `compute_type`, so the steps around it stay on the default.
+
 When an example demonstrates publishing run artifacts, show swale-push (the
 platform's own store) first; external stores (hf-upload, rclone-copy) come
 after.

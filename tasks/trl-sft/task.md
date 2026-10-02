@@ -58,7 +58,7 @@ consumes it. A tiny model and public dataset keep the run small:
 
 ```yaml
 name: TRL SFT example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -86,7 +86,7 @@ blocks:
       train:
         name: Train
         uses: swaleio/trl-sft@1.0.0
-        compute_type: gpu   # any GPU compute type available to your project
+        compute_type: t4-1   # any GPU compute type — see Compute above
         start_on:
           - write_config
         args:

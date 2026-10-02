@@ -80,7 +80,7 @@ workspace, and to poll a not-yet-ready runner until it starts answering.
 
 ```yaml
 name: HTTP request example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:

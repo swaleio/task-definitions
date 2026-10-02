@@ -16,7 +16,7 @@ Reference a task by `account/name@version`:
 
 ```yaml
 name: Checkout example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -31,9 +31,11 @@ blocks:
 ```
 
 `name`, `compute_type`, `entry_point` and `blocks` are all required; tasks live
-inside a block, and `entry_point` names the block execution starts from. Compute
-type names come from what your project has available — `cpu` and `gpu` are the
-documented defaults.
+inside a block, and `entry_point` names the block execution starts from.
+`compute_type` names the machine each task runs on unless the task sets its
+own; `cpu-4` is one of the
+[compute types](https://docs.swale.io/explanation/core-concepts#compute-types)
+the platform offers.
 
 ## Repository layout
 

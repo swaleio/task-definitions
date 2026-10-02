@@ -76,7 +76,7 @@ sequence. The frame chunks are a JSON array the run can override at start:
 
 ```yaml
 name: Render an animation
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 inputs:
@@ -130,7 +130,7 @@ blocks:
       render:
         name: Render frames
         uses: swaleio/blender-render@1.0.0
-        compute_type: gpu   # any GPU compute type available to your project
+        compute_type: t4-1   # any GPU compute type — see Compute above
         args:
           scene: ${{env.WORKFLOW_STORAGE}}/scene/animation.blend
           output: ${{env.WORKFLOW_STORAGE}}/frames/frame_####

@@ -67,7 +67,7 @@ one the merge reads, and `adapter_dir` is the config's `output_dir`.
 
 ```yaml
 name: Axolotl merge LoRA example
-compute_type: cpu
+compute_type: cpu-4
 entry_point: main
 
 blocks:
@@ -105,13 +105,13 @@ blocks:
         uses: swaleio/axolotl-train@1.0.0
         start_on:
           - write_config
-        compute_type: gpu   # training needs a GPU compute type — see swaleio/axolotl-train
+        compute_type: t4-1   # training needs a GPU compute type — see swaleio/axolotl-train
         args:
           config: ${{env.WORKFLOW_STORAGE}}/axolotl.yaml
       merge:
         name: Merge adapter
         uses: swaleio/axolotl-merge-lora@1.0.0
-        compute_type: gpu   # any GPU compute type available to your project
+        compute_type: t4-1   # any GPU compute type — see Compute above
         start_on:
           - train
         args:

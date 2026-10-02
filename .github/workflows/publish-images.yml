@@ -1,6 +1,6 @@
 name: Publish images
 
-# Builds each swale-built task image and syncs its README to the Docker Hub
+# Builds each swale-built task image, then syncs its README to the Docker Hub
 # page. A push only proves the image still builds; publishing is deliberate,
 # via workflow_dispatch with the version to release, and moves `latest` with it
 # so `latest` always names a released version rather than an arbitrary build.
@@ -136,8 +136,12 @@ jobs:
           echo "\`docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"
 
   sync-readme:
-    needs: discover
-    if: needs.discover.outputs.sync != '[]'
+    # After publish, so a first publish describes the repository it has just
+    # created. !cancelled() still runs it when publish is skipped (a README-only
+    # change, a dispatch without a version) or fails: a description never waits
+    # on a build succeeding.
+    needs: [discover, publish]
+    if: ${{ !cancelled() && needs.discover.result == 'success' && needs.discover.outputs.sync != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -6,7 +6,8 @@
 #
 # The two are independent concerns. A README is not part of the build, so
 # changing one must not rebuild gigabytes; a Dockerfile change does not touch
-# the description. A commit doing both gets both, in parallel.
+# the description. A commit doing both gets both, the description once the
+# build is done.
 set -euo pipefail
 
 requested="${1:-}"

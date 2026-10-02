@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/swaleio/ffmpeg:1.0.0
-  image: docker.io/swaleio/ffmpeg@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/ffmpeg@sha256:3f1239cac560f19208a56fa0fa3f417dc4a2979925c6166f837e168232175271
   args:
     - bash
     - -lc

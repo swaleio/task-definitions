@@ -6,7 +6,7 @@ inputs:
     description: "Repository to pull from, as <project>/<repository>[:<tag>]. Without a tag, the latest is pulled."
     required: true
   dest:
-    description: Absolute path inside the container to write the pulled files to. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/data) to share the result with later tasks, or at any other container-local path.
+    description: Absolute path inside the container to write the pulled files to, created with any missing parent folders if it does not exist. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/data) to share the result with later tasks, or at any other container-local path.
     required: true
   account:
     description: Swale account name for authentication. Delivered to the CLI as SWALE_ACCOUNT_NAME.
@@ -15,8 +15,8 @@ inputs:
     description: Swale access token for authentication (pass a secret). Delivered to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
     required: true
 exec:
-  # docker.io/swaleio/swale-cli:1.0.0
-  image: docker.io/swaleio/swale-cli@sha256:f369436d2c9fa0ac1e671cfdc2e3b284b7cc392e85089ee0f8f44bdd25a5620c
+  # docker.io/swaleio/swale-cli:1.0.1
+  image: docker.io/swaleio/swale-cli@sha256:bfb574e7340716df9ab6d65292ed80d981a8f5cd3bd62afcaa057a8661bd4569
   # The CLI reads its credentials from the environment. exec.env is how they get
   # there without appearing in the container's argv, and so its pod spec.
   env:
@@ -33,7 +33,9 @@ exec:
 
 Pulls the content of a Swale repository into the `dest` path you supply. Point
 `dest` at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/data`) so later
-tasks in the run can read it, or at any other container-local path.
+tasks in the run can read it, or at any other container-local path. `dest` is
+created, with any missing parent folders, if it does not exist yet; a `dest` that
+is an existing file is refused.
 
 `target` names what to pull, in the CLI's own form —
 `<project>/<repository>[:<tag>]`. The tag selects the version and is part of the
@@ -48,7 +50,7 @@ never appears in the container's argv, pod spec, or run logs.
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `target` | yes | — | Repository to pull, as `<project>/<repository>[:<tag>]`. |
-| `dest` | yes | — | Absolute container path to write into (e.g. `${{env.WORKFLOW_STORAGE}}/data`). |
+| `dest` | yes | — | Absolute container path to write into, created if missing (e.g. `${{env.WORKFLOW_STORAGE}}/data`). |
 | `account` | yes | — | Swale account name; delivered as `SWALE_ACCOUNT_NAME`. |
 | `token` | yes | — | Swale access token (pass a secret); delivered as `SWALE_ACCOUNT_TOKEN`. |
 

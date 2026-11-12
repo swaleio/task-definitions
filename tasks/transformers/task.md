@@ -45,7 +45,7 @@ it on the GPU.
 
 ```yaml
 name: Transformers example
-compute_type: t4-1
+compute_type: a100-1
 entry_point: main
 
 blocks:
@@ -110,7 +110,7 @@ blocks:
       generate:
         name: Generate
         uses: swaleio/transformers@1.0.0
-        compute_type: t4-1   # any GPU compute type whose VRAM fits the model
+        compute_type: a100-1   # any GPU compute type whose VRAM fits the model
         start_on:
           - publish_token
         args:

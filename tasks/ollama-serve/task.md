@@ -99,7 +99,7 @@ blocks:
         name: Ollama server
         uses: swaleio/ollama-serve@1.0.0
         # Any GPU compute type whose VRAM fits the model.
-        compute_type: t4-1
+        compute_type: a100-1
         terminate_on:
           - generate
         args:

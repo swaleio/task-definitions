@@ -105,13 +105,13 @@ blocks:
         uses: swaleio/axolotl-train@1.0.0
         start_on:
           - write_config
-        compute_type: t4-1   # training needs a GPU compute type — see swaleio/axolotl-train
+        compute_type: a100-1   # training needs a GPU compute type — see swaleio/axolotl-train
         args:
           config: ${{env.WORKFLOW_STORAGE}}/axolotl.yaml
       merge:
         name: Merge adapter
         uses: swaleio/axolotl-merge-lora@1.0.0
-        compute_type: t4-1   # any GPU compute type — see Compute above
+        compute_type: a100-1   # any GPU compute type — see Compute above
         start_on:
           - train
         args:

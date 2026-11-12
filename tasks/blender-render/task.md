@@ -130,7 +130,7 @@ blocks:
       render:
         name: Render frames
         uses: swaleio/blender-render@1.0.0
-        compute_type: t4-1   # any GPU compute type — see Compute above
+        compute_type: a100-1   # any GPU compute type — see Compute above
         args:
           scene: ${{env.WORKFLOW_STORAGE}}/scene/animation.blend
           output: ${{env.WORKFLOW_STORAGE}}/frames/frame_####

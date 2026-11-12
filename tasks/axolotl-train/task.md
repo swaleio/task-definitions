@@ -114,7 +114,7 @@ blocks:
         uses: swaleio/axolotl-train@1.0.0
         start_on:
           - write_config
-        compute_type: t4-1   # any GPU compute type — see Compute above
+        compute_type: a100-1   # any GPU compute type — see Compute above
         args:
           config: ${{env.WORKFLOW_STORAGE}}/axolotl.yaml
 ```

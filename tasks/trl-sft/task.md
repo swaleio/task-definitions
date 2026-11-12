@@ -86,7 +86,7 @@ blocks:
       train:
         name: Train
         uses: swaleio/trl-sft@1.0.0
-        compute_type: t4-1   # any GPU compute type — see Compute above
+        compute_type: a100-1   # any GPU compute type — see Compute above
         start_on:
           - write_config
         args:

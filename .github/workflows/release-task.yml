@@ -42,7 +42,7 @@ jobs:
 
       # TODO: switch to automated import once a platform service account exists.
       # Requires SWALE_ACCOUNT_NAME / SWALE_ACCOUNT_TOKEN secrets and the swale
-      # CLI (or the HTTP API): create-if-needed, then add the version from file.
+      # CLI (or the HTTP API): create-if-needed, then publish the version from file.
       - name: Import instructions
         shell: bash
         run: |
@@ -54,6 +54,6 @@ jobs:
             echo '```sh'
             echo "swale task-definition create --name ${{ steps.tag.outputs.name }} --version ${{ steps.tag.outputs.version }} --file tasks/${{ steps.tag.outputs.name }}/task.md --public"
             echo "# or, if the definition already exists:"
-            echo "swale task-definition add-version ${{ steps.tag.outputs.name }} --version ${{ steps.tag.outputs.version }} --file tasks/${{ steps.tag.outputs.name }}/task.md"
+            echo "swale task-definition publish-version --name ${{ steps.tag.outputs.name }} --version ${{ steps.tag.outputs.version }} --file tasks/${{ steps.tag.outputs.name }}/task.md"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"

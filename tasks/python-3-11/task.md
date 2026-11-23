@@ -1,23 +1,23 @@
 ---
-name: Python
-description: Runs an arbitrary Python script. The escape hatch for anything without a dedicated task.
+name: Python 3.11
+description: Runs an arbitrary Python 3.11 script. The escape hatch for anything without a dedicated task.
 inputs:
   script:
     description: The Python program to run. Parameterize it by interpolating a trusted workflow expression into the program text, or by reading a run-level environment variable via os.environ inside it.
     required: true
 exec:
-  # ghcr.io/astral-sh/uv:python3.13-bookworm-slim
-  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca
+  # ghcr.io/astral-sh/uv:python3.11-trixie-slim
+  image: ghcr.io/astral-sh/uv@sha256:839b8b68a4bf47933fbd4e64f2550fc6f36d7e15aceca8b1cc7e1ade1eb2f1c5
   args:
     - bash
     - -lc
-    - 'printf %s "$INPUT_SCRIPT" > /tmp/run.py && exec python /tmp/run.py'
+    - 'cd "$WORKFLOW_TASK_STORAGE" && printf %s "$INPUT_SCRIPT" > /tmp/run.py && exec python /tmp/run.py'
 ---
 
-# Python
+# Python 3.11
 
 Writes your `script` to `/tmp/run.py` and runs it with `python` (CPU-only
-Python 3.13), so tracebacks, multi-line programs, and standard-library imports
+Python 3.11), so tracebacks, multi-line programs, and standard-library imports
 all behave exactly as they do in a normal interpreter.
 
 This image ships [`uv`](https://docs.astral.sh/uv/) and `uvx`, so a script that
@@ -51,7 +51,7 @@ Keep untrusted data out of the program body.
 
 Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
-this generic `python` task declares none, so emitting a key here would fail the
+this generic `python-3-11` task declares none, so emitting a key here would fail the
 task — exchange results through files instead: write to the working directory,
 or to the shared workspace (`$WORKFLOW_STORAGE` in the container) when a later task must read them).
 
@@ -63,10 +63,10 @@ or to the shared workspace (`$WORKFLOW_STORAGE` in the container) when a later t
 
 The task declares only `script`, so the example passes only `script` and the
 program is self-contained — it writes to a relative `out/` directory under the
-working directory rather than assuming any particular mount.
+working directory rather than assuming any particular mount. The task starts in its own scratch directory (`$WORKFLOW_TASK_STORAGE`), which is writable and discarded when the task ends.
 
 ```yaml
-name: Python example
+name: Python 3.11 example
 compute_type: cpu-4
 entry_point: main
 
@@ -75,7 +75,7 @@ blocks:
     tasks:
       summarize:
         name: Summarize
-        uses: swaleio/python@1.0.0
+        uses: swaleio/python-3-11@1.0.0
         args:
           script: |
             from pathlib import Path

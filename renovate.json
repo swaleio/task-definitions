@@ -1,0 +1,34 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Keeps each task definition's pinned image digest current within the tag it names.",
+  "enabledManagers": ["custom.regex"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The image a task definition pins: the tag in the comment directly above exec.image, and the digest on that line.",
+      "managerFilePatterns": ["/^tasks/[^/]+/task\\.md$/"],
+      "matchStrings": [
+        "#\\s*(?<depName>[^\\s:@]+(?:/[^\\s:@]+)+):(?<currentValue>[^\\s@]+)\\s*\\n\\s*image:\\s*[^\\s@]+@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "A definition is pinned to one release line, so only the digest behind its tag may move. A new line is a new definition, added by hand.",
+      "matchManagers": ["custom.regex"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "enabled": false
+    },
+    {
+      "description": "One pull request for every definition whose image was rebuilt upstream that week.",
+      "matchManagers": ["custom.regex"],
+      "matchUpdateTypes": ["digest"],
+      "groupName": "task definition images"
+    }
+  ],
+  "schedule": ["before 6am on monday"],
+  "dependencyDashboard": {
+    "enabled": true
+  }
+}

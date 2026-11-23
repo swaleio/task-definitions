@@ -13,7 +13,7 @@ exec:
     - -NoLogo
     - -NonInteractive
     - -Command
-    - '$s=$env:INPUT_SCRIPT; Set-Content -Path /tmp/run.ps1 -Value $s; pwsh -File /tmp/run.ps1'
+    - 'Set-Location $env:WORKFLOW_TASK_STORAGE; $s=$env:INPUT_SCRIPT; Set-Content -Path /tmp/run.ps1 -Value $s; pwsh -File /tmp/run.ps1'
 ---
 
 # PowerShell
@@ -62,7 +62,7 @@ Swale runtime which sets it in the execution environment.
 
 The task declares only `script`, so the example passes only `script` and the
 script is self-contained — it writes to a relative `out/` directory under the
-working directory rather than assuming any particular mount.
+working directory rather than assuming any particular mount. The task starts in its own scratch directory (`$WORKFLOW_TASK_STORAGE`), which is writable and discarded when the task ends.
 
 ```yaml
 name: PowerShell example

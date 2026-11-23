@@ -1,6 +1,6 @@
 ---
-name: Blender render
-description: Renders frames of a .blend file with Blender in the background, on CPU or on the GPU.
+name: Blender 5.2 render
+description: Renders frames of a .blend file with Blender 5.2 LTS in the background, on CPU or on the GPU.
 inputs:
   scene:
     description: Absolute path of the .blend file to render, e.g. ${{env.WORKFLOW_STORAGE}}/scene/animation.blend.
@@ -24,11 +24,11 @@ outputs:
   path:
     description: The directory the frames were written to, i.e. the directory of the output input.
 exec:
-  # docker.io/swaleio/blender:1.0.0
-  image: docker.io/swaleio/blender@sha256:e65baad8e666a31e9fe91b0c8ca5cda807ec9b2e695f3cfe40537949f23cbce0
+  # docker.io/swaleio/blender-5-2:1.0.0
+  image: docker.io/swaleio/blender-5-2@sha256:2356ceec5886906dda39874cbc5bb05bcf39b2887cdb6dc5af724dd0808cd64a
 ---
 
-# Blender render
+# Blender 5.2 render
 
 Renders `frames` of the `.blend` file at `scene` with Blender 5.2 LTS in
 background mode, writing them to `output`. Point both at the shared workspace
@@ -36,6 +36,12 @@ and the task becomes one unit of a render farm: a `for_each` over frame ranges
 runs as many of these as the workflow lists, every one reading the same scene
 and its textures from the workspace without copying them, and every one
 writing into the same frame sequence for the encoder that follows.
+
+Render with the Blender line the scene was authored in. An older Blender opens a
+newer `.blend` only with a warning to expect data loss — 4.5 reports
+`File written by newer Blender binary (502.45), expect loss of data!` for a 5.2
+file — and the render engines change between releases. Each Blender LTS line has
+its own definition for that reason.
 
 The image is the official Blender build straight from `download.blender.org`,
 checksum-verified, running as a non-root user; nothing is added to it. Keep the
@@ -129,7 +135,7 @@ blocks:
     tasks:
       render:
         name: Render frames
-        uses: swaleio/blender-render@1.0.0
+        uses: swaleio/blender-render-5-2@1.0.0
         compute_type: a100-1   # any GPU compute type — see Compute above
         args:
           scene: ${{env.WORKFLOW_STORAGE}}/scene/animation.blend

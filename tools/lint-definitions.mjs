@@ -7,7 +7,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, dirname, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import yaml from "js-yaml";
+import { load } from "js-yaml";
 
 const NAME_RE = /^[A-Za-z0-9_-]{1,100}$/;
 const IDENT_RE = /^[a-z0-9_]+$/; // snake_case identifiers
@@ -74,7 +74,7 @@ function lintFile(root, path) {
 
   let data;
   try {
-    data = yaml.load(frontmatter);
+    data = load(frontmatter);
   } catch (error) {
     errors.push(`${rel}: frontmatter is not valid YAML: ${error.message}`);
     return errors;

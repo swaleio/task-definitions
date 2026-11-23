@@ -8,6 +8,6 @@
     "lint": "node tools/lint-definitions.mjs"
   },
   "dependencies": {
-    "js-yaml": "4.3.2"
+    "js-yaml": "5.5.0"
   }
 }

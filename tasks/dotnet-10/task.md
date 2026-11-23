@@ -1,20 +1,20 @@
 ---
-name: Dotnet
-description: Runs an arbitrary shell script with the .NET SDK available, for build, test, and publish flows.
+name: .NET 10
+description: Runs an arbitrary shell script with the .NET 10 SDK available, for build, test, and publish flows.
 inputs:
   script:
     description: The shell script to run. The dotnet CLI is on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
   # mcr.microsoft.com/dotnet/sdk:10.0
-  image: mcr.microsoft.com/dotnet/sdk@sha256:ea8bde36c11b6e7eec2656d0e59101d4462f6bd630730f2c8201ed0572b295d5
+  image: mcr.microsoft.com/dotnet/sdk@sha256:2b1e13a22e46b55117f9cdb4b38e73172de08a30370166c8227d06cdaff82473
   args:
     - bash
     - -lc
-    - 'printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
+    - 'cd "$WORKFLOW_TASK_STORAGE" && printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
 ---
 
-# Dotnet
+# .NET 10
 
 Writes your `script` to a file and executes it with `bash` inside the
 `mcr.microsoft.com/dotnet/sdk:10.0` image, so the full .NET SDK — `dotnet build`,
@@ -54,10 +54,10 @@ Keep untrusted data out of the script body.
 
 The task declares only `script`, so the example passes only `script` and the
 script is self-contained — it scaffolds and builds under a relative `out/`
-directory rather than assuming any particular mount.
+directory rather than assuming any particular mount. The task starts in its own scratch directory (`$WORKFLOW_TASK_STORAGE`), which is writable and discarded when the task ends.
 
 ```yaml
-name: Dotnet example
+name: Dotnet 10 example
 compute_type: cpu-4
 entry_point: main
 
@@ -66,7 +66,7 @@ blocks:
     tasks:
       test:
         name: Build and test
-        uses: swaleio/dotnet@1.0.0
+        uses: swaleio/dotnet-10@1.0.0
         args:
           script: |
             set -euo pipefail
@@ -79,7 +79,7 @@ blocks:
 
 Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
-this generic `dotnet` task declares none). Share build artifacts by writing them
+this generic `dotnet-10` task declares none). Share build artifacts by writing them
 somewhere a later task reads — the working directory for this task alone, or the
 shared workspace (`$WORKFLOW_STORAGE` in the container) when another task must
 pick them up.

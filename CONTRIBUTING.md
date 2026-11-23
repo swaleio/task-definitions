@@ -159,13 +159,56 @@ Keep the section short — it is a scannable label, not an essay.
   fixed argv placeholders. The default. Safe, discoverable, composable. Each
   declared input also arrives in the container as `$INPUT_*`, safe to read as
   data.
-- **Free-form** — a per-runtime escape hatch (`bash`, `powershell`, `python`, …)
-  that takes a single multiline `script` input, writes it to a file, and executes
-  it. A free-form task declares **only** `script` (and no outputs), so there are
-  no extra `$INPUT_*` values. Parameterize it by interpolating a **trusted**
-  workflow expression (`${{inputs.x}}`, `${{tasks.x.outputs.y}}`) into the script,
-  or by reading a run-level environment variable — never interpolate an untrusted
-  value into the script text.
+- **Free-form** — a per-runtime escape hatch (`bash`, `powershell-7-6`,
+  `python-3-13`, …) that takes a single multiline `script` input, writes it to a file, and
+  executes it. A free-form task declares **only** `script` (and no outputs), so
+  there are no extra `$INPUT_*` values. Parameterize it by interpolating a
+  **trusted** workflow expression (`${{inputs.x}}`, `${{tasks.x.outputs.y}}`) into
+  the script, or by reading a run-level environment variable — never interpolate
+  an untrusted value into the script text.
+- A free-form wrapper **starts in `$WORKFLOW_TASK_STORAGE`** before running the
+  script. A vendor image usually sets no working directory, which leaves the
+  script in `/` — read-only on the platform — so a relative path such as `out/`
+  would fail. The task's scratch is writable, private, and discarded afterwards.
+- A tool that ignores `$HOME` has to be pointed at it in the wrapper. The JVM
+  takes its home from the image's account entry, so the `java-maven-*` wrappers
+  set `-Duser.home=$HOME` through `MAVEN_OPTS`.
+- A wrapper whose toolchain lives outside `/usr/local/bin` and `/usr/bin` runs
+  `bash -c`, not `bash -lc`. A login shell reads Debian's `/etc/profile`, which
+  replaces `PATH` for a non-root user and drops the image's own entries — that
+  is why `go` and `rust` cannot find `/usr/local/go/bin` or `/usr/local/cargo/bin`
+  under `-l`.
+
+### Runtime lines
+
+A language runtime with several supported versions gets **one definition per
+release line**, named `<runtime>-<line>`: `node-24`, `python-3-13`, `dotnet-10`,
+`java-maven-21`. Names cannot contain dots, so a line's dots become hyphens.
+
+- **The line follows the ecosystem's own compatibility boundary**: the major
+  version for Node.js, .NET, and Java, and the minor version for Python and
+  PowerShell. Node.js and Java ship only their LTS lines — their other releases
+  are supported for six to eight months, too short to be worth a definition —
+  while .NET and PowerShell give every release at least two years.
+- **Go and Rust have one line each**, `go` and `rust`, following the newest
+  release. Both promise backward compatibility across all of 1.x, so their
+  compatibility boundary is the major version, and there is only one.
+- **Ship every line its upstream still supports.** Add a definition when a line
+  is released; stop releasing one when its line reaches end of life. Versions
+  already published stay usable, so nobody's pinned workflow breaks.
+- **One definition never spans lines.** A definition version pins one image
+  digest, and `uses:` without a version resolves to the most recently
+  *published* version, not the highest — so putting several lines behind one
+  name would let a refresh of an old line become everyone's default.
+- **The definition's own version describes the definition**, not the runtime:
+  a patch refreshes the image digest within the line, a minor adds an optional
+  input, a major breaks the interface.
+
+[Renovate](renovate.json) opens a weekly pull request moving each definition's
+digest to whatever its tag now names. It never moves a definition to another
+tag — a new line is a new definition, added by hand. Merging that pull request
+changes `main`; each changed definition still needs a release tag to publish
+the refreshed version.
 
 ### Workflow examples in the body
 

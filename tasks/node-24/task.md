@@ -1,20 +1,20 @@
 ---
-name: Node
-description: Runs an arbitrary shell script with Node.js, npm, npx, and corepack available.
+name: Node.js 24
+description: Runs an arbitrary shell script with Node.js 24, npm, npx, and corepack available.
 inputs:
   script:
     description: The shell script to run. node, npm, and npx are on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
   # docker.io/library/node:24-trixie-slim
-  image: docker.io/library/node@sha256:366fdef91728b1b7fa18c84fba63b6e79ed77b7e10cc206878e9705da4d7b169
+  image: docker.io/library/node@sha256:af02d57b57719b9657a45199a79264a9437940cd55b3c7b3fc99615654f124a0
   args:
     - bash
     - -lc
-    - 'printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
+    - 'cd "$WORKFLOW_TASK_STORAGE" && printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
 ---
 
-# Node
+# Node.js 24
 
 Writes your `script` to a file and executes it with `bash` on the
 `node:24-trixie-slim` image, so `node`, `npm`, and `npx` are on `PATH` and you
@@ -22,9 +22,9 @@ can run JavaScript/TypeScript build tooling — installs, builds, tests, bundler
 and codegen. `script` is a **shell** script (not raw JavaScript): call the Node
 toolchain from it the way you would in a terminal.
 
-`corepack` is bundled, so `pnpm` and `yarn` are available too — enable the one
-your project uses with `corepack enable` (or `corepack prepare`) at the top of
-your script.
+`corepack` is bundled, so `pnpm` and `yarn` are available too. Call them
+through it — `corepack pnpm install` — rather than running `corepack enable`,
+which writes its shims into the image's read-only `/usr/local/bin` and fails.
 
 ## Parameterizing
 
@@ -51,7 +51,7 @@ Keep untrusted data out of the script body.
 
 Append `key=value` lines to the file at `$WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
-this generic `node` task declares none).
+this generic `node-24` task declares none).
 
 ## Compute
 
@@ -61,10 +61,10 @@ this generic `node` task declares none).
 
 The task declares only `script`, so the example passes only `script` and the
 script is self-contained — it works in a relative `out/` directory under the
-working directory rather than assuming any particular mount.
+working directory rather than assuming any particular mount. The task starts in its own scratch directory (`$WORKFLOW_TASK_STORAGE`), which is writable and discarded when the task ends.
 
 ```yaml
-name: Node example
+name: Node.js 24 example
 compute_type: cpu-4
 entry_point: main
 
@@ -73,11 +73,10 @@ blocks:
     tasks:
       build:
         name: Build web app
-        uses: swaleio/node@1.0.0
+        uses: swaleio/node-24@1.0.0
         args:
           script: |
             set -euo pipefail
-            corepack enable
             mkdir -p out
             cd out
             npm init -y

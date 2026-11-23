@@ -1,25 +1,30 @@
 ---
-name: Java Maven
-description: Runs an arbitrary shell script with a JDK and Maven available, for building and testing Java.
+name: Java 25 Maven
+description: Runs an arbitrary shell script with a Java 25 JDK and Maven, for building and testing Java.
 inputs:
   script:
     description: The shell script to run. A JDK and Maven are on PATH; invoke Maven as `mvn -B`. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
   # docker.io/library/maven:3.9-eclipse-temurin-25
-  image: docker.io/library/maven@sha256:7e461cec477077c1d9e50b13df8aef9018764410f4c4cd7c34803f10c4c99e4c
+  image: docker.io/library/maven@sha256:93b8a14ea2f412782e4e842651273b4d903e35cc496284f178fbbe2d67d00976
   args:
     - bash
     - -lc
-    - 'printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
+    - 'cd "$WORKFLOW_TASK_STORAGE" && export MAVEN_OPTS="-Duser.home=$HOME $MAVEN_OPTS" && printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
 ---
 
-# Java Maven
+# Java 25 Maven
 
 Writes your `script` to a file and executes it with `bash` inside an image that
 has a JDK (Eclipse Temurin 25) and Apache Maven 3.9 on `PATH`. Use it to build,
 test, and package Java projects. Run Maven in batch mode (`mvn -B`) so it emits
 non-interactive, log-friendly output.
+
+Maven reads its home from the image's account rather than `$HOME`, so the task
+points it at `$HOME` through `MAVEN_OPTS`; the local repository therefore lands
+in the writable home directory. The image's own entrypoint still reports that it
+cannot write to `/root/.m2` as the task starts — that message is harmless.
 
 ## Parameterizing
 
@@ -50,10 +55,10 @@ Keep untrusted data out of the script body.
 
 The task declares only `script`, so the example passes only `script` and the
 script is self-contained — it scaffolds and packages a project under a relative
-`out/` directory rather than assuming any particular mount.
+`out/` directory rather than assuming any particular mount. The task starts in its own scratch directory (`$WORKFLOW_TASK_STORAGE`), which is writable and discarded when the task ends.
 
 ```yaml
-name: Java Maven example
+name: Java 25 Maven example
 compute_type: cpu-4
 entry_point: main
 
@@ -62,7 +67,7 @@ blocks:
     tasks:
       build:
         name: Build
-        uses: swaleio/java-maven@1.0.0
+        uses: swaleio/java-maven-25@1.0.0
         args:
           script: |
             set -euo pipefail
@@ -71,7 +76,7 @@ blocks:
               -DarchetypeArtifactId=maven-archetype-quickstart \
               -DarchetypeVersion=1.4 -DinteractiveMode=false \
               -DoutputDirectory=out
-            mvn -B -f out/app/pom.xml package
+            mvn -B -f out/app/pom.xml -Dmaven.compiler.source=25 -Dmaven.compiler.target=25 package
 ```
 
 The example scaffolds and packages into a relative `out/` directory; point Maven

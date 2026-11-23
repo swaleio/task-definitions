@@ -1,28 +1,27 @@
 ---
-name: PowerShell
-description: Runs an arbitrary PowerShell (pwsh) script. The escape hatch for anything without a task.
+name: PowerShell 7.7
+description: Runs an arbitrary PowerShell 7.7 (pwsh) script. The escape hatch for anything without a task.
 inputs:
   script:
     description: The PowerShell script to run. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable via $env inside it.
     required: true
 exec:
-  # mcr.microsoft.com/dotnet/sdk:10.0
-  image: mcr.microsoft.com/dotnet/sdk@sha256:ea8bde36c11b6e7eec2656d0e59101d4462f6bd630730f2c8201ed0572b295d5
+  # mcr.microsoft.com/dotnet/sdk:11.0
+  image: mcr.microsoft.com/dotnet/sdk@sha256:65f3c7c6a25a239ab3e6719f2896147e7b68242ff2d8818dd70498bde6ef8bea
   args:
     - pwsh
     - -NoLogo
     - -NonInteractive
     - -Command
-    - '$s=$env:INPUT_SCRIPT; Set-Content -Path /tmp/run.ps1 -Value $s; pwsh -File /tmp/run.ps1'
+    - 'Set-Location $env:WORKFLOW_TASK_STORAGE; $s=$env:INPUT_SCRIPT; Set-Content -Path /tmp/run.ps1 -Value $s; pwsh -File /tmp/run.ps1'
 ---
 
-# PowerShell
+# PowerShell 7.7
 
 Writes your `script` to `/tmp/run.ps1` and executes it with `pwsh`, so
 `$ErrorActionPreference`, multi-line pipelines, functions, and error records all
-behave exactly as they do in a normal PowerShell session. Runs on the
-cross-platform PowerShell that ships in the `mcr.microsoft.com/dotnet/sdk:10.0`
-base image, non-interactively (`-NonInteractive`, no TTY).
+behave exactly as they do in a normal PowerShell session. Runs on
+PowerShell 7.7, which ships in the `mcr.microsoft.com/dotnet/sdk:11.0` base image, non-interactively (`-NonInteractive`, no TTY).
 
 ## Parameterizing
 
@@ -62,10 +61,10 @@ Swale runtime which sets it in the execution environment.
 
 The task declares only `script`, so the example passes only `script` and the
 script is self-contained — it writes to a relative `out/` directory under the
-working directory rather than assuming any particular mount.
+working directory rather than assuming any particular mount. The task starts in its own scratch directory (`$WORKFLOW_TASK_STORAGE`), which is writable and discarded when the task ends.
 
 ```yaml
-name: PowerShell example
+name: PowerShell 7.7 example
 compute_type: cpu-4
 entry_point: main
 
@@ -74,7 +73,7 @@ blocks:
     tasks:
       report:
         name: Report
-        uses: swaleio/powershell@1.0.0
+        uses: swaleio/powershell-7-7@1.0.0
         args:
           script: |
             $ErrorActionPreference = 'Stop'
@@ -88,7 +87,7 @@ blocks:
 
 Append `key=value` lines to the file at `$env:WORKFLOW_TASK_OUTPUT` to publish
 outputs for downstream tasks (declare them in a task that needs typed outputs;
-this generic `powershell` task declares none).
+this generic `powershell-7-7` task declares none).
 
 ---
 

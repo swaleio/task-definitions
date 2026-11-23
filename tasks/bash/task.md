@@ -11,7 +11,7 @@ exec:
   args:
     - bash
     - -lc
-    - 'printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
+    - 'cd "$WORKFLOW_TASK_STORAGE" && printf %s "$INPUT_SCRIPT" > /tmp/run.sh && exec bash /tmp/run.sh'
 ---
 
 # Bash
@@ -28,7 +28,7 @@ exactly as they do in a normal shell.
 
 The task declares only `script`, so the example passes only `script` and the
 script is self-contained — it writes to a relative `out/` directory under the
-working directory rather than assuming any particular mount.
+working directory rather than assuming any particular mount. The task starts in its own scratch directory (`$WORKFLOW_TASK_STORAGE`), which is writable and discarded when the task ends.
 
 ```yaml
 name: Bash example

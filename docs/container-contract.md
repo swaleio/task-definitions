@@ -41,6 +41,10 @@ fixed non-root user:
 | `/tmp` | This task only, discarded after | Temporary files |
 | `$HOME` (`/home/task`) | This task only, discarded after | Tool caches and config |
 
+A task starts in its image's `WORKDIR`. An image that sets none starts in `/`,
+which is read-only, so a script that writes relative paths must change to a
+writable directory first.
+
 `$HOME` being writable is why tools work unmodified: `~/.cache/huggingface`,
 `~/.ollama`, `git config --global`, and package-manager caches all land there
 without configuration.

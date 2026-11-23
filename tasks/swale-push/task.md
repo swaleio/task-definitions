@@ -15,8 +15,8 @@ inputs:
     description: Swale access token for authentication (pass a secret). Delivered to the CLI as SWALE_ACCOUNT_TOKEN, never placed on the command line.
     required: true
 exec:
-  # docker.io/swaleio/swale-cli:1.2.0
-  image: docker.io/swaleio/swale-cli@sha256:028530027a5ae41f89dc3c6e844f28b880fcbb7b410e35bcd9bae721c1eaa7bf
+  # docker.io/swaleio/swale-cli:1.3.0
+  image: docker.io/swaleio/swale-cli@sha256:4926d5997e6f1f7f1f52beb1c4e21c66e914f826229ae80b75eab0aa2166188e
   # The CLI reads its credentials from the environment. exec.env is how they get
   # there without appearing in the container's argv, and so its pod spec.
   env:

@@ -1,12 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Keeps each task definition's pinned image digest current within the tag it names.",
-  "enabledManagers": ["custom.regex"],
+  "description": [
+    "Keeps each task definition's pinned image digest current within the tag it names.",
+    "Renovate merges its own pull requests rather than using GitHub's auto-merge, which waits only for required checks; main requires none, so it would merge before lint finished."
+  ],
+  "enabledManagers": [
+    "custom.regex",
+    "npm"
+  ],
   "customManagers": [
     {
       "customType": "regex",
       "description": "The image a task definition pins: the tag in the comment directly above exec.image, and the digest on that line.",
-      "managerFilePatterns": ["/^tasks/[^/]+/task\\.md$/"],
+      "managerFilePatterns": [
+        "/^tasks/[^/]+/task\\.md$/"
+      ],
       "matchStrings": [
         "#\\s*(?<depName>[^\\s:@]+(?:/[^\\s:@]+)+):(?<currentValue>[^\\s@]+)\\s*\\n\\s*image:\\s*[^\\s@]+@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
@@ -16,19 +24,44 @@
   "packageRules": [
     {
       "description": "A definition is pinned to one release line, so only the digest behind its tag may move. A new line is a new definition, added by hand.",
-      "matchManagers": ["custom.regex"],
-      "matchUpdateTypes": ["major", "minor", "patch"],
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ],
       "enabled": false
     },
     {
-      "description": "One pull request for every definition whose image was rebuilt upstream that week.",
-      "matchManagers": ["custom.regex"],
-      "matchUpdateTypes": ["digest"],
-      "groupName": "task definition images"
+      "description": "One pull request for every definition whose image was rebuilt upstream that week. It merges itself once its checks pass: the tag a definition names is unchanged, only the build behind it moves.",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "groupName": "task definition images",
+      "automerge": true
+    },
+    {
+      "description": "The linter's npm dependencies. A patch or minor update merges itself once its checks pass; a major update changes how the linter reads YAML, so it waits for review.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
     }
   ],
-  "schedule": ["before 6am on monday"],
+  "schedule": [
+    "before 6am on monday"
+  ],
   "dependencyDashboard": {
     "enabled": true
-  }
+  },
+  "platformAutomerge": false
 }

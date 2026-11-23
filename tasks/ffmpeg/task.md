@@ -84,8 +84,8 @@ blocks:
           token: ${{secrets.WORKFLOW_TOKEN}}
 ```
 
-See `blender-render` for the task that produces such a frame sequence, split
-across a `for_each` over frame ranges.
+See `blender-render-5-2` and `blender-render-4-5` for the tasks that produce such
+a frame sequence, split across a `for_each` over frame ranges.
 
 ## Parameterizing
 

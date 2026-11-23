@@ -1,12 +1,12 @@
-# blender
+# blender-5-2
 
-Swale-built image backing the `blender-render` task definition. It packages the
+Swale-built image backing the `blender-render-5-2` task definition. It packages the
 official [Blender](https://www.blender.org/) 5.2 LTS Linux build for background
 (`-b`) rendering, so a workflow can render a `.blend` file's frames into the
 shared workspace — split across as many tasks as the frame range has chunks.
 
 - **Base:** `ubuntu:24.04`
-- **Installed:** Blender 5.2.2 from `download.blender.org`, checksum-verified,
+- **Installed:** Blender 5.2.4 from `download.blender.org`, checksum-verified,
   under `/opt/blender` with `blender` on `PATH`; the X11/GL client libraries
   the binary links against (needed even without a display)
 - **User:** non-root `swale` (uid 1000)
@@ -47,15 +47,15 @@ to `$WORKFLOW_TASK_OUTPUT`. The consuming task must declare a `path` output.
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/blender:1.0.0 images/blender
+docker build -t docker.io/swaleio/blender-5-2:1.0.0 images/blender-5-2
 ```
 
 CI pins the real base digest and publishes the image; task definitions reference
-it as `docker.io/swaleio/blender@sha256:<digest>`.
+it as `docker.io/swaleio/blender-5-2@sha256:<digest>`.
 
 ---
 
-Built from [`images/blender`](https://github.com/swaleio/task-definitions/tree/main/images/blender) in the
+Built from [`images/blender-5-2`](https://github.com/swaleio/task-definitions/tree/main/images/blender-5-2) in the
 [swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository. For how a task definition
 references an image, see the
 [task definition reference](https://docs.swale.io/reference/task-definition-syntax)

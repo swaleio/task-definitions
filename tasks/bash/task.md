@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/library/debian:13-slim
-  image: docker.io/library/debian@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2
+  image: docker.io/library/debian@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
   args:
     - bash
     - -lc

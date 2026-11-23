@@ -6,8 +6,8 @@ FROM ubuntu@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33
 # Blender's own Python and its render kernels, so the only system packages it
 # needs are the X11/GL client libraries the binary links against - required even
 # for background rendering, where no display is ever opened.
-ARG BLENDER_VERSION=5.2.2
-ARG BLENDER_SHA256=84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168
+ARG BLENDER_VERSION=5.2.4
+ARG BLENDER_SHA256=2fd14c50987426897ba60237ee996edf2b4151f4b1a72a460ca20be58c1d2d86
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -46,8 +46,8 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 # LABEL - without that the generated repository-wide description would win.
 # The description also becomes the Docker Hub short description, which the
 # registry does not read from labels at all.
-LABEL org.opencontainers.image.title="Blender"
-LABEL org.opencontainers.image.description="Blender 5.2 LTS for background rendering in Swale workflows. Backs the blender-render task."
+LABEL org.opencontainers.image.title="Blender 5.2 LTS"
+LABEL org.opencontainers.image.description="Blender 5.2 LTS for background rendering in Swale workflows. Backs the blender-render-5-2 task."
 LABEL org.opencontainers.image.source="https://github.com/swaleio/task-definitions"
-LABEL org.opencontainers.image.documentation="https://github.com/swaleio/task-definitions/blob/main/images/blender/README.md"
+LABEL org.opencontainers.image.documentation="https://github.com/swaleio/task-definitions/blob/main/images/blender-5-2/README.md"
 LABEL org.opencontainers.image.licenses="GPL-2.0-or-later"

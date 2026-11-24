@@ -16,7 +16,7 @@ inputs:
     default: ""
 exec:
   # docker.io/swaleio/lm-eval:0.4.12
-  image: docker.io/swaleio/lm-eval@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/lm-eval@sha256:8eae69e18805fa4780bc7ef6ddd051929af948e30258d28748d48f43ba410977
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

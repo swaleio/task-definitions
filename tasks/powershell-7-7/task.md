@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/swaleio/powershell-7-7:7.7.0
-  image: docker.io/swaleio/powershell-7-7@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/powershell-7-7@sha256:068caffc0e98ec908d2f5f64de10e993b108c206cacb269a13b70100fe962f87
   args:
     - pwsh
     - -NoLogo

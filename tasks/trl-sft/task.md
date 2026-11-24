@@ -10,7 +10,7 @@ inputs:
     default: ""
 exec:
   # docker.io/swaleio/trl:0.24.0
-  image: docker.io/swaleio/trl@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/trl@sha256:646bd73c0a34200cf1d50b3f909551c9c67231782be7035b197faab06d7a7d14
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

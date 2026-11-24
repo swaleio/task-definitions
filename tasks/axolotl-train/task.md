@@ -10,7 +10,7 @@ inputs:
     default: ""
 exec:
   # docker.io/swaleio/axolotl:0.21.1
-  image: docker.io/swaleio/axolotl@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/axolotl@sha256:053fa952ae038539415cff1e4425292f78cc1076aa1d9bf975b62da747d2809a
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

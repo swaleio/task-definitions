@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/swaleio/bash:5.2.37
-  image: docker.io/swaleio/bash@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/bash@sha256:52ca3a8c0e9ef08f8503b1161481c57b260815f4ae1eeabbb6909a0d989ed718
   args:
     - bash
     - -lc

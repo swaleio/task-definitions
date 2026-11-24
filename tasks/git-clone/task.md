@@ -19,7 +19,7 @@ outputs:
     description: The resolved HEAD commit SHA after cloning.
 exec:
   # docker.io/swaleio/git:2.54.0
-  image: docker.io/swaleio/git@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: docker.io/swaleio/git@sha256:b649e5590cc677dbfa43ff6a5a8aa5d23019a58fc309cff2943d5a670bc04d2a
   args:
     - clone
     - "--depth=1"

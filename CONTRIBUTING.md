@@ -288,7 +288,8 @@ images/<name>/README.md         # synced to the Docker Hub page by CI
   any other version in an `ARG` under a `# renovate: datasource=… depName=…`
   comment. Packages from the base distribution's own repositories stay unpinned
   and arrive with the base's digest refreshes.
-- **Merging a change under `images/<name>` publishes the image.** Publish CI
+- **Merging a change under `images/<name>` publishes the image**, unless it
+  only touches comments, which change nothing the image runs. Publish CI
   builds each image the change touched, picks its tag, pushes
   `docker.io/swaleio/<name>`, attests build provenance, and then syncs the
   README to Docker Hub, so an image's first publish also gives it its page. A

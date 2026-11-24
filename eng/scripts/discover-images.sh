@@ -55,7 +55,19 @@ else
   # its own changes.
   [ -n "$before" ] || before=$(git rev-parse HEAD^)
   changed=$(git diff --name-only "$before...$head_sha" -- images/)
-  build=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u | existing)
+  # Comment-only changes rebuild nothing, except a `#!` line or a Dockerfile
+  # parser directive. Per file, because git 2.43's --name-only ignores -I.
+  built=""
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    if ! git diff --quiet -I '^[[:space:]]*#[^!]' -I '^[[:space:]]*#$' "$before...$head_sha" -- "$file"; then
+      built+="$file"$'\n'
+    fi
+  done <<< "$changed"
+  directives=$(git diff -U0 "$before...$head_sha" -- images/ | awk '
+    /^\+\+\+ b\// { file = substr($0, 7) }
+    tolower($0) ~ /^[-+]#[[:space:]]*(syntax|escape|check)[[:space:]]*=/ { print file }')
+  build=$(printf '%s\n%s\n' "$built" "$directives" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u | existing)
   sync=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF == "README.md" { print $2 }' | sort -u | existing)
 fi
 

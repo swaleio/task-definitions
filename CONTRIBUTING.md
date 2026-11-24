@@ -21,6 +21,13 @@ A task definition is a Markdown file with a YAML frontmatter block:
   release workflow, which imports the frozen file into the platform under the
   version from the tag name. The file on `main` keeps evolving toward the next
   release — doc typo fixes don't mint versions.
+- **Push one release tag per `git push`.** GitHub starts no workflow for a
+  push of more than three tags, so pushing several release tags together
+  releases none of them:
+
+  ```sh
+  for tag in git-clone/1.0.0 node-24/1.0.0; do git tag "$tag" && git push origin "$tag"; done
+  ```
 - A published version is **immutable** on the platform (and the release tag
   should never be moved). Compare two versions with
   `git diff git-clone/1.0.0..git-clone/1.1.0 -- tasks/git-clone/task.md`.

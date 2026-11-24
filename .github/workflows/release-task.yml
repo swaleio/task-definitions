@@ -3,8 +3,10 @@ name: Release task version
 # A task version is released by pushing a tag named `<task-name>/<version>`
 # (e.g. `git-clone/1.0.0`). The tag freezes tasks/<task-name>/task.md as that
 # immutable version — the same file on main keeps evolving toward the next one.
-# This workflow validates the tag and imports the frozen file into the Swale
-# platform under the version from the tag name.
+# This workflow validates the tag and publishes the frozen file to the Swale
+# platform as the `swaleio` organization, under the version from the tag name.
+# SWALE_ACCOUNT_TOKEN is a personal access token of `swale-admin`, the account
+# that owns `swaleio`: the platform issues no organization tokens.
 
 on:
   push:
@@ -40,19 +42,17 @@ jobs:
             echo "::error::tasks/${{ steps.tag.outputs.name }}/task.md still pins a placeholder digest — publish the image and pin the real digest before releasing"; exit 1
           fi
 
-      # TODO: switch to automated import once a platform service account exists.
-      # Requires SWALE_ACCOUNT_NAME / SWALE_ACCOUNT_TOKEN secrets and the swale
-      # CLI (or the HTTP API): publish the version from file; the first publish
-      # under a name creates the task definition.
-      - name: Import instructions
+      - uses: swaleio/setup-swale@c12442e5ceae0e7435a259842453b63177625387 # v1.0.0
+        with:
+          version: 1.3.0
+
+      - name: Publish to the platform
         shell: bash
+        env:
+          SWALE_ACCOUNT_NAME: swaleio
+          SWALE_ACCOUNT_TOKEN: ${{ secrets.SWALE_ACCOUNT_TOKEN }}
+          NAME: ${{ steps.tag.outputs.name }}
+          VERSION: ${{ steps.tag.outputs.version }}
         run: |
-          {
-            echo "## Release ${{ steps.tag.outputs.name }}@${{ steps.tag.outputs.version }}"
-            echo
-            echo "Import this frozen file into the platform:"
-            echo
-            echo '```sh'
-            echo "swale task-definition publish --name ${{ steps.tag.outputs.name }} --version ${{ steps.tag.outputs.version }} --file tasks/${{ steps.tag.outputs.name }}/task.md --public"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          swale task-definition publish --name "$NAME" --version "$VERSION" --file "tasks/$NAME/task.md" --public
+          echo "Published \`swaleio/$NAME@$VERSION\`." >> "$GITHUB_STEP_SUMMARY"

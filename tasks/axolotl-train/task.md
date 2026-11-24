@@ -9,8 +9,8 @@ inputs:
     description: Hugging Face access token for gated or private base models (pass a secret). Omit for public base models or local model directories.
     default: ""
 exec:
-  # docker.io/axolotlai/axolotl:main-20260712-py3.12-cu130-2.12.0
-  image: docker.io/axolotlai/axolotl@sha256:c33b21ad322e49fcc2db6116042cc206c69f26716482fc2902179fa303dd60b4
+  # docker.io/swaleio/axolotl:0.21.1
+  image: docker.io/swaleio/axolotl@sha256:053fa952ae038539415cff1e4425292f78cc1076aa1d9bf975b62da747d2809a
   env:
     HF_TOKEN: ${{inputs.token}}
   args:
@@ -84,7 +84,7 @@ blocks:
     tasks:
       write_config:
         name: Write training config
-        uses: swaleio/bash@1.0.0
+        uses: swaleio/bash
         args:
           script: |
             set -euo pipefail
@@ -111,7 +111,7 @@ blocks:
             EOF
       train:
         name: QLoRA fine-tune
-        uses: swaleio/axolotl-train@1.0.0
+        uses: swaleio/axolotl-train
         start_on:
           - write_config
         compute_type: a100-1   # any GPU compute type — see Compute above

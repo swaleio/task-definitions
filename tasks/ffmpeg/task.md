@@ -6,8 +6,8 @@ inputs:
     description: The Bash script to run; ffmpeg and ffprobe are on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
-  # docker.io/swaleio/ffmpeg:1.0.0
-  image: docker.io/swaleio/ffmpeg@sha256:3f1239cac560f19208a56fa0fa3f417dc4a2979925c6166f837e168232175271
+  # docker.io/swaleio/ffmpeg:7.1.5
+  image: docker.io/swaleio/ffmpeg@sha256:c8f36e72a2b5ecacdf2729628c978a3bc077ec844cfd9d40aea94f698a360a64
   args:
     - bash
     - -lc
@@ -61,7 +61,7 @@ blocks:
     tasks:
       encode:
         name: Encode
-        uses: swaleio/ffmpeg@1.0.0
+        uses: swaleio/ffmpeg
         args:
           script: |
             set -euo pipefail
@@ -76,7 +76,7 @@ blocks:
         name: Publish
         start_on:
           - encode
-        uses: swaleio/swale-push@1.0.0
+        uses: swaleio/swale-push
         args:
           target: my-project/renders:latest
           source: ${{env.WORKFLOW_STORAGE}}/out

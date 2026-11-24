@@ -6,8 +6,8 @@ inputs:
     description: The shell script to run. go is on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
-  # docker.io/library/golang:1-trixie
-  image: docker.io/library/golang@sha256:f18c3d73a184fb0582828510722e723b63a93f7188d11dd223d9be6f6880e65d
+  # docker.io/library/golang:1.27.4-trixie
+  image: docker.io/library/golang@sha256:c393c00864b56f4404b3fe4d029e47742fbb53ee11506521d2f3377009ad7a3a
   args:
     - bash
     - -c
@@ -85,7 +85,7 @@ blocks:
     tasks:
       build:
         name: Build service
-        uses: swaleio/go@1.0.0
+        uses: swaleio/go
         args:
           script: |
             set -euo pipefail

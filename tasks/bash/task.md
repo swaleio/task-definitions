@@ -6,8 +6,8 @@ inputs:
     description: The Bash script to run. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
-  # docker.io/library/debian:13-slim
-  image: docker.io/library/debian@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
+  # docker.io/swaleio/bash:5.2.37
+  image: docker.io/swaleio/bash@sha256:52ca3a8c0e9ef08f8503b1161481c57b260815f4ae1eeabbb6909a0d989ed718
   args:
     - bash
     - -lc
@@ -40,7 +40,7 @@ blocks:
     tasks:
       build:
         name: Build
-        uses: swaleio/bash@1.0.0
+        uses: swaleio/bash
         args:
           script: |
             set -euo pipefail

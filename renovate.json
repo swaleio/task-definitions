@@ -29,7 +29,7 @@
         "/^tasks/[^/]+/task\\.md$/"
       ],
       "matchStrings": [
-        "#\\s*(?<depName>[^\\s:@]+(?:/[^\\s:@]+)+):(?<currentValue>[^\\s@]+)\\s*\\n\\s*image:\\s*[^\\s@]+@(?<currentDigest>sha256:[a-f0-9]{64})"
+        "#\\s*(?<depName>[^\\s:@/]+(?:/[^\\s:@/]+)+):(?<currentValue>[^\\s@]+)\\s*\\n\\s*image:\\s*[^\\s@]+@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker"
     },
@@ -53,22 +53,46 @@
   },
   "packageRules": [
     {
-      "description": "A definition is pinned to one release line, so only the digest behind its tag may move. A new line is a new definition, added by hand.",
+      "description": "A definition is pinned to one release line, so its vendor image never moves to another major version. A new line is a new definition, added by hand. A swale-built image's major version is its tool's, moved by an image change already reviewed.",
       "matchFileNames": [
         "tasks/**"
       ],
       "matchManagers": [
         "custom.regex"
       ],
+      "matchDepNames": [
+        "!docker.io/swaleio/**"
+      ],
       "matchUpdateTypes": [
-        "major",
-        "minor",
-        "patch"
+        "major"
       ],
       "enabled": false
     },
     {
-      "description": "One pull request for every definition whose image was rebuilt upstream that day. It merges itself once its checks pass: the tag a definition names is unchanged, only the build behind it moves.",
+      "description": "Python's release line is its minor version, so a Python definition takes patch releases only. Renovate offers the newest minor and patch as one update unless told to keep them apart.",
+      "matchFileNames": [
+        "tasks/**"
+      ],
+      "matchDepNames": [
+        "docker.io/library/python"
+      ],
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Python's release line is its minor version, so a Python definition takes patch releases only.",
+      "matchFileNames": [
+        "tasks/**"
+      ],
+      "matchDepNames": [
+        "docker.io/library/python"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "One pull request a day for every definition whose vendor image has a new build or release within its line. It merges itself once lint passes.",
       "matchFileNames": [
         "tasks/**"
       ],
@@ -76,9 +100,67 @@
         "custom.regex"
       ],
       "matchUpdateTypes": [
-        "digest"
+        "digest",
+        "minor",
+        "patch"
       ],
       "groupName": "task definition images",
+      "automerge": true
+    },
+    {
+      "description": "Releases that can change behavior within a version line wait for review, each in its own pull request: vLLM is still 0.x, and every llama.cpp build is a release.",
+      "matchFileNames": [
+        "tasks/**"
+      ],
+      "matchDepNames": [
+        "docker.io/vllm/vllm-openai",
+        "ghcr.io/ggml-org/llama.cpp"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": null,
+      "automerge": false
+    },
+    {
+      "description": "llama.cpp tags each build full-b<number>.",
+      "matchDepNames": [
+        "ghcr.io/ggml-org/llama.cpp"
+      ],
+      "versioning": "regex:^full-b(?<patch>\\d+)$"
+    },
+    {
+      "description": "A swale-built image is tagged with its tool's version, plus -r<N> for each rebuild on that version. Renovate's Docker versioning would read -r1 as a different variant and never offer it.",
+      "matchDepNames": [
+        "docker.io/swaleio/**"
+      ],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-r(?<build>\\d+))?$"
+    },
+    {
+      "description": "swaleio/ollama still carries 1.0.0, its tag from before images were tagged by their tool's version, which outranks Ollama's own 0.x versions. Drop this once that tag is deleted from Docker Hub.",
+      "matchDepNames": [
+        "docker.io/swaleio/ollama"
+      ],
+      "allowedVersions": "!/^1\\.0\\.0$/"
+    },
+    {
+      "description": "A swale-built image is published from a change that already built here, so definitions follow it as soon as it lands, in one pull request that merges itself once lint passes. A major version waits for review.",
+      "matchFileNames": [
+        "tasks/**"
+      ],
+      "matchDepNames": [
+        "docker.io/swaleio/**"
+      ],
+      "matchUpdateTypes": [
+        "digest",
+        "minor",
+        "patch"
+      ],
+      "groupName": "swale-built images",
+      "schedule": [
+        "at any time"
+      ],
       "automerge": true
     },
     {

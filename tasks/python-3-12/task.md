@@ -6,8 +6,8 @@ inputs:
     description: The Python program to run. Parameterize it by interpolating a trusted workflow expression into the program text, or by reading a run-level environment variable via os.environ inside it.
     required: true
 exec:
-  # ghcr.io/astral-sh/uv:python3.12-trixie-slim
-  image: ghcr.io/astral-sh/uv@sha256:b12436aceed37b21524b327362bd67e73a284b5d52f4f6be0e047dd8e4c4eb90
+  # docker.io/library/python:3.12.16-slim-trixie
+  image: docker.io/library/python@sha256:a0e2dd78cc679ddfffea960fe45ecfcff9ac2f68d67917a0edfcde5c2100151b
   args:
     - bash
     - -lc
@@ -20,11 +20,22 @@ Writes your `script` to `/tmp/run.py` and runs it with `python` (CPU-only
 Python 3.12), so tracebacks, multi-line programs, and standard-library imports
 all behave exactly as they do in a normal interpreter.
 
-This image ships [`uv`](https://docs.astral.sh/uv/) and `uvx`, so a script that
-needs extra packages can pull them in a single shot without a build step — for
-example `uv pip install --system httpx` at the top of the script, or invoke a
-tool with `uvx`. This is a **CPU** task: there is no CUDA/GPU stack and no
-`torch` — use a GPU-typed task for accelerated workloads.
+It runs on the official Python image, whose own packages are read-only. A
+script that needs a package the image lacks installs it with `pip` into a
+writable directory and puts that directory on `sys.path` before importing it:
+
+```python
+import subprocess, sys
+
+subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--target", "/tmp/deps", "httpx"], check=True)
+sys.path.insert(0, "/tmp/deps")
+import httpx
+```
+
+`pip install --user` does not work inside one script: Python adds the user
+package directory to `sys.path` only if it exists when the interpreter starts.
+This is a **CPU** task: there is no CUDA/GPU stack and no `torch` — use a
+GPU-typed task for accelerated workloads.
 
 ## Parameterizing
 
@@ -75,7 +86,7 @@ blocks:
     tasks:
       summarize:
         name: Summarize
-        uses: swaleio/python-3-12@1.0.0
+        uses: swaleio/python-3-12
         args:
           script: |
             from pathlib import Path

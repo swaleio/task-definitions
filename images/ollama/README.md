@@ -6,7 +6,7 @@ API that other tasks in the run call over HTTP — Ollama's native API
 (`/api/generate`, `/api/chat`, `/api/tags`, …) and its OpenAI-compatible
 endpoints (`/v1/chat/completions`, …) are both served on port `11434`.
 
-- **Base:** `ollama/ollama:0.31.2` (digest-pinned)
+- **Base:** the official `ollama/ollama` image
 - **User:** non-root `swale` (uid 1000)
 - **`OLLAMA_HOST=0.0.0.0:11434`** baked in, so the server binds all interfaces
   on the expected port regardless of base-image defaults and consumer tasks can
@@ -54,16 +54,23 @@ the server starts — `ollama pull` finds the model present and returns without
 transferring anything. Because the workspace is shared by every task in the run,
 two tasks writing the same store path must not overlap.
 
+## Tags
+
+Each tag is the version of Ollama the image packages, such as `0.31.2`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
 ## Building
 
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/ollama:1.0.0 images/ollama
+docker build -t swaleio/ollama:dev images/ollama
 ```
 
-CI pins the base digest, publishes the image, and task definitions reference it
-as `docker.io/swaleio/ollama@sha256:<digest>`.
+Merging a change under `images/ollama` publishes the image under its next tag;
+task definitions reference it by digest.
 
 ---
 

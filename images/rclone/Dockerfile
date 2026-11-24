@@ -1,5 +1,4 @@
-# Base: rclone/rclone:1 (pin the digest; tag kept for humans)
-FROM rclone/rclone@sha256:c61954aaa32328a5486715dd063a81c7879f5195ad3505cd362deddd509dc4a1
+FROM rclone/rclone:1.74.4@sha256:c61954aaa32328a5486715dd063a81c7879f5195ad3505cd362deddd509dc4a1
 
 # The base image's ENTRYPOINT is the `rclone` binary itself. Override it with a
 # thin wrapper that maps task inputs to rclone's remote-config env vars before
@@ -8,6 +7,9 @@ FROM rclone/rclone@sha256:c61954aaa32328a5486715dd063a81c7879f5195ad3505cd362ded
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# The version of the tool this image is built around. Publishing tags the image
+# with it, adding -r1, -r2, ... when that version is already published.
+RUN rclone version | head -n 1 | cut -d' ' -f2 | sed 's/^v//' > /usr/share/swale-image-version
 USER rclone
 WORKDIR /mnt/workspace
 ENTRYPOINT ["/entrypoint.sh"]

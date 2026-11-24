@@ -27,16 +27,23 @@ The `ffmpeg` task is free-form: the platform delivers the caller's script as
 `bash`. Inside the script `$WORKFLOW_STORAGE` names the shared workspace and
 `$WORKFLOW_TASK_STORAGE` the task's private scratch.
 
+## Tags
+
+Each tag is the version of FFmpeg the image packages, such as `7.1.5`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
 ## Building
 
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/ffmpeg:1.0.0 images/ffmpeg
+docker build -t swaleio/ffmpeg:dev images/ffmpeg
 ```
 
-CI pins the real base digest and publishes the image; task definitions reference
-it as `docker.io/swaleio/ffmpeg@sha256:<digest>`.
+Merging a change under `images/ffmpeg` publishes the image under its next tag;
+task definitions reference it by digest.
 
 ---
 

@@ -94,13 +94,11 @@ exec:
   Swale-built images live at `docker.io/swaleio/<name>`; vendor images keep their
   own registry and tag.
 - **The tag in that comment must exist on the registry, and must not be deleted
-  or moved while a definition pins its digest.** Merging an image change only
-  proves it still builds; publishing is a deliberate release that names the
-  version, and `latest` moves with it — so `latest` always names a released
-  version rather than whatever landed last. A digest stays pullable once
-  untagged, but it disappears from the registry's listing, so nobody can see what
-  the catalog runs. `latest` does not count: publishing moves it, so it stops
-  naming the pinned digest as soon as the next build lands.
+  while a definition pins its digest.** A digest stays pullable once untagged,
+  but it disappears from the registry's listing, so nobody can see what the
+  catalog runs. A swale-built image never reuses a tag, so its tags never move.
+  `latest` does not count: each publish moves it, so it stops naming the pinned
+  digest as soon as the next build lands.
 
 ### Inputs and outputs
 
@@ -211,8 +209,8 @@ release line**, named `<runtime>-<line>`: `node-24`, `python-3-13`, `dotnet-10`,
   a patch refreshes the image digest within the line, a minor adds an optional
   input, a major breaks the interface.
 
-[Renovate](renovate.json) opens a weekly pull request moving each definition's
-digest to whatever its tag now names. It never moves a definition to another
+[Renovate](renovate.json) opens a pull request, at most one a day, moving each
+definition's digest to whatever its tag now names. It never moves a definition to another
 tag — a new line is a new definition, added by hand. Merging that pull request
 changes `main`; each changed definition still needs a release tag to publish
 the refreshed version.
@@ -246,20 +244,38 @@ key=value output file, and non-interactive (no-TTY) operation.
 
 ## Swale-built images
 
-If no trusted vendor image fits (wrong entrypoint, missing tooling, or an output
-needs to be emitted), add one under `images/<name>/`:
+If no trusted vendor image fits (wrong entrypoint, missing tooling, an output
+that needs to be emitted, or a tag that does not name the tool's version), add
+one under `images/<name>/`:
 
 ```
-images/<name>/Dockerfile     # FROM a digest-pinned trusted base; non-root; workdir /mnt/workspace
-images/<name>/entrypoint.sh  # runs the tool, emits declared outputs to $WORKFLOW_TASK_OUTPUT
-images/<name>/README.md      # synced to the Docker Hub page by CI
+images/<name>/Dockerfile        # FROM <base>:<tag>@sha256:<digest>; non-root; workdir /mnt/workspace
+images/<name>/entrypoint.sh     # runs the tool, emits declared outputs to $WORKFLOW_TASK_OUTPUT
+images/<name>/requirements.txt  # the pinned Python packages, when the image installs any
+images/<name>/README.md         # synced to the Docker Hub page by CI
 ```
 
-Publish CI builds changed images, pushes `docker.io/swaleio/<name>`, attests
-build provenance, and then syncs the image README to Docker Hub, so an image's
-first publish also gives it its page. To refresh a page without changing its
-README, dispatch "Publish images" without a version: it builds and pushes
-nothing and only syncs the selected images' READMEs.
+- **An image records the version of the tool it is built around**, read from
+  the tool itself, in `/usr/share/swale-image-version`. Publishing tags the
+  image with that version, adding `-r1`, `-r2`, and so on when it is already
+  published: a rebuilt base or a wrapper fix keeps the tool's version. A tag is
+  never reused; `latest` follows the newest publish.
+- **Everything a build installs is pinned where Renovate can see it:** the base
+  as `<image>:<tag>@sha256:<digest>`, Python packages in `requirements.txt`, and
+  any other version in an `ARG` under a `# renovate: datasource=… depName=…`
+  comment. Packages from the base distribution's own repositories stay unpinned
+  and arrive with the base's digest refreshes.
+- **Merging a change under `images/<name>` publishes the image.** Publish CI
+  builds each image the change touched, picks its tag, pushes
+  `docker.io/swaleio/<name>`, attests build provenance, and then syncs the
+  README to Docker Hub, so an image's first publish also gives it its page. A
+  pull request builds the same images and reports the tag each would get.
+- **Renovate keeps bases and pins current.** A rebuilt base or a patch release
+  merges itself once the image builds; a minor or major release waits for
+  review. A distribution base (`debian`, `ubuntu`, `alpine`, `python`) moves to
+  a new release by hand.
+- To republish an image unchanged, dispatch "Publish images" with **publish**
+  ticked. Unticked, it only syncs the selected images' READMEs.
 
 Images are pushed with a Docker Hub organization access token; a second, personal
 credential exists only to sync image READMEs, because Docker Hub's management
@@ -288,6 +304,11 @@ On every PR (`lint.yml`):
 - Task name and input/output identifiers match the regex and are snake_case.
 - Images are digest-pinned.
 - Non-empty body.
+
+On every PR that touches `images/` (`publish-images.yml`):
+
+- Each image the PR touches builds, and the run reports the tag it would
+  publish under.
 
 On every release tag (`release-task.yml`):
 

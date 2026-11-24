@@ -49,6 +49,24 @@ Appended to `$WORKFLOW_TASK_OUTPUT` as `key=value` lines:
 - Runs as a non-root user (uid 1000) with `WORKDIR /mnt/workspace`, per the Swale
   container contract.
 
+## Tags
+
+Each tag is the version of curl the image packages, such as `8.14.1`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
+## Building
+
+From the repository root:
+
+```sh
+docker build -t swaleio/curl-jq:dev images/curl-jq
+```
+
+Merging a change under `images/curl-jq` publishes the image under its next tag;
+task definitions reference it by digest.
+
 ---
 
 Built from [`images/curl-jq`](https://github.com/swaleio/task-definitions/tree/main/images/curl-jq) in the

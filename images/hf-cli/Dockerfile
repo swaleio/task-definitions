@@ -1,7 +1,8 @@
-# Base: python:3.13-slim (pin the digest; tag kept for humans)
-FROM python@sha256:eb43ff125d8d58d7449dcba7d336c23bcac412f526d861db493b9994d8010280
+FROM python:3.13-slim@sha256:1b5c0692836eae9b028cc352d7146872f36939aa1fb0de24d3ef6df307b956c9
 
-RUN pip install --no-cache-dir "huggingface_hub[cli,hf_xet]" \
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+ && rm /tmp/requirements.txt \
  && useradd --create-home --uid 1000 swale
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
@@ -11,6 +12,9 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # platform mounts writable and per-task. Downloaded models go wherever the
 # caller's `dest` points, so nothing another task needs lives in the cache.
 
+# The version of the tool this image is built around. Publishing tags the image
+# with it, adding -r1, -r2, ... when that version is already published.
+RUN python -c "import importlib.metadata as m; print(m.version('huggingface_hub'))" > /usr/share/swale-image-version
 USER swale
 WORKDIR /mnt/workspace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

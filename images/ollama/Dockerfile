@@ -1,5 +1,4 @@
-# Base: ollama/ollama:0.31.2 (digest-pinned; tag kept for humans)
-FROM ollama/ollama@sha256:509fdf54e23bd50d87af646cb51c0a7a203d6a83cc4d6695b3b08c5be1c62c0a
+FROM ollama/ollama:0.31.2@sha256:509fdf54e23bd50d87af646cb51c0a7a203d6a83cc4d6695b3b08c5be1c62c0a
 
 RUN (userdel --remove ubuntu || true) && useradd --create-home --uid 1000 swale
 
@@ -15,6 +14,9 @@ ENV OLLAMA_HOST=0.0.0.0:11434
 # writable and per-task. That suits a runner exactly: the models are needed for
 # the pod's lifetime and nothing outside it reads them.
 
+# The version of the tool this image is built around. Publishing tags the image
+# with it, adding -r1, -r2, ... when that version is already published.
+RUN /bin/ollama --version 2>&1 | tail -n 1 | awk '{print $NF}' > /usr/share/swale-image-version
 USER swale
 WORKDIR /mnt/workspace
 EXPOSE 11434

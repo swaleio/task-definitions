@@ -1,27 +1,32 @@
 name: Publish images
 
-# Builds each swale-built task image, then syncs its README to the Docker Hub
-# page. A push only proves the image still builds; publishing is deliberate,
-# via workflow_dispatch with the version to release, and moves `latest` with it
-# so `latest` always names a released version rather than an arbitrary build.
-# A dispatch without a version builds nothing and only refreshes descriptions.
-# The published digest is what a task definition pins in exec.image.
+# Builds the swale-built task images and publishes each one a change touched
+# once that change reaches main, then syncs its README to the Docker Hub page.
+# An image is tagged with the version of the tool it is built around, which its
+# Dockerfile records in /usr/share/swale-image-version; a rebuild that keeps that
+# version (a base image refresh, a wrapper fix) adds -r1, -r2, and so on.
+# `latest` follows the newest publish. A pull request builds the same images and
+# reports the tag each would get, pushing nothing. The published digest is what
+# a task definition pins in exec.image.
 
 on:
   push:
     branches: [main]
     paths:
       - "images/**"
+  pull_request:
+    paths:
+      - "images/**"
   workflow_dispatch:
     inputs:
       image:
-        description: "Image to (re)publish or describe: a single name (e.g. git), 'all' for every image under images/, or empty to fall back to changed-since-last-push."
-        required: false
+        description: "Image to republish or describe: a single name (e.g. git), or 'all' for every image under images/."
+        required: true
         default: "all"
-      tag:
-        description: "Version to publish, e.g. 1.0.0. Published alongside 'latest'. Empty builds and pushes nothing and only refreshes the Docker Hub descriptions."
-        required: false
-        default: ""
+      publish:
+        description: "Rebuild and publish the image. Unticked, only its Docker Hub description is refreshed."
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -34,6 +39,7 @@ env:
 
 jobs:
   discover:
+    name: Detect changed images
     runs-on: ubuntu-latest
     outputs:
       build: ${{ steps.list.outputs.build }}
@@ -41,29 +47,41 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
-          fetch-depth: 2
+          # The whole history, so a pull request diffs from where it branched.
+          fetch-depth: 0
       - id: list
         shell: bash
         env:
           IMAGE: ${{ github.event.inputs.image }}
-          BEFORE: ${{ github.event.before }}
+          BEFORE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
-          eng/scripts/discover-images.sh "$IMAGE" "$BEFORE" "$GITHUB_SHA"
+          eng/scripts/discover-images.sh "$IMAGE" "$BEFORE" "$HEAD"
 
   publish:
+    # A pull request only builds, so its checks say so.
+    name: ${{ github.event_name == 'pull_request' && 'Build' || 'Publish' }} ${{ matrix.image }}
     needs: discover
-    # A dispatch without a version is a description refresh, so nothing builds.
-    if: needs.discover.outputs.build != '[]' && (github.event_name == 'push' || github.event.inputs.tag != '')
+    # An unticked dispatch is a description refresh, so nothing builds.
+    if: needs.discover.outputs.build != '[]' && (github.event_name != 'workflow_dispatch' || inputs.publish)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         image: ${{ fromJson(needs.discover.outputs.build) }}
+    # One publish at a time per image, so two never pick the same tag. A pull
+    # request only builds, in a group of its own, and a newer push to it
+    # replaces the build still running.
+    concurrency:
+      group: publish-image-${{ matrix.image }}-${{ github.event_name == 'pull_request' && github.event.number || 'main' }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    env:
+      PUBLISH: ${{ github.event_name != 'pull_request' }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       # The GPU bases unpack to tens of gigabytes and exhaust the runner's root
-      # volume (vllm-tools previously failed with 'No space left on device').
+      # volume (the vLLM image once failed with 'No space left on device').
       # Reclaim the preinstalled toolchains this workflow never uses.
       - name: Free runner disk space
         shell: bash
@@ -77,7 +95,11 @@ jobs:
 
       - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
 
+      # Also on pull requests from this repository, so pulling the bases does not
+      # hit Docker Hub's anonymous rate limit. A fork's pull request has no
+      # secrets and builds anonymously.
       - name: Log in to Docker Hub as the organization
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           username: ${{ vars.DOCKERHUB_ORGANIZATION }}
@@ -98,50 +120,79 @@ jobs:
             echo "${label}=${value}" >> "$GITHUB_OUTPUT"
           done
 
+      # Built once and loaded, so the tag can be read from the image itself. The
+      # publish below reuses this build's layers from the builder's cache.
+      - name: Build
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
+        with:
+          context: images/${{ matrix.image }}
+          load: true
+          tags: candidate/${{ matrix.image }}:build
+
+      - name: Choose the tag
+        id: version
+        shell: bash
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          version=$(docker run --rm --entrypoint cat "candidate/$IMAGE:build" /usr/share/swale-image-version)
+          tag=$(eng/scripts/next-image-tag.sh "$REGISTRY_NAMESPACE/$IMAGE" "$version")
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [ "$PUBLISH" = "true" ]; then
+            message="Publishing docker.io/$REGISTRY_NAMESPACE/$IMAGE:$tag (packages version $version)"
+          else
+            message="Would publish docker.io/$REGISTRY_NAMESPACE/$IMAGE:$tag (packages version $version)"
+          fi
+          # A notice, so a pull request's checks show each tag; and the summary.
+          echo "::notice title=$IMAGE::$message"
+          echo "$message." >> "$GITHUB_STEP_SUMMARY"
+
       - id: meta
+        if: env.PUBLISH == 'true'
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
           images: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
           tags: |
-            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
-            type=raw,value=latest,enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=raw,value=${{ steps.version.outputs.tag }}
+            type=raw,value=latest
           labels: |
             org.opencontainers.image.title=${{ steps.imagemeta.outputs.title }}
             org.opencontainers.image.description=${{ steps.imagemeta.outputs.description }}
             org.opencontainers.image.licenses=${{ steps.imagemeta.outputs.licenses }}
+            org.opencontainers.image.version=${{ steps.version.outputs.tag }}
 
       - id: build
+        if: env.PUBLISH == 'true'
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
         with:
           context: images/${{ matrix.image }}
-          push: ${{ github.event_name == 'workflow_dispatch' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Attestations need an image exporter, which only exists when pushing.
-          provenance: ${{ github.event_name == 'workflow_dispatch' }}
-          sbom: ${{ github.event_name == 'workflow_dispatch' }}
+          provenance: true
+          sbom: true
 
       - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
-        if: github.event_name == 'workflow_dispatch'
+        if: env.PUBLISH == 'true'
         with:
           subject-name: docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
       - name: Report published digest
-        if: github.event_name == 'workflow_dispatch'
+        if: env.PUBLISH == 'true'
         run: |
-          echo "Published docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}"
-          echo "Pin this digest in the referencing task definition's exec.image." >> "$GITHUB_STEP_SUMMARY"
-          echo "\`docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}@${{ steps.build.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Published docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}:${{ steps.version.outputs.tag }}@${{ steps.build.outputs.digest }}"
+          echo "\`docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}:${{ steps.version.outputs.tag }}@${{ steps.build.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"
 
   sync-readme:
+    name: Sync ${{ matrix.image }} README
     # After publish, so a first publish describes the repository it has just
     # created. !cancelled() still runs it when publish is skipped (a README-only
-    # change, a dispatch without a version) or fails: a description never waits
-    # on a build succeeding.
+    # change, an unticked dispatch) or fails: a description never waits on a
+    # build succeeding. A pull request publishes nothing, so it describes nothing.
     needs: [discover, publish]
-    if: ${{ !cancelled() && needs.discover.result == 'success' && needs.discover.outputs.sync != '[]' }}
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && needs.discover.result == 'success' && needs.discover.outputs.sync != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -4,6 +4,8 @@
 #
 #   eng/scripts/discover-images.sh "" <before-sha> <head-sha>
 #
+# For a pull request, <before-sha> is the base it targets.
+#
 # The two are independent concerns. A README is not part of the build, so
 # changing one must not rebuild gigabytes; a Dockerfile change does not touch
 # the description. A commit doing both gets both, the description once the
@@ -48,9 +50,11 @@ elif [ -n "$requested" ]; then
   sync="$requested"
 else
   # workflow_dispatch carries no "before" commit, so fall back to the previous
-  # commit for the documented changed-since-last-push behaviour.
+  # commit for the documented changed-since-last-push behaviour. Three dots diff
+  # from where the two meet, so a pull request whose base has moved on sees only
+  # its own changes.
   [ -n "$before" ] || before=$(git rev-parse HEAD^)
-  changed=$(git diff --name-only "$before" "$head_sha" -- images/)
+  changed=$(git diff --name-only "$before...$head_sha" -- images/)
   build=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u | existing)
   sync=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF == "README.md" { print $2 }' | sort -u | existing)
 fi

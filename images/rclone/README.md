@@ -71,6 +71,24 @@ rclone copy "$INPUT_SOURCE" "$INPUT_DEST" $INPUT_FLAGS
 The image is Alpine-based and runs as the base image's non-root `rclone` user
 (UID 1009) with `ca-certificates` already installed.
 
+## Tags
+
+Each tag is the version of rclone the image packages, such as `1.74.4`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
+## Building
+
+From the repository root:
+
+```sh
+docker build -t swaleio/rclone:dev images/rclone
+```
+
+Merging a change under `images/rclone` publishes the image under its next tag;
+task definitions reference it by digest.
+
 ---
 
 Built from [`images/rclone`](https://github.com/swaleio/task-definitions/tree/main/images/rclone) in the

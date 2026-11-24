@@ -1,13 +1,14 @@
-# Base: ubuntu:24.04 (pin the digest; tag kept for humans)
-FROM ubuntu@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3
+FROM ubuntu:24.04@sha256:562111b88caa79c71391c0c4d3c2114a7d5c35915c20561fd893cb1e07929e6b
 
 # Blender 5.2 LTS, the official Linux build straight from download.blender.org,
-# verified against the checksum Blender publishes beside it. The tarball bundles
+# verified against the SHA-256 file Blender publishes beside it. Renovate moves
+# BLENDER_VERSION within the 5.2 line and cannot compute a checksum, so the
+# build reads the published one rather than pinning it here. The tarball bundles
 # Blender's own Python and its render kernels, so the only system packages it
 # needs are the X11/GL client libraries the binary links against - required even
 # for background rendering, where no display is ever opened.
+# renovate: datasource=custom.blender depName=blender packageName=5.2
 ARG BLENDER_VERSION=5.2.4
-ARG BLENDER_SHA256=2fd14c50987426897ba60237ee996edf2b4151f4b1a72a460ca20be58c1d2d86
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -17,7 +18,10 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  && curl -fsSL "https://download.blender.org/release/Blender${BLENDER_VERSION%.*}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
       -o /tmp/blender.tar.xz \
- && echo "${BLENDER_SHA256}  /tmp/blender.tar.xz" | sha256sum -c - \
+ && curl -fsSL "https://download.blender.org/release/Blender${BLENDER_VERSION%.*}/blender-${BLENDER_VERSION}.sha256" \
+      | grep " blender-${BLENDER_VERSION}-linux-x64.tar.xz$" \
+      | sed "s| blender-${BLENDER_VERSION}-linux-x64.tar.xz$| /tmp/blender.tar.xz|" \
+      | sha256sum -c - \
  && mkdir -p /opt/blender \
  && tar -xJf /tmp/blender.tar.xz -C /opt/blender --strip-components=1 \
  && rm /tmp/blender.tar.xz \
@@ -36,6 +40,9 @@ ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 # Blender keeps its user configuration under the home directory, which the
 # platform mounts writable and per-task; the install itself stays read-only.
 
+# The version of the tool this image is built around. Publishing tags the image
+# with it, adding -r1, -r2, ... when that version is already published.
+RUN blender --version 2>/dev/null | head -n 1 | cut -d' ' -f2 > /usr/share/swale-image-version
 USER swale
 WORKDIR /mnt/workspace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

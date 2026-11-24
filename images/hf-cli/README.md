@@ -7,7 +7,8 @@ artifacts back to the Hub.
 
 - **Base:** `python:3.13-slim`
 - **Installed:** `huggingface_hub[cli,hf_xet]` (the `hf` CLI plus the Xet
-  accelerated transfer backend)
+  accelerated transfer backend), at the version pinned in
+  [`requirements.txt`](https://github.com/swaleio/task-definitions/blob/main/images/hf-cli/requirements.txt)
 - **User:** non-root `swale` (uid 1000)
 - **Hub cache** — defaults to the CLI location under the home directory, which
   the platform mounts writable and per-task, so it is discarded with the task.
@@ -42,16 +43,23 @@ to `$WORKFLOW_TASK_OUTPUT`, where `<dest>` is the full path from `INPUT_DEST`
 (the caller-supplied, required `dest` input). The consuming task must declare a
 `path` output. `upload` emits nothing.
 
+## Tags
+
+Each tag is the version of the Hugging Face Hub client (`huggingface_hub`) the image packages, such as `1.29.0`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
 ## Building
 
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/hf-cli:1.0.0 images/hf-cli
+docker build -t swaleio/hf-cli:dev images/hf-cli
 ```
 
-CI pins the real base digest and publishes the image; task definitions reference
-it as `docker.io/swaleio/hf-cli@sha256:<digest>`.
+Merging a change under `images/hf-cli` publishes the image under its next tag;
+task definitions reference it by digest.
 
 ---
 

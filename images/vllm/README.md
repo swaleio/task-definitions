@@ -1,14 +1,11 @@
-# vllm-tools
+# vllm
 
-Swale-built image backing the `vllm-batch` and `lm-eval` task definitions. It
-is the official [vLLM](https://docs.vllm.ai) OpenAI-server image with the
-EleutherAI [evaluation harness](https://github.com/EleutherAI/lm-evaluation-harness)
-installed on top, so a single GPU image covers both offline batch inference and
-model evaluation.
+Swale-built image backing the `vllm-batch` task definition. It is the official
+[vLLM](https://docs.vllm.ai) image with its server entrypoint reset, so a
+workflow can run offline batch inference on a GPU.
 
-- **Base:** `vllm/vllm-openai:v0.25.0-cu129-ubuntu2404` (digest-pinned)
-- **Installed on top:** `lm-eval==0.4.12` — the `lm_eval` CLI, which drives the
-  bundled vLLM engine as its inference backend
+- **Base:** the official `vllm/vllm-openai` image (CUDA 12.9, Ubuntu 24.04),
+  whose tag is the vLLM version
 - **User:** non-root `swale` (uid 1000; replaces the Ubuntu base image's
   default uid-1000 user)
 - **`WORKDIR /mnt/workspace`**, **`ENTRYPOINT []`**
@@ -17,10 +14,8 @@ model evaluation.
 
 The base image's ENTRYPOINT launches the OpenAI-compatible API server; this
 image **resets it to empty** (`ENTRYPOINT []`), so a task definition's
-`exec.args` form the **full** command line:
-
-- `["vllm", "run-batch", ...]` — offline batch inference (the `vllm-batch` task)
-- `["lm_eval", ...]` — benchmark evaluation (the `lm-eval` task)
+`exec.args` form the **full** command line: `["vllm", "run-batch", ...]`.
+The `vllm-serve` task runs a server, so it uses the official image directly.
 
 Hugging Face authentication is not the image's job: a definition that needs it
 maps its `token` input to `HF_TOKEN` via its own `exec.env` (an omitted token
@@ -29,8 +24,8 @@ token).
 
 ## Outputs
 
-Neither backed task declares outputs — results are written to caller-supplied
-file paths — so nothing is appended to `$WORKFLOW_TASK_OUTPUT`.
+The `vllm-batch` task declares no outputs — results are written to a
+caller-supplied file path — so nothing is appended to `$WORKFLOW_TASK_OUTPUT`.
 
 ## Shared memory
 
@@ -38,25 +33,32 @@ vLLM's tensor-parallel workers exchange tensors through `/dev/shm`, so shared
 memory sizing matters when a model is sharded across several GPUs. The platform
 provides a default shm size; single-GPU workloads run fine with it.
 
+## Tags
+
+Each tag is the version of vLLM the image packages, such as `0.25.0`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
 ## Building
 
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/vllm-tools:1.0.0 images/vllm-tools
+docker build -t swaleio/vllm:dev images/vllm
 ```
 
-CI pins the real base digest and publishes the image; task definitions
-reference it as `docker.io/swaleio/vllm-tools@sha256:<digest>`.
+Merging a change under `images/vllm` publishes the image under its next tag;
+task definitions reference it by digest.
 
 ---
 
-Built from [`images/vllm-tools`](https://github.com/swaleio/task-definitions/tree/main/images/vllm-tools) in the
+Built from [`images/vllm`](https://github.com/swaleio/task-definitions/tree/main/images/vllm) in the
 [swaleio/task-definitions](https://github.com/swaleio/task-definitions) repository. For how a task definition
 references an image, see the
 [task definition reference](https://docs.swale.io/reference/task-definition-syntax)
 in the [Swale documentation](https://docs.swale.io).
 
-The Dockerfile and entrypoint are covered by the
+The Dockerfile is covered by the
 [MIT License](https://github.com/swaleio/task-definitions/blob/main/LICENSE). The software this image packages keeps
 its own licenses, which ship inside the image.

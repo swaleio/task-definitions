@@ -6,7 +6,8 @@ official [Blender](https://www.blender.org/) 5.2 LTS Linux build for background
 shared workspace — split across as many tasks as the frame range has chunks.
 
 - **Base:** `ubuntu:24.04`
-- **Installed:** Blender 5.2.4 from `download.blender.org`, checksum-verified,
+- **Installed:** Blender 5.2 LTS from `download.blender.org`, checked against the
+  SHA-256 Blender publishes beside it,
   under `/opt/blender` with `blender` on `PATH`; the X11/GL client libraries
   the binary links against (needed even without a display)
 - **User:** non-root `swale` (uid 1000)
@@ -42,16 +43,23 @@ path=<directory of INPUT_OUTPUT>
 
 to `$WORKFLOW_TASK_OUTPUT`. The consuming task must declare a `path` output.
 
+## Tags
+
+Each tag is the version of Blender the image packages, such as `5.2.4`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
 ## Building
 
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/blender-5-2:1.0.0 images/blender-5-2
+docker build -t swaleio/blender-5-2:dev images/blender-5-2
 ```
 
-CI pins the real base digest and publishes the image; task definitions reference
-it as `docker.io/swaleio/blender-5-2@sha256:<digest>`.
+Merging a change under `images/blender-5-2` publishes the image under its next tag;
+task definitions reference it by digest.
 
 ---
 

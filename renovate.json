@@ -1,13 +1,25 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
-    "Keeps each task definition's pinned image digest current within the tag it names.",
+    "Keeps each task definition's pinned image digest current within the tag it names, and each image under images/ current with its base and the tool versions it pins.",
     "Renovate merges its own pull requests rather than using GitHub's auto-merge, which waits only for required checks; main requires none, so it would merge before lint finished."
   ],
   "enabledManagers": [
     "custom.regex",
+    "dockerfile",
+    "pip_requirements",
     "npm"
   ],
+  "dockerfile": {
+    "managerFilePatterns": [
+      "/^images/[^/]+/Dockerfile$/"
+    ]
+  },
+  "pip_requirements": {
+    "managerFilePatterns": [
+      "/^images/[^/]+/requirements\\.txt$/"
+    ]
+  },
   "customManagers": [
     {
       "customType": "regex",
@@ -19,11 +31,31 @@
         "#\\s*(?<depName>[^\\s:@]+(?:/[^\\s:@]+)+):(?<currentValue>[^\\s@]+)\\s*\\n\\s*image:\\s*[^\\s@]+@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "A tool version an image's Dockerfile pins in an ARG, named by the `# renovate:` comment directly above it.",
+      "managerFilePatterns": [
+        "/^images/[^/]+/Dockerfile$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: packageName=(?<packageName>\\S+))?(?: registryUrl=(?<registryUrl>\\S+))?\\s*\\nARG [A-Z_]+=(?<currentValue>\\S+)"
+      ]
     }
   ],
+  "customDatasources": {
+    "blender": {
+      "description": "Blender publishes no release feed, only a download directory per release line.",
+      "defaultRegistryUrlTemplate": "https://download.blender.org/release/Blender{{packageName}}/",
+      "format": "html"
+    }
+  },
   "packageRules": [
     {
       "description": "A definition is pinned to one release line, so only the digest behind its tag may move. A new line is a new definition, added by hand.",
+      "matchFileNames": [
+        "tasks/**"
+      ],
       "matchManagers": [
         "custom.regex"
       ],
@@ -36,6 +68,9 @@
     },
     {
       "description": "One pull request for every definition whose image was rebuilt upstream that week. It merges itself once its checks pass: the tag a definition names is unchanged, only the build behind it moves.",
+      "matchFileNames": [
+        "tasks/**"
+      ],
       "matchManagers": [
         "custom.regex"
       ],
@@ -44,6 +79,93 @@
       ],
       "groupName": "task definition images",
       "automerge": true
+    },
+    {
+      "description": "Merging an image change publishes the image. A rebuilt base or a patch release merges itself once the image builds; a minor or major release waits for review.",
+      "matchFileNames": [
+        "images/**"
+      ],
+      "matchUpdateTypes": [
+        "digest",
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "One pull request for every image whose base was rebuilt upstream that week.",
+      "matchFileNames": [
+        "images/**"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "groupName": "image bases"
+    },
+    {
+      "description": "A distribution base moves to a new release by hand; only its digest is kept current.",
+      "matchFileNames": [
+        "images/**"
+      ],
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchDepNames": [
+        "alpine",
+        "debian",
+        "python",
+        "ubuntu"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "alpine/git tags each release twice, as 2.54.1 and v2.54.1; stay on the form without the v.",
+      "matchDepNames": [
+        "alpine/git"
+      ],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "description": "Blender's download directory lists every file of every release in the line; the version is read from the Linux build's file name.",
+      "matchDatasources": [
+        "custom.blender"
+      ],
+      "extractVersion": "^blender-(?<version>\\d+\\.\\d+\\.\\d+)-linux-x64\\.tar\\.xz$"
+    },
+    {
+      "description": "Each PowerShell image stays on its own release line.",
+      "matchFileNames": [
+        "images/powershell-7-6/**"
+      ],
+      "matchDepNames": [
+        "powershell-lts"
+      ],
+      "allowedVersions": "/^7\\.6\\./"
+    },
+    {
+      "description": "Each PowerShell image stays on its own release line.",
+      "matchFileNames": [
+        "images/powershell-7-7/**"
+      ],
+      "matchDepNames": [
+        "powershell"
+      ],
+      "allowedVersions": "/^7\\.7\\./"
+    },
+    {
+      "description": "The Hugging Face training stack is pinned in two images, which move together.",
+      "matchFileNames": [
+        "images/transformers-gpu/**",
+        "images/trl/**"
+      ],
+      "matchManagers": [
+        "pip_requirements"
+      ],
+      "groupName": "Hugging Face training stack"
     },
     {
       "description": "The linter's npm dependencies. A patch or minor update merges itself once its checks pass; a major update changes how the linter reads YAML, so it waits for review.",

@@ -1,5 +1,4 @@
-# docker.io/library/alpine:3.22
-FROM docker.io/library/alpine@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
+FROM alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
 
 RUN apk add --no-cache curl jq ca-certificates \
  && adduser -D -u 1000 swale
@@ -7,6 +6,9 @@ RUN apk add --no-cache curl jq ca-certificates \
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# The version of the tool this image is built around. Publishing tags the image
+# with it, adding -r1, -r2, ... when that version is already published.
+RUN curl --version | head -n 1 | cut -d' ' -f2 > /usr/share/swale-image-version
 USER swale
 WORKDIR /mnt/workspace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

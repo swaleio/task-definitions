@@ -1,5 +1,4 @@
-# Base: alpine/git:latest (digest-pinned; tag kept for humans)
-FROM alpine/git@sha256:697cb1c85aefc5724febaec2202a974e0d66f6abb6be91a9a86d0c8757af692a
+FROM alpine/git:2.54.0@sha256:6a1fdb962814ca11508ca8d1bab94375b5b7ac4e4a9a40981c29fc32c02f095d
 
 RUN apk add --no-cache git-lfs openssh-client ca-certificates \
  && git lfs install --system \
@@ -8,6 +7,9 @@ RUN apk add --no-cache git-lfs openssh-client ca-certificates \
 COPY entrypoint.sh /opt/git/entrypoint.sh
 RUN chmod +x /opt/git/entrypoint.sh
 
+# The version of the tool this image is built around. Publishing tags the image
+# with it, adding -r1, -r2, ... when that version is already published.
+RUN git --version | cut -d' ' -f3 > /usr/share/swale-image-version
 USER swale
 WORKDIR /mnt/workspace
 ENTRYPOINT ["/opt/git/entrypoint.sh"]

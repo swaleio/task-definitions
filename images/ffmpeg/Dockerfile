@@ -1,5 +1,4 @@
-# Base: debian:13-slim (pin the digest; tag kept for humans)
-FROM debian@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2
+FROM debian:13-slim@sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74362a8b73af672b0481b35b44a0
 
 # Debian's own ffmpeg build: signed packages, a full CPU codec set (libx264,
 # libx265, libvpx, libaom, libopus, ...), and a version Debian keeps patched.
@@ -12,6 +11,9 @@ RUN apt-get update \
 # No ENTRYPOINT: the ffmpeg task is a free-form script task, so its exec.args
 # are the full command line (`bash -lc <script>`), exactly like the bash task,
 # with ffmpeg and ffprobe on PATH.
+# The version of the tool this image is built around. Publishing tags the image
+# with it, adding -r1, -r2, ... when that version is already published.
+RUN ffmpeg -version | head -n 1 | cut -d' ' -f3 | cut -d- -f1 > /usr/share/swale-image-version
 USER swale
 WORKDIR /mnt/workspace
 

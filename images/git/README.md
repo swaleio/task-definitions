@@ -4,7 +4,7 @@ Swale-built image backing the `git-clone` task definition. It wraps `git` with
 Git LFS and non-interactive HTTPS token authentication, and emits the resolved
 commit SHA as a task output.
 
-- **Base:** `alpine/git`
+- **Base:** `alpine/git`, whose tag is the Git version
 - **Installed:** `git`, `git-lfs`, `openssh-client`, `ca-certificates`
 - **User:** non-root `swale` (uid 1000)
 - **`WORKDIR /mnt/workspace`**, **`ENTRYPOINT ["/opt/git/entrypoint.sh"]`**
@@ -31,16 +31,23 @@ commit_sha=<resolved HEAD SHA>
 
 to `$WORKFLOW_TASK_OUTPUT`.
 
+## Tags
+
+Each tag is the version of Git the image packages, such as `2.54.0`. A
+rebuild that keeps that version, to pick up a fixed base image or wrapper,
+adds `-r1`, `-r2`, and so on. A tag is never reused; `latest` follows the
+newest publish.
+
 ## Building
 
 From the repository root:
 
 ```sh
-docker build -t docker.io/swaleio/git:1.0.0 images/git
+docker build -t swaleio/git:dev images/git
 ```
 
-CI publishes the image; task definitions reference it as
-`docker.io/swaleio/git@sha256:<digest>`.
+Merging a change under `images/git` publishes the image under its next tag;
+task definitions reference it by digest.
 
 ---
 

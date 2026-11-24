@@ -1,0 +1,1 @@
+huggingface_hub[cli,hf_xet]==1.29.0

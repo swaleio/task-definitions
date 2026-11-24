@@ -55,7 +55,26 @@ else
   # its own changes.
   [ -n "$before" ] || before=$(git rev-parse HEAD^)
   changed=$(git diff --name-only "$before...$head_sha" -- images/)
-  build=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u | existing)
+  # A comment changes nothing an image runs, so a file whose changes are all
+  # comment lines rebuilds nothing; publishing it would only mint an -rN of the
+  # same image. Two lines look like comments but are not: an entrypoint's `#!`,
+  # which the pattern leaves out, and a Dockerfile parser directive (`# syntax=`,
+  # `# escape=`, `# check=`), which steers the build, so a changed one counts.
+  # git reads -I as a basic regex, with no alternation: one pattern for a
+  # comment with text, one for a bare `#` line. Each file is checked on its
+  # own because some git versions list a file under --name-only even when -I
+  # leaves nothing of its change; --quiet's exit code honours -I in all of them.
+  built=""
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    if ! git diff --quiet -I '^[[:space:]]*#[^!]' -I '^[[:space:]]*#$' "$before...$head_sha" -- "$file"; then
+      built+="$file"$'\n'
+    fi
+  done <<< "$changed"
+  directives=$(git diff -U0 "$before...$head_sha" -- images/ | awk '
+    /^\+\+\+ b\// { file = substr($0, 7) }
+    tolower($0) ~ /^[-+]#[[:space:]]*(syntax|escape|check)[[:space:]]*=/ { print file }')
+  build=$(printf '%s\n%s\n' "$built" "$directives" | awk -F/ 'NF > 1 && $NF != "README.md" { print $2 }' | sort -u | existing)
   sync=$(printf '%s\n' "$changed" | awk -F/ 'NF > 1 && $NF == "README.md" { print $2 }' | sort -u | existing)
 fi
 

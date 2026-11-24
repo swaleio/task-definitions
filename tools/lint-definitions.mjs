@@ -8,6 +8,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, dirname, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "js-yaml";
+import { pinnedImage, toolVersion } from "./release-version.mjs";
 
 const NAME_RE = /^[A-Za-z0-9_-]{1,100}$/;
 const IDENT_RE = /^[a-z0-9_]+$/; // snake_case identifiers
@@ -113,6 +114,20 @@ function lintFile(root, path) {
       errors.push(`${rel}: exec.image is required and must be a non-empty string`);
     } else if (!DIGEST_RE.test(image)) {
       errors.push(`${rel}: exec.image must be digest-pinned (…@sha256:<64 hex>): '${image}'`);
+    } else {
+      // The definition's version is read from this tag, and Renovate reads the
+      // same comment to keep the digest current.
+      const pinned = pinnedImage(text);
+      if (!pinned) {
+        errors.push(`${rel}: exec.image needs its image's tag in a comment directly above it ('# <repository>:<tag>')`);
+      } else if (pinned.repository !== pinned.imageRepository) {
+        errors.push(`${rel}: the comment above exec.image names ${pinned.repository}, but exec.image pins ${pinned.imageRepository}`);
+      } else if (!toolVersion(pinned.tag)) {
+        errors.push(
+          `${rel}: the image tag '${pinned.tag}' names no version. Pin the tag that names the tool's exact ` +
+            "version (24.22.3-trixie-slim, not 24-trixie-slim): the definition's version is read from it",
+        );
+      }
     }
 
     if (execBlock.args !== undefined && !Array.isArray(execBlock.args)) {

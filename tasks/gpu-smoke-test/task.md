@@ -9,8 +9,8 @@ outputs:
   cuda_version:
     description: The CUDA version the torch build targets (e.g. 13.0).
 exec:
-  # docker.io/swaleio/transformers-gpu:1.0.0
-  image: docker.io/swaleio/transformers-gpu@sha256:9346b9a6a9da72735635d0227a2547873ee4015b09188434f2f768e425d2d9a9
+  # docker.io/pytorch/pytorch:2.13.0-cuda13.0-cudnn9-runtime
+  image: docker.io/pytorch/pytorch@sha256:db80a41f8428644cebcb3d75b0b62df334ab6c0e75785951eb25f48bfbd42407
   args:
     - bash
     - -lc
@@ -68,7 +68,7 @@ blocks:
     tasks:
       gpu_check:
         name: GPU check
-        uses: swaleio/gpu-smoke-test@1.0.0
+        uses: swaleio/gpu-smoke-test
 ```
 
 Downstream tasks read the probed hardware via

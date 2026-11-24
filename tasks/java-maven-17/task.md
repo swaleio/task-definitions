@@ -6,7 +6,7 @@ inputs:
     description: The shell script to run. A JDK and Maven are on PATH; invoke Maven as `mvn -B`. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
-  # docker.io/library/maven:3.9-eclipse-temurin-17
+  # docker.io/library/maven:3.9.16-eclipse-temurin-17
   image: docker.io/library/maven@sha256:1a352420f7aba21f5ad08df31bab55f74c013fb491f1ae8ab1dd7ff9ed698584
   args:
     - bash
@@ -67,7 +67,7 @@ blocks:
     tasks:
       build:
         name: Build
-        uses: swaleio/java-maven-17@1.0.0
+        uses: swaleio/java-maven-17
         args:
           script: |
             set -euo pipefail

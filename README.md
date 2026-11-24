@@ -24,7 +24,7 @@ blocks:
     tasks:
       checkout:
         name: Checkout
-        uses: swaleio/git-clone@1.0.0
+        uses: swaleio/git-clone
         args:
           repository_url: https://github.com/acme/app.git
           dest: ${{env.WORKFLOW_STORAGE}}/repo
@@ -47,8 +47,9 @@ docs/container-contract.md     # the runtime contract every image must honor
 ```
 
 A task version is released by pushing a tag `<name>/<version>` (e.g.
-`git-clone/1.0.0`), which freezes `tasks/<name>/task.md` as that immutable
-version and imports it into the platform.
+`git-clone/2.54.0`), which freezes `tasks/<name>/task.md` as that immutable
+version and imports it into the platform. A definition's version is the version
+of the tool it runs, read from its image's tag.
 
 ## Contributing
 

@@ -15,8 +15,8 @@ inputs:
     description: Hugging Face access token for gated or private models (pass a secret). Omit for public models and local model directories.
     default: ""
 exec:
-  # docker.io/swaleio/vllm-tools:1.0.0
-  image: docker.io/swaleio/vllm-tools@sha256:3f8ae9ff26ddb3ec1905475b35ceebf672a07e750c12a2cef5b6d1f98f9db3cc
+  # docker.io/swaleio/vllm:0.25.0
+  image: docker.io/swaleio/vllm@sha256:c7d37d0a2d6fb692888a3d56a7d16a8b46b339684b4662d677edc2e548319542
   env:
     HF_TOKEN: ${{inputs.token}}
   args:
@@ -94,14 +94,14 @@ blocks:
     tasks:
       weights:
         name: Fetch weights
-        uses: swaleio/hf-download@1.0.0
+        uses: swaleio/hf-download
         args:
           repo: Qwen/Qwen2.5-7B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
           dest: ${{env.WORKFLOW_STORAGE}}/qwen
       requests:
         name: Write batch requests
-        uses: swaleio/bash@1.0.0
+        uses: swaleio/bash
         args:
           script: |
             set -euo pipefail
@@ -112,7 +112,7 @@ blocks:
             EOF
       batch:
         name: Batch inference
-        uses: swaleio/vllm-batch@1.0.0
+        uses: swaleio/vllm-batch
         start_on:
           - weights
           - requests

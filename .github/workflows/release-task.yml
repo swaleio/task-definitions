@@ -1,7 +1,7 @@
 name: Release task version
 
 # A task version is released by pushing a tag named `<task-name>/<version>`
-# (e.g. `git-clone/1.0.0`). The tag freezes tasks/<task-name>/task.md as that
+# (e.g. `git-clone/2.54.0`). The tag freezes tasks/<task-name>/task.md as that
 # immutable version — the same file on main keeps evolving toward the next one.
 # This workflow validates the tag and publishes the frozen file to the Swale
 # platform as the `swaleio` organization, under the version from the tag name.
@@ -34,6 +34,15 @@ jobs:
       - run: npm ci
       - name: Lint the released definition
         run: npm run lint
+
+      # A definition's version is the version of the tool its image tag names,
+      # with -r<N> added when it is released again on that version.
+      - name: Check the version against the image tag
+        shell: bash
+        env:
+          NAME: ${{ steps.tag.outputs.name }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: node tools/release-version.mjs "$NAME" "$VERSION"
 
       - name: Refuse unpinned swale image digests
         shell: bash

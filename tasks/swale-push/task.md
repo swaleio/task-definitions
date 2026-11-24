@@ -73,7 +73,7 @@ blocks:
     tasks:
       publish:
         name: Publish artifacts
-        uses: swaleio/swale-push@1.0.0
+        uses: swaleio/swale-push
         args:
           target: acme/model-artifacts:nightly
           source: ${{env.WORKFLOW_STORAGE}}/outputs

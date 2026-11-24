@@ -35,8 +35,8 @@ outputs:
   body_file:
     description: Path of the written response body (equals response_path).
 exec:
-  # docker.io/swaleio/curl-jq:1.0.0
-  image: docker.io/swaleio/curl-jq@sha256:4e69b0173338b4f6b7608254f6874c8783332dbb9bfcfb325a86ce46611e7c6c
+  # docker.io/swaleio/curl-jq:8.14.1
+  image: docker.io/swaleio/curl-jq@sha256:920b38af34c544b6f80d21e3273e9a8f8acd98a876db799114e1a1cea0927ef3
   args: []
 ---
 
@@ -88,7 +88,7 @@ blocks:
     tasks:
       submit:
         name: Submit job
-        uses: swaleio/http-request@1.0.0
+        uses: swaleio/http-request
         args:
           url: https://api.example.com/v1/jobs
           method: POST

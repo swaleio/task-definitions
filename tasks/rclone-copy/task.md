@@ -30,8 +30,8 @@ inputs:
     description: Extra rclone flags appended to the copy command, split on whitespace (e.g. "--s3-region eu-west-1 --transfers 8"). Also how SFTP/HTTP connection details are supplied — see below.
     default: ""
 exec:
-  # docker.io/swaleio/rclone:1.0.0
-  image: docker.io/swaleio/rclone@sha256:2cbece0f10abd3779942bb4b9a1ff7f2cde256aaab70e9ff8dd8e6740d30d389
+  # docker.io/swaleio/rclone:1.74.4
+  image: docker.io/swaleio/rclone@sha256:f5f7a139221a1df03945060ac4e89dac8f36b3f453c1c3d7ad4ad904e97beca2
   args: []
 ---
 
@@ -109,7 +109,7 @@ blocks:
     tasks:
       fetch_dataset:
         name: Fetch dataset
-        uses: swaleio/rclone-copy@1.0.0
+        uses: swaleio/rclone-copy
         args:
           remote_type: s3
           source: remote:my-bucket/datasets/train

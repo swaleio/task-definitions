@@ -9,8 +9,8 @@ inputs:
     description: Directory holding the Ollama model store. Point it at the workspace to share one store across tasks; defaults to the per-task home directory, which is discarded with the runner.
     default: ""
 exec:
-  # docker.io/swaleio/ollama:1.0.0
-  image: docker.io/swaleio/ollama@sha256:5fdc6b5df30f1e6533f1493d0bcd03408dfa5b33fbbb4e5849789421e82ab9fc
+  # docker.io/swaleio/ollama:0.31.2
+  image: docker.io/swaleio/ollama@sha256:4b7bac49a86b015be6eea96a51a9a864a57f8663b4d9c6fdbd777ec081859125
   args: []
 ---
 
@@ -97,7 +97,7 @@ blocks:
     tasks:
       llm:
         name: Ollama server
-        uses: swaleio/ollama-serve@1.0.0
+        uses: swaleio/ollama-serve
         # Any GPU compute type whose VRAM fits the model.
         compute_type: a100-1
         terminate_on:
@@ -107,7 +107,7 @@ blocks:
 
       ready:
         name: Wait for Ollama
-        uses: swaleio/http-request@1.0.0
+        uses: swaleio/http-request
         start_on:
           - llm
         args:
@@ -118,7 +118,7 @@ blocks:
 
       generate:
         name: Generate
-        uses: swaleio/http-request@1.0.0
+        uses: swaleio/http-request
         start_on:
           - llm
           - ready

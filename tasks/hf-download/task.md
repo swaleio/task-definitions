@@ -27,8 +27,8 @@ outputs:
   path:
     description: The local directory the content was downloaded to, i.e. the value of the dest input.
 exec:
-  # docker.io/swaleio/hf-cli:1.0.0
-  image: docker.io/swaleio/hf-cli@sha256:62c02b3e1baff3eb11a85d49b511d418c71e2fcd01ac4e00d052ad255aaac59a
+  # docker.io/swaleio/hf-cli:1.29.0
+  image: docker.io/swaleio/hf-cli@sha256:f7b5bae8a78cb40afd777f2eb71a42e78ba781728d8b253b94bbccd3acaa9caa
   env:
     HF_TOKEN: ${{inputs.token}}
   args:
@@ -91,7 +91,7 @@ blocks:
     tasks:
       weights:
         name: Fetch weights
-        uses: swaleio/hf-download@1.0.0
+        uses: swaleio/hf-download
         args:
           repo: meta-llama/Llama-3.1-8B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"

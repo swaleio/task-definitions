@@ -70,10 +70,11 @@ jobs:
       matrix:
         image: ${{ fromJson(needs.discover.outputs.build) }}
     # One publish at a time per image, so two never pick the same tag. A pull
-    # request only builds, so it gets a group of its own instead of queueing.
+    # request only builds, in a group of its own, and a newer push to it
+    # replaces the build still running.
     concurrency:
       group: publish-image-${{ matrix.image }}-${{ github.event_name == 'pull_request' && github.event.number || 'main' }}
-      cancel-in-progress: false
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     env:
       PUBLISH: ${{ github.event_name != 'pull_request' }}
     steps:

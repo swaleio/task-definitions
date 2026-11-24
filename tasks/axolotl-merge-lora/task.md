@@ -9,8 +9,8 @@ inputs:
     description: Absolute path inside the container to the trained LoRA adapter directory. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/lora-out, the training config's output_dir) to consume the training task's result, or any other container-local path.
     required: true
 exec:
-  # docker.io/axolotlai/axolotl:main-20260712-py3.12-cu130-2.12.0
-  image: docker.io/axolotlai/axolotl@sha256:c33b21ad322e49fcc2db6116042cc206c69f26716482fc2902179fa303dd60b4
+  # docker.io/axolotlai/axolotl:0.21.1-py3.12-cu130-2.13.0
+  image: docker.io/axolotlai/axolotl@sha256:ef2d9fb57a684c8f8c052b6f7e8fe3adafe9028762c5539aad670bb2deb19b0b
   args:
     - axolotl
     - merge-lora
@@ -75,7 +75,7 @@ blocks:
     tasks:
       write_config:
         name: Write training config
-        uses: swaleio/bash@1.0.0
+        uses: swaleio/bash
         args:
           script: |
             set -euo pipefail
@@ -102,7 +102,7 @@ blocks:
             EOF
       train:
         name: QLoRA fine-tune
-        uses: swaleio/axolotl-train@1.0.0
+        uses: swaleio/axolotl-train
         start_on:
           - write_config
         compute_type: a100-1   # training needs a GPU compute type — see swaleio/axolotl-train
@@ -110,7 +110,7 @@ blocks:
           config: ${{env.WORKFLOW_STORAGE}}/axolotl.yaml
       merge:
         name: Merge adapter
-        uses: swaleio/axolotl-merge-lora@1.0.0
+        uses: swaleio/axolotl-merge-lora
         compute_type: a100-1   # any GPU compute type — see Compute above
         start_on:
           - train

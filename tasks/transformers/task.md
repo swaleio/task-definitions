@@ -6,8 +6,8 @@ inputs:
     description: The Python program to run. Parameterize it by interpolating a trusted workflow expression into the program text, or by reading a run-level environment variable via os.environ inside it.
     required: true
 exec:
-  # docker.io/swaleio/transformers-gpu:1.0.0
-  image: docker.io/swaleio/transformers-gpu@sha256:9346b9a6a9da72735635d0227a2547873ee4015b09188434f2f768e425d2d9a9
+  # docker.io/swaleio/transformers-gpu:4.57.1
+  image: docker.io/swaleio/transformers-gpu@sha256:0000000000000000000000000000000000000000000000000000000000000000
   args:
     - bash
     - -lc
@@ -53,7 +53,7 @@ blocks:
     tasks:
       classify:
         name: Classify
-        uses: swaleio/transformers@1.0.0
+        uses: swaleio/transformers
         args:
           script: |
             import torch
@@ -103,13 +103,13 @@ blocks:
     tasks:
       publish_token:
         name: Publish HF token
-        uses: swaleio/bash@1.0.0
+        uses: swaleio/bash
         args:
           script: |
             printf 'HF_TOKEN=%s\n' '${{secrets.hf_token}}' >> "$WORKFLOW_ENV"
       generate:
         name: Generate
-        uses: swaleio/transformers@1.0.0
+        uses: swaleio/transformers
         compute_type: a100-1   # any GPU compute type whose VRAM fits the model
         start_on:
           - publish_token

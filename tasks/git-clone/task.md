@@ -18,8 +18,8 @@ outputs:
   commit_sha:
     description: The resolved HEAD commit SHA after cloning.
 exec:
-  # docker.io/swaleio/git:1.0.0
-  image: docker.io/swaleio/git@sha256:16b5d6bfe6cd72791c69c56a7f0c05d439d05c68bd810847145799beddc6b111
+  # docker.io/swaleio/git:2.54.0
+  image: docker.io/swaleio/git@sha256:0000000000000000000000000000000000000000000000000000000000000000
   args:
     - clone
     - "--depth=1"
@@ -63,7 +63,7 @@ blocks:
     tasks:
       checkout:
         name: Checkout
-        uses: swaleio/git-clone@1.0.0
+        uses: swaleio/git-clone
         args:
           repository_url: https://github.com/acme/app.git
           dest: ${{env.WORKFLOW_STORAGE}}/repo

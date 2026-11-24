@@ -24,8 +24,8 @@ outputs:
   path:
     description: The directory the frames were written to, i.e. the directory of the output input.
 exec:
-  # docker.io/swaleio/blender-5-2:1.0.0
-  image: docker.io/swaleio/blender-5-2@sha256:2356ceec5886906dda39874cbc5bb05bcf39b2887cdb6dc5af724dd0808cd64a
+  # docker.io/swaleio/blender-5-2:5.2.4
+  image: docker.io/swaleio/blender-5-2@sha256:0000000000000000000000000000000000000000000000000000000000000000
 ---
 
 # Blender 5.2 render
@@ -94,7 +94,7 @@ blocks:
     tasks:
       fetch:
         name: Fetch the scene
-        uses: swaleio/swale-pull@1.0.0
+        uses: swaleio/swale-pull
         args:
           target: my-project/scenes:latest
           dest: ${{env.WORKFLOW_STORAGE}}/scene
@@ -111,7 +111,7 @@ blocks:
         name: Encode
         start_on:
           - render_chunks
-        uses: swaleio/ffmpeg@1.0.0
+        uses: swaleio/ffmpeg
         args:
           script: |
             set -euo pipefail
@@ -124,7 +124,7 @@ blocks:
         name: Publish
         start_on:
           - encode
-        uses: swaleio/swale-push@1.0.0
+        uses: swaleio/swale-push
         args:
           target: my-project/renders:latest
           source: ${{env.WORKFLOW_STORAGE}}/out
@@ -135,7 +135,7 @@ blocks:
     tasks:
       render:
         name: Render frames
-        uses: swaleio/blender-render-5-2@1.0.0
+        uses: swaleio/blender-render-5-2
         compute_type: a100-1   # any GPU compute type — see Compute above
         args:
           scene: ${{env.WORKFLOW_STORAGE}}/scene/animation.blend

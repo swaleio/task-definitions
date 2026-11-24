@@ -15,8 +15,8 @@ inputs:
     description: Hugging Face access token for gated or private models (pass a secret). Omit for public models and local model directories.
     default: ""
 exec:
-  # docker.io/swaleio/vllm-tools:1.0.0
-  image: docker.io/swaleio/vllm-tools@sha256:3f8ae9ff26ddb3ec1905475b35ceebf672a07e750c12a2cef5b6d1f98f9db3cc
+  # docker.io/swaleio/lm-eval:0.4.12
+  image: docker.io/swaleio/lm-eval@sha256:0000000000000000000000000000000000000000000000000000000000000000
   env:
     HF_TOKEN: ${{inputs.token}}
   args:
@@ -94,14 +94,14 @@ blocks:
     tasks:
       weights:
         name: Fetch weights
-        uses: swaleio/hf-download@1.0.0
+        uses: swaleio/hf-download
         args:
           repo: Qwen/Qwen2.5-7B-Instruct
           include: "*.safetensors,*.json,tokenizer.*"
           dest: ${{env.WORKFLOW_STORAGE}}/qwen
       eval:
         name: Evaluate
-        uses: swaleio/lm-eval@1.0.0
+        uses: swaleio/lm-eval
         start_on:
           - weights
         compute_type: a100-1   # any GPU compute type whose VRAM fits the model

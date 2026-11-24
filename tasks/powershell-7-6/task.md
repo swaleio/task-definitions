@@ -6,8 +6,8 @@ inputs:
     description: The PowerShell script to run. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable via $env inside it.
     required: true
 exec:
-  # mcr.microsoft.com/dotnet/sdk:10.0
-  image: mcr.microsoft.com/dotnet/sdk@sha256:8c6edfb26c85153f236d26efebd9ad349aec403583f343f201ee67838b23658d
+  # docker.io/swaleio/powershell-7-6:7.6.10
+  image: docker.io/swaleio/powershell-7-6@sha256:0000000000000000000000000000000000000000000000000000000000000000
   args:
     - pwsh
     - -NoLogo
@@ -21,7 +21,8 @@ exec:
 Writes your `script` to `/tmp/run.ps1` and executes it with `pwsh`, so
 `$ErrorActionPreference`, multi-line pipelines, functions, and error records all
 behave exactly as they do in a normal PowerShell session. Runs on
-PowerShell 7.6 LTS, which ships in the `mcr.microsoft.com/dotnet/sdk:10.0` base image, non-interactively (`-NonInteractive`, no TTY).
+PowerShell 7.6 LTS, installed from Microsoft's Debian 13 package, non-interactively
+(`-NonInteractive`, no TTY).
 
 ## Parameterizing
 
@@ -73,7 +74,7 @@ blocks:
     tasks:
       report:
         name: Report
-        uses: swaleio/powershell-7-6@1.0.0
+        uses: swaleio/powershell-7-6
         args:
           script: |
             $ErrorActionPreference = 'Stop'

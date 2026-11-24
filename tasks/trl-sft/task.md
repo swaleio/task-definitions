@@ -9,8 +9,8 @@ inputs:
     description: Hugging Face access token for gated or private models and datasets (pass a secret). Delivered as HF_TOKEN via the definition's exec.env; omit for public repos.
     default: ""
 exec:
-  # docker.io/swaleio/transformers-gpu:1.0.0
-  image: docker.io/swaleio/transformers-gpu@sha256:9346b9a6a9da72735635d0227a2547873ee4015b09188434f2f768e425d2d9a9
+  # docker.io/swaleio/trl:0.24.0
+  image: docker.io/swaleio/trl@sha256:0000000000000000000000000000000000000000000000000000000000000000
   env:
     HF_TOKEN: ${{inputs.token}}
   args:
@@ -66,7 +66,7 @@ blocks:
     tasks:
       write_config:
         name: Write config
-        uses: swaleio/bash@1.0.0
+        uses: swaleio/bash
         args:
           script: |
             cat > ${{env.WORKFLOW_STORAGE}}/sft.yaml <<'EOF'
@@ -85,7 +85,7 @@ blocks:
             EOF
       train:
         name: Train
-        uses: swaleio/trl-sft@1.0.0
+        uses: swaleio/trl-sft
         compute_type: a100-1   # any GPU compute type — see Compute above
         start_on:
           - write_config

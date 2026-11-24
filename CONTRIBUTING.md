@@ -12,25 +12,41 @@ A task definition is a Markdown file with a YAML frontmatter block:
 ### Names and versions
 
 - **Names** match `^[A-Za-z0-9_-]{1,100}$` — no dots.
-- **Versions** match `^[A-Za-z0-9]([A-Za-z0-9._-]{0,98}[A-Za-z0-9])?$`, so `1.0.0`
-  works. A version must begin and end with a letter or digit, must not contain
-  `..`, and cannot be `latest` — the platform reserves it.
+- **Versions** match `^[A-Za-z0-9]([A-Za-z0-9._-]{0,98}[A-Za-z0-9])?$`. A
+  version must begin and end with a letter or digit, must not contain `..`, and
+  cannot be `latest` — the platform reserves it.
+- **A definition's version is the version of the tool it runs**, read from the
+  tag of the image it pins: `# docker.io/library/node:24.22.3-trixie-slim`
+  makes `node-24` version `24.22.3`. Releasing it again on the same tool
+  version, for a fixed wrapper or a rebuilt image, adds `-r1`, `-r2`, and so on.
+  The release workflow refuses any other version.
+- **A definition never breaks under its name.** Removing or renaming an input
+  or output, or making an input required, makes a new definition with a new
+  name, the way a new runtime line does. A workflow that pins a version keeps
+  it; one that names none gets each new release when it is created or updated.
 - **Versions are git tags**, GitHub-Actions-style: releasing a version means
-  pushing a tag named `<name>/<version>` (e.g. `git-clone/1.0.0`). The tag
+  pushing a tag named `<name>/<version>` (e.g. `git-clone/2.54.0`). The tag
   freezes `tasks/<name>/task.md` as that immutable version and triggers the
   release workflow, which imports the frozen file into the platform under the
   version from the tag name. The file on `main` keeps evolving toward the next
   release — doc typo fixes don't mint versions.
 - **Push one release tag per `git push`.** GitHub starts no workflow for a
   push of more than three tags, so pushing several release tags together
-  releases none of them:
+  releases none of them. `tools/release-version.mjs` prints the version a
+  definition releases next, counting the release tags git knows:
 
   ```sh
-  for tag in git-clone/1.0.0 node-24/1.0.0; do git tag "$tag" && git push origin "$tag"; done
+  git fetch --tags
+  for name in git-clone node-24; do
+    tag="$name/$(node tools/release-version.mjs "$name")"
+    git tag -m "$tag" "$tag" && git push origin "$tag"
+  done
   ```
+
+  `ls tasks` lists every name, to release the whole catalog.
 - A published version is **immutable** on the platform (and the release tag
   should never be moved). Compare two versions with
-  `git diff git-clone/1.0.0..git-clone/1.1.0 -- tasks/git-clone/task.md`.
+  `git diff git-clone/2.54.0..git-clone/2.54.1 -- tasks/git-clone/task.md`.
 
 ### Name and description
 
@@ -60,7 +76,7 @@ override.
 
 ```yaml
 exec:
-  # docker.io/swaleio/git:1.0.0
+  # docker.io/swaleio/git:2.54.0
   image: docker.io/swaleio/git@sha256:<digest>   # digest-pinned
   env:
     GIT_TOKEN: ${{inputs.token}}
@@ -86,11 +102,13 @@ exec:
   wrong for path-like variables (e.g. `HF_HOME`), where a set-but-empty value
   breaks path resolution — those belong in a wrapper conditional that sets the
   variable only when the input is non-empty, not in `exec.env`.
-- **Images are digest-pinned** (`repo@sha256:…`). Keep the human-readable tag in
-  a comment on the line **directly above** `image:` (`# <full ref>:<tag>`), so a
-  reader knows what the digest points to. The **task version pins the digest** —
-  the image's own tag versions independently (several tasks may share one image),
-  exactly as a GitHub Action's tag freezes the image reference inside it.
+- **Images are digest-pinned** (`repo@sha256:…`). Keep the tag in a comment on
+  the line **directly above** `image:` (`# <full ref>:<tag>`), so a reader knows
+  what the digest points to. The tag must name the tool's exact version
+  (`24.22.3-trixie-slim`, not `24-trixie-slim`), because the definition's
+  version is read from it; lint refuses a tag it cannot read a version from.
+  When no vendor image is tagged by the tool's version, the definition gets a
+  swale-built one that is (see [Swale-built images](#swale-built-images)).
   Swale-built images live at `docker.io/swaleio/<name>`; vendor images keep their
   own registry and tag.
 - **The tag in that comment must exist on the registry, and must not be deleted
@@ -205,17 +223,22 @@ release line**, named `<runtime>-<line>`: `node-24`, `python-3-13`, `dotnet-10`,
   digest, and `uses:` without a version resolves to the most recently
   *published* version, not the highest — so putting several lines behind one
   name would let a refresh of an old line become everyone's default.
-- **The definition's own version describes the definition**, not the runtime:
-  a patch refreshes the image digest within the line, a minor adds an optional
-  input, a major breaks the interface.
+- **The definition's version is the runtime's**: `node-24` releases as
+  `24.22.3`, and as `24.22.4` once its image moves to that release.
 
-[Renovate](renovate.json) opens a pull request, at most one a day, moving each
-definition's digest to whatever its tag now names. It never moves a definition to another
-tag — a new line is a new definition, added by hand. Merging that pull request
-changes `main`; each changed definition still needs a release tag to publish
-the refreshed version.
+[Renovate](renovate.json) moves each definition's image to the newest build or
+release within its line, in at most one pull request a day that merges itself
+once lint passes. It never moves a definition to another major version, or a
+Python definition to another minor one — a new line is a new definition, added
+by hand. vLLM and llama.cpp releases wait for review in their own pull requests.
+A definition on a swale-built image follows it as soon as the image publishes.
+Merging changes `main`; each changed definition still needs a release tag to
+publish the refreshed version.
 
 ### Workflow examples in the body
+
+Examples name tasks without a version (`uses: swaleio/node-24`), so they never
+point at a release that has since been replaced.
 
 Examples must use only inputs declared in the task's frontmatter — when a step
 passes args not declared as inputs, the platform warns in the task's first
@@ -302,7 +325,8 @@ On every PR (`lint.yml`):
 
 - Frontmatter parses; only known keys; `exec.image` present.
 - Task name and input/output identifiers match the regex and are snake_case.
-- Images are digest-pinned.
+- Images are digest-pinned, and the comment above `exec.image` names the same
+  repository with a tag a version can be read from.
 - Non-empty body.
 
 On every PR that touches `images/` (`publish-images.yml`):
@@ -316,3 +340,5 @@ On every release tag (`release-task.yml`):
 - `tasks/<name>/task.md` exists at the tag and lints.
 - No placeholder digests — an image must be published and pinned before its
   task can be released.
+- The version is the tool version the image tag names, or that version with
+  `-r<N>`.

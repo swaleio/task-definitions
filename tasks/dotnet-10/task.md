@@ -6,7 +6,7 @@ inputs:
     description: The shell script to run. The dotnet CLI is on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
-  # mcr.microsoft.com/dotnet/sdk:10.0
+  # mcr.microsoft.com/dotnet/sdk:10.0.404
   image: mcr.microsoft.com/dotnet/sdk@sha256:8c6edfb26c85153f236d26efebd9ad349aec403583f343f201ee67838b23658d
   args:
     - bash
@@ -66,7 +66,7 @@ blocks:
     tasks:
       test:
         name: Build and test
-        uses: swaleio/dotnet-10@1.0.0
+        uses: swaleio/dotnet-10
         args:
           script: |
             set -euo pipefail

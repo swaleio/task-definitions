@@ -6,8 +6,8 @@ inputs:
     description: The shell script to run. node, npm, and npx are on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
-  # docker.io/library/node:24-trixie-slim
-  image: docker.io/library/node@sha256:af02d57b57719b9657a45199a79264a9437940cd55b3c7b3fc99615654f124a0
+  # docker.io/library/node:24.22.3-trixie-slim
+  image: docker.io/library/node@sha256:4d00acb4bcc42c454c4eb801526f7ad7f772ea3bd4fd168c5cc2e384abcbb9d4
   args:
     - bash
     - -lc
@@ -73,7 +73,7 @@ blocks:
     tasks:
       build:
         name: Build web app
-        uses: swaleio/node-24@1.0.0
+        uses: swaleio/node-24
         args:
           script: |
             set -euo pipefail

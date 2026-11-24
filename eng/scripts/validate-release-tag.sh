@@ -2,7 +2,7 @@
 # Validates a release tag of the form <task-name>/<version> and resolves it to
 # the definition it releases. Run it directly to check a tag before pushing:
 #
-#   eng/scripts/validate-release-tag.sh git-clone/1.0.0
+#   eng/scripts/validate-release-tag.sh git-clone/2.54.0
 #
 # The rules mirror the platform's own, which rejects a version at import time:
 # names take no dots, versions do but must begin and end alphanumeric, never

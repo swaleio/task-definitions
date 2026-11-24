@@ -6,8 +6,8 @@ inputs:
     description: The shell script to run. cargo and rustc are on PATH. Parameterize it by interpolating a trusted workflow expression into the script text, or by reading a run-level environment variable inside it.
     required: true
 exec:
-  # docker.io/library/rust:1-slim-trixie
-  image: docker.io/library/rust@sha256:6f14b2b4b278ec0d50aa1d69541c304ce0f95e0f6268487aa9924af1c2e9aebe
+  # docker.io/library/rust:1.100.0-slim-trixie
+  image: docker.io/library/rust@sha256:51fdc80ccc3fb83bf14481f2cd8d0d11703eeb9f416ab47476c32a793a822307
   args:
     - bash
     - -c
@@ -90,7 +90,7 @@ blocks:
     tasks:
       build:
         name: Build binary
-        uses: swaleio/rust@1.0.0
+        uses: swaleio/rust
         args:
           script: |
             set -euo pipefail

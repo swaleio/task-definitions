@@ -14,8 +14,10 @@ import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// The comment and the image line Renovate reads, in the same shape.
-const IMAGE_RE = /#\s*([^\s:@]+(?:\/[^\s:@]+)+):([^\s@]+)\s*\n\s*image:\s*([^\s@]+)@sha256:[a-f0-9]{64}/;
+// The comment and the image line Renovate reads, in the same shape. A path
+// segment excludes `/`, so each repository has one way to split into segments
+// and a near miss cannot backtrack exponentially.
+const IMAGE_RE = /#\s*([^\s:@/]+(?:\/[^\s:@/]+)+):([^\s@]+)\s*\n\s*image:\s*([^\s@]+)@sha256:[a-f0-9]{64}/;
 
 // The pinned image: the repository and tag in the comment, and the repository
 // on the image line, which must be the same one.

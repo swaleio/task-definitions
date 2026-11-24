@@ -29,7 +29,7 @@
         "/^tasks/[^/]+/task\\.md$/"
       ],
       "matchStrings": [
-        "#\\s*(?<depName>[^\\s:@]+(?:/[^\\s:@]+)+):(?<currentValue>[^\\s@]+)\\s*\\n\\s*image:\\s*[^\\s@]+@(?<currentDigest>sha256:[a-f0-9]{64})"
+        "#\\s*(?<depName>[^\\s:@/]+(?:/[^\\s:@/]+)+):(?<currentValue>[^\\s@]+)\\s*\\n\\s*image:\\s*[^\\s@]+@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker"
     },

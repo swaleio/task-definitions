@@ -39,6 +39,7 @@ env:
 
 jobs:
   discover:
+    name: Detect changed images
     runs-on: ubuntu-latest
     outputs:
       build: ${{ steps.list.outputs.build }}
@@ -58,6 +59,8 @@ jobs:
           eng/scripts/discover-images.sh "$IMAGE" "$BEFORE" "$HEAD"
 
   publish:
+    # A pull request only builds, so its checks say so.
+    name: ${{ github.event_name == 'pull_request' && 'Build' || 'Publish' }} ${{ matrix.image }}
     needs: discover
     # An unticked dispatch is a description refresh, so nothing builds.
     if: needs.discover.outputs.build != '[]' && (github.event_name != 'workflow_dispatch' || inputs.publish)
@@ -182,6 +185,7 @@ jobs:
           echo "\`docker.io/${{ env.REGISTRY_NAMESPACE }}/${{ matrix.image }}:${{ steps.version.outputs.tag }}@${{ steps.build.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"
 
   sync-readme:
+    name: Sync ${{ matrix.image }} README
     # After publish, so a first publish describes the repository it has just
     # created. !cancelled() still runs it when publish is skipped (a README-only
     # change, an unticked dispatch) or fails: a description never waits on a

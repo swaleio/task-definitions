@@ -209,8 +209,8 @@ release line**, named `<runtime>-<line>`: `node-24`, `python-3-13`, `dotnet-10`,
   a patch refreshes the image digest within the line, a minor adds an optional
   input, a major breaks the interface.
 
-[Renovate](renovate.json) opens a weekly pull request moving each definition's
-digest to whatever its tag now names. It never moves a definition to another
+[Renovate](renovate.json) opens a pull request, at most one a day, moving each
+definition's digest to whatever its tag now names. It never moves a definition to another
 tag — a new line is a new definition, added by hand. Merging that pull request
 changes `main`; each changed definition still needs a release tag to publish
 the refreshed version.

@@ -2,7 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
     "Keeps each task definition's pinned image digest current within the tag it names, and each image under images/ current with its base and the tool versions it pins.",
-    "Renovate merges its own pull requests rather than using GitHub's auto-merge, which waits only for required checks; main requires none, so it would merge before lint finished."
+    "Renovate merges its own pull requests rather than using GitHub's auto-merge, which waits only for required checks; main requires none, so it would merge before lint finished.",
+    "Schedules are in UTC, Renovate's default: each day's updates are batched before 06:00 UTC."
   ],
   "enabledManagers": [
     "custom.regex",
@@ -67,7 +68,7 @@
       "enabled": false
     },
     {
-      "description": "One pull request for every definition whose image was rebuilt upstream that week. It merges itself once its checks pass: the tag a definition names is unchanged, only the build behind it moves.",
+      "description": "One pull request for every definition whose image was rebuilt upstream that day. It merges itself once its checks pass: the tag a definition names is unchanged, only the build behind it moves.",
       "matchFileNames": [
         "tasks/**"
       ],
@@ -92,7 +93,7 @@
       "automerge": true
     },
     {
-      "description": "One pull request for every image whose base was rebuilt upstream that week.",
+      "description": "One pull request for every image whose base was rebuilt upstream that day.",
       "matchFileNames": [
         "images/**"
       ],
@@ -180,7 +181,7 @@
     }
   ],
   "schedule": [
-    "before 6am on monday"
+    "before 6am"
   ],
   "dependencyDashboard": {
     "enabled": true

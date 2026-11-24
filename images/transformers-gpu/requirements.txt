@@ -1,7 +1,7 @@
-transformers==4.57.6
+transformers==5.10.1
 accelerate==1.11.0
 datasets==5.0.1
-trl==0.24.0
+trl==0.29.1
 peft==0.18.0
 sentencepiece==0.2.1
-huggingface_hub[hf_xet]==0.36.0
+huggingface_hub[hf_xet]==1.33.0

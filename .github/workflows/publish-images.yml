@@ -135,10 +135,13 @@ jobs:
           tag=$(eng/scripts/next-image-tag.sh "$REGISTRY_NAMESPACE/$IMAGE" "$version")
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           if [ "$PUBLISH" = "true" ]; then
-            echo "Publishing \`docker.io/$REGISTRY_NAMESPACE/$IMAGE:$tag\` (packages version $version)." >> "$GITHUB_STEP_SUMMARY"
+            message="Publishing docker.io/$REGISTRY_NAMESPACE/$IMAGE:$tag (packages version $version)"
           else
-            echo "Would publish \`docker.io/$REGISTRY_NAMESPACE/$IMAGE:$tag\` (packages version $version)." >> "$GITHUB_STEP_SUMMARY"
+            message="Would publish docker.io/$REGISTRY_NAMESPACE/$IMAGE:$tag (packages version $version)"
           fi
+          # A notice, so a pull request's checks show each tag; and the summary.
+          echo "::notice title=$IMAGE::$message"
+          echo "$message." >> "$GITHUB_STEP_SUMMARY"
 
       - id: meta
         if: env.PUBLISH == 'true'

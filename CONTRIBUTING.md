@@ -227,11 +227,11 @@ release line**, named `<runtime>-<line>`: `node-24`, `python-3-13`, `dotnet-10`,
   `24.22.3`, and as `24.22.4` once its image moves to that release.
 
 [Renovate](renovate.json) moves each definition's image to the newest build or
-release within its line, in one weekly pull request that merges itself once lint
-passes. It never moves a definition to another major version, or a Python
-definition to another minor one — a new line is a new definition, added by hand.
-vLLM and llama.cpp releases wait for review in their own pull requests. A
-definition on a swale-built image follows it as soon as the image publishes.
+release within its line, in at most one pull request a day that merges itself
+once lint passes. It never moves a definition to another major version, or a
+Python definition to another minor one — a new line is a new definition, added
+by hand. vLLM and llama.cpp releases wait for review in their own pull requests.
+A definition on a swale-built image follows it as soon as the image publishes.
 Merging changes `main`; each changed definition still needs a release tag to
 publish the refreshed version.
 

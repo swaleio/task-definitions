@@ -92,7 +92,7 @@
       "enabled": false
     },
     {
-      "description": "One pull request a week for every definition whose vendor image has a new build or release within its line. It merges itself once lint passes.",
+      "description": "One pull request a day for every definition whose vendor image has a new build or release within its line. It merges itself once lint passes.",
       "matchFileNames": [
         "tasks/**"
       ],

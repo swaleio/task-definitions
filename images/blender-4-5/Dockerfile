@@ -2,12 +2,13 @@ FROM ubuntu:24.04@sha256:562111b88caa79c71391c0c4d3c2114a7d5c35915c20561fd893cb1
 
 # Blender 4.5 LTS, the official Linux build straight from download.blender.org,
 # verified against the SHA-256 file Blender publishes beside it. Renovate moves
-# BLENDER_VERSION within the 4.5 line and cannot compute a checksum, so the
-# build reads the published one rather than pinning it here. The tarball bundles
+# BLENDER_VERSION within the 4.5 line, following Blender's release tags,
+# and cannot compute a checksum, so the build reads the published one rather
+# than pinning it here. The tarball bundles
 # Blender's own Python and its render kernels, so the only system packages it
 # needs are the X11/GL client libraries the binary links against - required even
 # for background rendering, where no display is ever opened.
-# renovate: datasource=custom.blender depName=blender packageName=4.5
+# renovate: datasource=github-tags depName=blender/blender
 ARG BLENDER_VERSION=4.5.16
 
 RUN apt-get update \

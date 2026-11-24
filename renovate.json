@@ -3,7 +3,8 @@
   "description": [
     "Keeps each task definition's pinned image digest current within the tag it names, and each image under images/ current with its base and the tool versions it pins.",
     "Renovate merges its own pull requests rather than using GitHub's auto-merge, which waits only for required checks; main requires none, so it would merge before lint finished.",
-    "Schedules are in UTC, Renovate's default: each day's updates are batched before 06:00 UTC."
+    "Schedules are in UTC, Renovate's default: each day's updates are batched before 06:00 UTC.",
+    "Renovate opens every pull request its rules allow: its defaults of 2 new pull requests an hour and 10 open at once would hold a day's batch back for hours, and let updates waiting for review block the ones that merge themselves."
   ],
   "enabledManagers": [
     "custom.regex",
@@ -44,13 +45,6 @@
       ]
     }
   ],
-  "customDatasources": {
-    "blender": {
-      "description": "Blender publishes no release feed, only a download directory per release line.",
-      "defaultRegistryUrlTemplate": "https://download.blender.org/release/Blender{{packageName}}/",
-      "format": "html"
-    }
-  },
   "packageRules": [
     {
       "description": "A definition is pinned to one release line, so its vendor image never moves to another major version. A new line is a new definition, added by hand. A swale-built image's major version is its tool's, moved by an image change already reviewed.",
@@ -138,13 +132,6 @@
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-r(?<build>\\d+))?$"
     },
     {
-      "description": "swaleio/ollama still carries 1.0.0, its tag from before images were tagged by their tool's version, which outranks Ollama's own 0.x versions. Drop this once that tag is deleted from Docker Hub.",
-      "matchDepNames": [
-        "docker.io/swaleio/ollama"
-      ],
-      "allowedVersions": "!/^1\\.0\\.0$/"
-    },
-    {
       "description": "A swale-built image is published from a change that already built here, so definitions follow it as soon as it lands, in one pull request that merges itself once lint passes. A major version waits for review.",
       "matchFileNames": [
         "tasks/**"
@@ -213,11 +200,32 @@
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
-      "description": "Blender's download directory lists every file of every release in the line; the version is read from the Linux build's file name.",
-      "matchDatasources": [
-        "custom.blender"
+      "description": "Blender's release tags on its GitHub mirror name each version, as v4.5.17. Its download site, which the build fetches from, refuses Mend's hosted runner, so Renovate reads the tags instead. A tag can land before the build is on the download site, so a release waits two days.",
+      "matchDepNames": [
+        "blender/blender"
       ],
-      "extractVersion": "^blender-(?<version>\\d+\\.\\d+\\.\\d+)-linux-x64\\.tar\\.xz$"
+      "extractVersion": "^v(?<version>\\d+\\.\\d+\\.\\d+)$",
+      "minimumReleaseAge": "2 days"
+    },
+    {
+      "description": "Each Blender image stays on its own LTS line.",
+      "matchFileNames": [
+        "images/blender-4-5/**"
+      ],
+      "matchDepNames": [
+        "blender/blender"
+      ],
+      "allowedVersions": "/^4\\.5\\./"
+    },
+    {
+      "description": "Each Blender image stays on its own LTS line.",
+      "matchFileNames": [
+        "images/blender-5-2/**"
+      ],
+      "matchDepNames": [
+        "blender/blender"
+      ],
+      "allowedVersions": "/^5\\.2\\./"
     },
     {
       "description": "Each PowerShell image stays on its own release line.",
@@ -262,6 +270,8 @@
       "automerge": true
     }
   ],
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0,
   "schedule": [
     "before 6am"
   ],

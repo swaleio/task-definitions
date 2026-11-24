@@ -55,15 +55,8 @@ else
   # its own changes.
   [ -n "$before" ] || before=$(git rev-parse HEAD^)
   changed=$(git diff --name-only "$before...$head_sha" -- images/)
-  # A comment changes nothing an image runs, so a file whose changes are all
-  # comment lines rebuilds nothing; publishing it would only mint an -rN of the
-  # same image. Two lines look like comments but are not: an entrypoint's `#!`,
-  # which the pattern leaves out, and a Dockerfile parser directive (`# syntax=`,
-  # `# escape=`, `# check=`), which steers the build, so a changed one counts.
-  # git reads -I as a basic regex, with no alternation: one pattern for a
-  # comment with text, one for a bare `#` line. Each file is checked on its
-  # own because some git versions list a file under --name-only even when -I
-  # leaves nothing of its change; --quiet's exit code honours -I in all of them.
+  # Comment-only changes rebuild nothing, except a `#!` line or a Dockerfile
+  # parser directive. Per file, because git 2.43's --name-only ignores -I.
   built=""
   while IFS= read -r file; do
     [ -n "$file" ] || continue

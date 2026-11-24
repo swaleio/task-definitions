@@ -9,8 +9,8 @@ inputs:
     description: Hugging Face access token for gated or private base models (pass a secret). Omit for public base models or local model directories.
     default: ""
 exec:
-  # docker.io/axolotlai/axolotl:0.21.1-py3.12-cu130-2.13.0
-  image: docker.io/axolotlai/axolotl@sha256:ef2d9fb57a684c8f8c052b6f7e8fe3adafe9028762c5539aad670bb2deb19b0b
+  # docker.io/swaleio/axolotl:0.21.1
+  image: docker.io/swaleio/axolotl@sha256:0000000000000000000000000000000000000000000000000000000000000000
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

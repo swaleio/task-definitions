@@ -108,12 +108,11 @@
       "automerge": true
     },
     {
-      "description": "Releases that can change behavior within a version line wait for review, each in its own pull request: vLLM and Axolotl are still 0.x, and every llama.cpp build is a release.",
+      "description": "Releases that can change behavior within a version line wait for review, each in its own pull request: vLLM is still 0.x, and every llama.cpp build is a release.",
       "matchFileNames": [
         "tasks/**"
       ],
       "matchDepNames": [
-        "docker.io/axolotlai/axolotl",
         "docker.io/vllm/vllm-openai",
         "ghcr.io/ggml-org/llama.cpp"
       ],

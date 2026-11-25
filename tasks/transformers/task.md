@@ -17,7 +17,7 @@ exec:
 # Transformers
 
 Writes your `script` to `/tmp/run.py` and runs it with `python` on the Swale
-GPU ML image: **torch 2.13 (CUDA 13.0)** plus pinned **transformers**,
+GPU ML image: **torch 2.14 (CUDA 13.0)** plus pinned **transformers**,
 **accelerate**, **datasets**, **trl**, **peft**, and **sentencepiece** are
 preinstalled, so inference pipelines, tokenizer work, dataset preprocessing,
 and custom training loops run without any build step. Tracebacks and multi-line

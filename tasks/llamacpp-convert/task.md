@@ -9,11 +9,11 @@ inputs:
     description: Absolute path inside the container for the converted .gguf file. Point it at the mounted workspace (e.g. ${{env.WORKFLOW_STORAGE}}/model-f16.gguf) to share it with later tasks, or any other container-local path.
     required: true
   outtype:
-    description: "GGUF tensor type to write: f16, bf16, or q8_0. Defaults to auto, which writes the checkpoint's own 16-bit float type — bf16 for a bf16 model, f16 otherwise."
+    description: "GGUF tensor type to write: f16, bf16, or q8_0. Defaults to auto, which writes bf16 for a bf16 model and f16 otherwise, but keeps the FP8 weights of an FP8 checkpoint with one scale per tensor."
     default: "auto"
 exec:
-  # ghcr.io/ggml-org/llama.cpp:full-b9976
-  image: ghcr.io/ggml-org/llama.cpp@sha256:2db4f3db6f354a7e73bb414674b32ea9812d93beee09ac28dcd71ed16f1060e0
+  # ghcr.io/ggml-org/llama.cpp:full-b12723
+  image: ghcr.io/ggml-org/llama.cpp@sha256:7dc505aa28b5b95c62a1884bf7606f9ce1d446e670b3ad81b9b1944006604006
   args:
     - "--convert"
     - ${{inputs.model_dir}}
@@ -45,15 +45,19 @@ the same path to the next task.
 |-------|----------|---------|-------------|
 | `model_dir` | yes | — | Absolute path of the Hugging Face format model directory to convert. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/model-hf`) where an earlier task placed the model, or any other container-local path. |
 | `outfile` | yes | — | Absolute path for the converted `.gguf` file. Point it at the mounted workspace (e.g. `${{env.WORKFLOW_STORAGE}}/model-f16.gguf`) to share it with later tasks, or any other container-local path. |
-| `outtype` | no | `auto` | GGUF tensor type: `f16`, `bf16`, or `q8_0`. The default `auto` matches the checkpoint — `bf16` for a bf16 model, `f16` otherwise. |
+| `outtype` | no | `auto` | GGUF tensor type: `f16`, `bf16`, or `q8_0`. The default `auto` writes `bf16` for a bf16 model and `f16` otherwise, but keeps the FP8 weights of an FP8 checkpoint with one scale per tensor. |
 
 `model_dir` and `outfile` are required — they are the paths you choose and the
 next task reads. `outtype` is optional and defaults to `auto`, which is what
 `convert_hf_to_gguf.py` itself does when the flag is omitted: it reads the
-checkpoint's own tensor dtype and writes `bf16` for a bf16 model, `f16` for an
-f16 one. Pass it explicitly to override that heuristic — `f16` for a fixed
+checkpoint's own tensor dtype and writes `bf16` for a bf16 model, `f16`
+otherwise. Pass it explicitly to override that heuristic — `f16` for a fixed
 full-precision baseline whatever the source is, `bf16` to force bfloat16, or
 `q8_0` to get an 8-bit file directly from conversion.
+
+An FP8 checkpoint with one scale per tensor converts only with `auto`, which
+keeps those weights in FP8 (`F8_E4M3`). Older llama.cpp builds cannot load the
+result, or the files quantized from it, correctly.
 
 ## Compute
 

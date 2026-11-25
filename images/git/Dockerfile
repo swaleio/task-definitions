@@ -1,4 +1,4 @@
-FROM alpine/git:2.54.0@sha256:6a1fdb962814ca11508ca8d1bab94375b5b7ac4e4a9a40981c29fc32c02f095d
+FROM alpine/git:2.54.1@sha256:29cff25811f790b9f72fc266bf8009a5a911714c0e03c31c47339c50909d9aef
 
 RUN apk add --no-cache git-lfs openssh-client ca-certificates \
  && git lfs install --system \

@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.13.0-cuda13.0-cudnn9-runtime@sha256:db80a41f8428644cebcb3d75b0b62df334ab6c0e75785951eb25f48bfbd42407
+FROM pytorch/pytorch:2.14.1-cuda13.0-cudnn9-runtime@sha256:3c0b174a1339193a5bcc4b37d737c9f5ca3c4782a2293d3888e4271367eddf44
 
 # The Hugging Face training stack, version-pinned in requirements.txt.
 # torch/CUDA come from the base image and are not reinstalled here.
@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir --break-system-packages -r /tmp/requirements.txt 
 
 # The Hub cache stays at its default under the user's home; the image does not
 # force a location.
+
+# TRL reports every training run to huggingface.co unless this is set.
+ENV HF_HUB_DISABLE_TELEMETRY=1
 
 # No ENTRYPOINT: the PyTorch base leaves it unset, so a task definition's
 # exec.args are the full command line (e.g. `trl sft --config <path>` or

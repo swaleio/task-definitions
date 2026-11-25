@@ -12,8 +12,8 @@ inputs:
     description: "GGUF tensor type to write: f16, bf16, or q8_0. Defaults to auto, which writes the checkpoint's own 16-bit float type — bf16 for a bf16 model, f16 otherwise."
     default: "auto"
 exec:
-  # ghcr.io/ggml-org/llama.cpp:full-b9976
-  image: ghcr.io/ggml-org/llama.cpp@sha256:2db4f3db6f354a7e73bb414674b32ea9812d93beee09ac28dcd71ed16f1060e0
+  # ghcr.io/ggml-org/llama.cpp:full-b12723
+  image: ghcr.io/ggml-org/llama.cpp@sha256:7dc505aa28b5b95c62a1884bf7606f9ce1d446e670b3ad81b9b1944006604006
   args:
     - "--convert"
     - ${{inputs.model_dir}}

@@ -1,4 +1,4 @@
-FROM vllm/vllm-openai:v0.32.0-cu129-ubuntu2404@sha256:9fea04bb6f2deb71db19b7cff586cefb56731a26884aa1cec60690d4e6463cf2
+FROM vllm/vllm-openai:v0.32.0@sha256:befccf0e7e4089aa23926bb6f887a85c0d46c2a99e6de5c5ffdf5cb7957c5b34
 
 # Ubuntu 24.04 bases ship a default `ubuntu` user at uid 1000; replace it with
 # the non-root `swale` user the container runs as.

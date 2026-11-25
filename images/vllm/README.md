@@ -4,7 +4,7 @@ Swale-built image backing the `vllm-batch` task definition. It is the official
 [vLLM](https://docs.vllm.ai) image with its server entrypoint reset, so a
 workflow can run offline batch inference on a GPU.
 
-- **Base:** the official `vllm/vllm-openai` image (CUDA 12.9, Ubuntu 24.04),
+- **Base:** the official `vllm/vllm-openai` image (CUDA 13.0, Ubuntu 24.04),
   whose tag is the vLLM version
 - **User:** non-root `swale` (uid 1000; replaces the Ubuntu base image's
   default uid-1000 user)

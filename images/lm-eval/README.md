@@ -6,7 +6,7 @@ Swale-built image backing the `lm-eval` task definition. It is the official
 installed on top, so a workflow can benchmark a model on a GPU with vLLM as
 the inference backend.
 
-- **Base:** the official `vllm/vllm-openai` image (CUDA 12.9, Ubuntu 24.04)
+- **Base:** the official `vllm/vllm-openai` image (CUDA 13.0, Ubuntu 24.04)
 - **Installed:** `lm-eval`, at the version pinned in
   [`requirements.txt`](https://github.com/swaleio/task-definitions/blob/main/images/lm-eval/requirements.txt) — the `lm_eval`
   CLI, which drives the bundled vLLM engine as its inference backend

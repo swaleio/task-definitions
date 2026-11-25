@@ -30,8 +30,8 @@ inputs:
     description: Extra rclone flags appended to the copy command, split on whitespace (e.g. "--s3-region eu-west-1 --transfers 8"). Also how SFTP/HTTP connection details are supplied — see below.
     default: ""
 exec:
-  # docker.io/swaleio/rclone:1.74.4
-  image: docker.io/swaleio/rclone@sha256:f5f7a139221a1df03945060ac4e89dac8f36b3f453c1c3d7ad4ad904e97beca2
+  # docker.io/swaleio/rclone:1.76.0
+  image: docker.io/swaleio/rclone@sha256:4e7d800fb1e07cdafcacc47e69d786167b54bb96940c8b7415c55cf431eeb2fc
   args: []
 ---
 

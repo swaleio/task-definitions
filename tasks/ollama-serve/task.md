@@ -9,8 +9,8 @@ inputs:
     description: Directory holding the Ollama model store. Point it at the workspace to share one store across tasks; defaults to the per-task home directory, which is discarded with the runner.
     default: ""
 exec:
-  # docker.io/swaleio/ollama:0.31.2
-  image: docker.io/swaleio/ollama@sha256:4b7bac49a86b015be6eea96a51a9a864a57f8663b4d9c6fdbd777ec081859125
+  # docker.io/swaleio/ollama:0.40.18
+  image: docker.io/swaleio/ollama@sha256:7de1b19ab41a2ba5dc27bdcc84aac64f7ea98d1117f2aed566afe1446290cdb5
   args: []
 ---
 

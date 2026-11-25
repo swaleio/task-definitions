@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/library/golang:1.27.4-trixie
-  image: docker.io/library/golang@sha256:c393c00864b56f4404b3fe4d029e47742fbb53ee11506521d2f3377009ad7a3a
+  image: docker.io/library/golang@sha256:430985542100b871e108ccc00e8dcc5eef08ca14ee5825e98ebf563d8ffec4ee
   args:
     - bash
     - -c

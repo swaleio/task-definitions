@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/library/python:3.12.16-slim-trixie
-  image: docker.io/library/python@sha256:a0e2dd78cc679ddfffea960fe45ecfcff9ac2f68d67917a0edfcde5c2100151b
+  image: docker.io/library/python@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
   args:
     - bash
     - -lc

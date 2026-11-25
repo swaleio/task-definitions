@@ -7,7 +7,7 @@ inputs:
     required: true
 exec:
   # docker.io/library/rust:1.100.0-slim-trixie
-  image: docker.io/library/rust@sha256:51fdc80ccc3fb83bf14481f2cd8d0d11703eeb9f416ab47476c32a793a822307
+  image: docker.io/library/rust@sha256:3b199fd6db7d709274df56565b8f4003f9e30d7bfcff9d53148c86053b7855e2
   args:
     - bash
     - -c

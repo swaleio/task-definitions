@@ -1,4 +1,4 @@
-FROM rclone/rclone:1.74.4@sha256:c61954aaa32328a5486715dd063a81c7879f5195ad3505cd362deddd509dc4a1
+FROM rclone/rclone:1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
 
 # The base image's ENTRYPOINT is the `rclone` binary itself. Override it with a
 # thin wrapper that maps task inputs to rclone's remote-config env vars before

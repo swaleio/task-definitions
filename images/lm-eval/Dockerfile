@@ -1,4 +1,4 @@
-FROM vllm/vllm-openai:v0.25.0-cu129-ubuntu2404@sha256:45fb56697a60265776fde7aed64f09b1368987d1d1cfdd1f6692a493548fa5ee
+FROM vllm/vllm-openai:v0.32.0-cu129-ubuntu2404@sha256:9fea04bb6f2deb71db19b7cff586cefb56731a26884aa1cec60690d4e6463cf2
 
 # The base image ships the vLLM engine; add the EleutherAI evaluation harness,
 # pinned in requirements.txt, which drives that engine as its inference backend.

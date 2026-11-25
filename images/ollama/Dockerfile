@@ -1,4 +1,4 @@
-FROM ollama/ollama:0.31.2@sha256:509fdf54e23bd50d87af646cb51c0a7a203d6a83cc4d6695b3b08c5be1c62c0a
+FROM ollama/ollama:0.40.18@sha256:1cabd20e1762a7a8444bf4a7110b346d923cd77ab6c97c984434140638c913ec
 
 RUN (userdel --remove ubuntu || true) && useradd --create-home --uid 1000 swale
 

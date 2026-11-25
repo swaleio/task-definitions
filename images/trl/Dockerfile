@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.13.0-cuda13.0-cudnn9-runtime@sha256:db80a41f8428644cebcb3d75b0b62df334ab6c0e75785951eb25f48bfbd42407
+FROM pytorch/pytorch:2.14.1-cuda13.0-cudnn9-runtime@sha256:3c0b174a1339193a5bcc4b37d737c9f5ca3c4782a2293d3888e4271367eddf44
 
 # TRL with the Hugging Face training stack it drives, version-pinned in
 # requirements.txt. torch/CUDA come from the base image and are not reinstalled

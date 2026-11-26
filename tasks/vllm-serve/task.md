@@ -12,8 +12,8 @@ inputs:
     description: Hugging Face access token for gated or private Hub models (pass a secret). Omit for public models or local model directories.
     default: ""
 exec:
-  # docker.io/vllm/vllm-openai:v0.32.0
-  image: docker.io/vllm/vllm-openai@sha256:befccf0e7e4089aa23926bb6f887a85c0d46c2a99e6de5c5ffdf5cb7957c5b34
+  # docker.io/vllm/vllm-openai:v0.34.0
+  image: docker.io/vllm/vllm-openai@sha256:20fdb089454afbb324efa4110a2c025ff7b27cc1a086e07aa580b18df8ad1ce1
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

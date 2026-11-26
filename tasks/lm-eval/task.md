@@ -15,8 +15,8 @@ inputs:
     description: Hugging Face access token for gated or private models (pass a secret). Omit for public models and local model directories.
     default: ""
 exec:
-  # docker.io/swaleio/lm-eval:0.4.12
-  image: docker.io/swaleio/lm-eval@sha256:8eae69e18805fa4780bc7ef6ddd051929af948e30258d28748d48f43ba410977
+  # docker.io/swaleio/lm-eval:0.4.13
+  image: docker.io/swaleio/lm-eval@sha256:20a63af385c5c743d95d076fd54b4b25607939873f4d0163c87ee78eba92e987
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

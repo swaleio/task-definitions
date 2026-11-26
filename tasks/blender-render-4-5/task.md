@@ -24,8 +24,8 @@ outputs:
   path:
     description: The directory the frames were written to, i.e. the directory of the output input.
 exec:
-  # docker.io/swaleio/blender-4-5:4.5.16
-  image: docker.io/swaleio/blender-4-5@sha256:d72bbab3eaf1ecc0fc293b30e9f7707a8101da4ff10eee2965a1e714376c867a
+  # docker.io/swaleio/blender-4-5:4.5.17
+  image: docker.io/swaleio/blender-4-5@sha256:20b528a16ed3f1e8537aa6da1653de41fd2489575be24aadfdb490e32cc25e51
 ---
 
 # Blender 4.5 render

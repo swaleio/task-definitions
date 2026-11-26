@@ -9,8 +9,8 @@ inputs:
     description: Hugging Face access token for gated or private models and datasets (pass a secret). Delivered as HF_TOKEN via the definition's exec.env; omit for public repos.
     default: ""
 exec:
-  # docker.io/swaleio/trl:0.29.1
-  image: docker.io/swaleio/trl@sha256:75b9dd7ede5a3265b5fcb10a2e6ff4ffd349ded96d6185f33cfe7c073c1e3866
+  # docker.io/swaleio/trl:1.18.2
+  image: docker.io/swaleio/trl@sha256:6207ec6217a9a1f67d614f4cd5c1f2f3ff8f3e1deb22bc150dbbb43fe1858a90
   env:
     HF_TOKEN: ${{inputs.token}}
   args:

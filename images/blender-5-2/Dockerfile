@@ -9,7 +9,7 @@ FROM ubuntu:24.04@sha256:562111b88caa79c71391c0c4d3c2114a7d5c35915c20561fd893cb1
 # needs are the X11/GL client libraries the binary links against - required even
 # for background rendering, where no display is ever opened.
 # renovate: datasource=github-tags depName=blender/blender
-ARG BLENDER_VERSION=5.2.4
+ARG BLENDER_VERSION=5.2.5
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \

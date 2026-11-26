@@ -1,9 +1,9 @@
 transformers==5.24.1
 accelerate==1.16.0
 datasets==5.2.0
-trl==1.18.2
+trl==1.19.0
 peft==0.22.0
 sentencepiece==0.2.3
-huggingface_hub[hf_xet]==2.4.0
+huggingface_hub[hf_xet]==2.5.0
 # datasets reads http(s) files through fsspec, which needs aiohttp.
 aiohttp==3.14.5

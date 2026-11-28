@@ -12,8 +12,8 @@ inputs:
     description: Quantization preset understood by llama-quantize, e.g. Q4_K_M, Q5_K_M, Q8_0.
     required: true
 exec:
-  # ghcr.io/ggml-org/llama.cpp:full-b12723
-  image: ghcr.io/ggml-org/llama.cpp@sha256:7dc505aa28b5b95c62a1884bf7606f9ce1d446e670b3ad81b9b1944006604006
+  # ghcr.io/ggml-org/llama.cpp:full-b12826
+  image: ghcr.io/ggml-org/llama.cpp@sha256:4bca33e716b2ee6e51299fbd43f18c470882b29c31511b52a50a7d21ae3c6b72
   args:
     - "--quantize"
     - ${{inputs.input_gguf}}

@@ -12,8 +12,8 @@ inputs:
     description: "GGUF tensor type to write: f16, bf16, or q8_0. Defaults to auto, which writes bf16 for a bf16 model and f16 otherwise, but keeps the FP8 weights of an FP8 checkpoint with one scale per tensor."
     default: "auto"
 exec:
-  # ghcr.io/ggml-org/llama.cpp:full-b12723
-  image: ghcr.io/ggml-org/llama.cpp@sha256:7dc505aa28b5b95c62a1884bf7606f9ce1d446e670b3ad81b9b1944006604006
+  # ghcr.io/ggml-org/llama.cpp:full-b12826
+  image: ghcr.io/ggml-org/llama.cpp@sha256:4bca33e716b2ee6e51299fbd43f18c470882b29c31511b52a50a7d21ae3c6b72
   args:
     - "--convert"
     - ${{inputs.model_dir}}
